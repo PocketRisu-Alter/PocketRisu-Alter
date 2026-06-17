@@ -1,0 +1,1023 @@
+diff --git a/src/lang/cn.ts b/src/lang/cn.ts
+index 8b75addf0..59b0d5be4 100644
+--- a/src/lang/cn.ts
++++ b/src/lang/cn.ts
+@@ -1036,7 +1036,7 @@ export const languageChinese = {
+     "menuSideBar": "菜单侧边栏",
+     "home": "主页",
+     "showSavingIcon": "显示保存图标",
+-    "pluginVersionWarn": "这是插件的 {{plugin_version}} 版本。它与此版本的 PocketRisu 不兼容。请将插件更新到 {{required_version}} 版本。",
++    "pluginVersionWarn": "这是插件的 {{plugin_version}} 版本。它与此版本的 PocketRisu-Alter 不兼容。请将插件更新到 {{required_version}} 版本。",
+     "imageTranslation": "图片翻译",
+     "banCharacterset": "字符集自动重新生成",
+     "realmDirectOpen": "在 RisuRealm 中直接打开角色",
+@@ -1239,10 +1239,10 @@ export const languageChinese = {
+     "add": "追加",
+     "nightlyWarning": "## Nightly Builds\n\n您正在连接到软件的每夜构建版本。此版本用于测试，很可能包含错误。**在此版本中，即使您遇到问题，我们也不支持直接解决它们。**",
+     "loginSionyw": "使用 Sionyw 账号登录",
+-    "pluginRiskDetectedAlert": "PocketRisu 检测到可能有害的代码，这可能会窃取您的 API 密钥或个人数据。我们建议您不要安装此插件。",
++    "pluginRiskDetectedAlert": "PocketRisu-Alter 检测到可能有害的代码，这可能会窃取您的 API 密钥或个人数据。我们建议您不要安装此插件。",
+     "doNotInstall": "不要安装",
+     "continueAnyway": "仍然继续",
+-    "pluginNoRiskButAlert": "PocketRisu 没有检测到有害代码，但请注意，从不受信任的来源安装插件可能会带来安全风险。",
++    "pluginNoRiskButAlert": "PocketRisu-Alter 没有检测到有害代码，但请注意，从不受信任的来源安装插件可能会带来安全风险。",
+     "pluginRisksInuserFriendly": {
+         "eval": "从字符串评估代码",
+         "globalAccess": "访问全局变量",
+diff --git a/src/lang/de.ts b/src/lang/de.ts
+index f83062f3d..10b62ffbe 100644
+--- a/src/lang/de.ts
++++ b/src/lang/de.ts
+@@ -26,7 +26,7 @@ export const languageGerman = {
+         "emptyText": "Der Text ist leer.",
+         "wrongPassword": "Falsches Passwort",
+         "networkFetch": "Dies passiert, wenn das Netzwerk instabil ist oder der Server ausgefallen ist.",
+-        "networkFetchWeb": "Dies kann ein CORS-Fehler sein. Dies geschieht nur bei Verwendung der Webversion aufgrund von Browserbeschränkungen. Versuchen Sie, die lokale Desktop-Version oder eine andere Version von PocketRisu zu verwenden.",
++        "networkFetchWeb": "Dies kann ein CORS-Fehler sein. Dies geschieht nur bei Verwendung der Webversion aufgrund von Browserbeschränkungen. Versuchen Sie, die lokale Desktop-Version oder eine andere Version von PocketRisu-Alter zu verwenden.",
+         "networkFetchPlain": "Dies kann ein einfacher Abruffehler sein. Versuchen Sie, die Option 'Erzwinge einfachen Abruf' in den Einstellungen zu deaktivieren.",
+         "requestLogRemoved": "Dieses Anfrage-Protokoll wurde entfernt.",
+         "requestLogRemovedDesc": "Dieses Anfrage-Protokoll wird entfernt, wenn der Client aktualisiert oder neu geladen wird.",
+@@ -50,12 +50,12 @@ export const languageGerman = {
+         "themeDescClassic": "Geeignet für alle Geräte",
+         "texttheme": "Wählen Sie Ihre Textfarbe",
+         "inputName": "Geben Sie abschließend Ihren Spitznamen ein",
+-        "welcome": "Willkommen bei PocketRisu! Ich bin Airisu und werde Sie durch die Einrichtung von PocketRisu führen. Zuerst, wie darf ich Sie nennen?",
++        "welcome": "Willkommen bei PocketRisu-Alter! Ich bin Airisu und werde Sie durch die Einrichtung von PocketRisu-Alter führen. Zuerst, wie darf ich Sie nennen?",
+         "welcome2": "Hallo {username}! Bevor wir beginnen, werde ich Ihnen einige Fragen stellen. Sie können diese Einstellungen später in den Einstellungen ändern.\n\nWählen Sie zunächst den KI-Anbieter aus.",
+         "openRouterProvider": "OpenRouter hat viele Modelle, einige davon ungefiltert und einige davon kostenlos, aber es ist nicht so gut wie OpenAI.",
+         "hordeProvider": "Horde ist ein kostenloser Anbieter, aber die Antwortzeit ist lang und die Qualität ist gering.",
+         "setProviderLater": "Es gibt andere Anbieter, aber Sie können dies später in den Einstellungen festlegen. Wählen Sie dies, wenn Sie es später einstellen möchten.",
+-        "setupOpenAI": "Um OpenAI nutzen zu können, benötigen Sie einen API-Schlüssel. \n1. Gehen Sie zu https://beta.openai.com/ \n2. Melden Sie sich mit Ihrem Konto an \n3. Gehen Sie zu https://beta.openai.com/account/api-keys \n4. Klicken Sie auf 'Create New API Key' und benennen Sie Ihren Schlüssel nach Belieben. \n5. Kopieren Sie den Schlüssel auf der Website.\n6. Gehen Sie zurück zu PocketRisu\n7. Fügen Sie ihn ein und klicken Sie auf die Senden-Schaltfläche.",
++        "setupOpenAI": "Um OpenAI nutzen zu können, benötigen Sie einen API-Schlüssel. \n1. Gehen Sie zu https://beta.openai.com/ \n2. Melden Sie sich mit Ihrem Konto an \n3. Gehen Sie zu https://beta.openai.com/account/api-keys \n4. Klicken Sie auf 'Create New API Key' und benennen Sie Ihren Schlüssel nach Belieben. \n5. Kopieren Sie den Schlüssel auf der Website.\n6. Gehen Sie zurück zu PocketRisu-Alter\n7. Fügen Sie ihn ein und klicken Sie auf die Senden-Schaltfläche.",
+         "setupClaude": "Um Claude nutzen zu können, benötigen Sie einen API-Schlüssel.",
+         "setupClaudeSteps": [
+             "Gehen Sie zu dieser URL und melden Sie sich als Google an",
+@@ -71,7 +71,7 @@ export const languageGerman = {
+             "Geben Sie es genau wie im Bild oben ein und drücken Sie 'Add'",
+             "Kopieren Sie den Schlüssel, fügen Sie ihn hier ein und senden Sie ihn."
+         ],
+-        "setupOpenRouter": "Um OpenRouter nutzen zu können, benötigen Sie einen API-Schlüssel. \n1. Gehen Sie zu https://openrouter.ai/keys\n2. Klicken Sie auf 'Create Key'\n3. Legen Sie einen beliebigen Schlüsselnamen fest.\n4. Kopieren Sie den Schlüssel auf der Website\n5. Gehen Sie zurück zu PocketRisu\n6. Fügen Sie ihn ein und klicken Sie auf die Senden-Schaltfläche.",
++        "setupOpenRouter": "Um OpenRouter nutzen zu können, benötigen Sie einen API-Schlüssel. \n1. Gehen Sie zu https://openrouter.ai/keys\n2. Klicken Sie auf 'Create Key'\n3. Legen Sie einen beliebigen Schlüsselnamen fest.\n4. Kopieren Sie den Schlüssel auf der Website\n5. Gehen Sie zurück zu PocketRisu-Alter\n6. Fügen Sie ihn ein und klicken Sie auf die Senden-Schaltfläche.",
+         "allDone": "Alles erledigt! Bitte warten Sie einen Moment.",
+         "setupLaterMessage": "Willkommen {username}! Möchten Sie, dass ich Sie durch die Einrichtung führe oder möchten Sie es selbst tun?",
+         "setupMessageOption1": "Führe mich durch die Einrichtung",
+@@ -672,9 +672,9 @@ export const languageGerman = {
+     "proxyAPIKey": "Schlüssel/Passwort",
+     "proxyRequestModel": "Anforderungsmodell",
+     "officialWiki": "Offizielles Wiki",
+-    "officialWikiDesc": "Offizielles Wiki für PocketRisu. Schauen Sie doch gerne bei uns vorbei",
++    "officialWikiDesc": "Offizielles Wiki für PocketRisu-Alter. Schauen Sie doch gerne bei uns vorbei",
+     "officialDiscord": "Offizieller Discord",
+-    "officialDiscordDesc": "Offizieller Discord zum Austausch über PocketRisu",
++    "officialDiscordDesc": "Offizieller Discord zum Austausch über PocketRisu-Alter",
+     "persona": "Mein Profil",
+     "icon": "Symbol",
+     "account": "Konto",
+@@ -893,8 +893,8 @@ export const languageGerman = {
+     "trash": "Papierkorb",
+     "trashDesc": "Gelöschte Charaktere werden in den Papierkorb verschoben. Sie können sie wiederherstellen oder dauerhaft löschen. Gelöschte Charaktere werden nach 3 Tagen automatisch bereinigt.",
+     "shareExport": "Teilen/Exportieren",
+-    "risupresetDesc": "Risupreset-Format ist ein Format, das speziell für PocketRisu-Voreinstellungen entwickelt wurde.",
+-    "risuMDesc": "RisuM-Format ist ein Format, das speziell für PocketRisu-Module entwickelt wurde.",
++    "risupresetDesc": "Risupreset-Format ist ein Format, das speziell für PocketRisu-Alter-Voreinstellungen entwickelt wurde.",
++    "risuMDesc": "RisuM-Format ist ein Format, das speziell für PocketRisu-Alter-Module entwickelt wurde.",
+     "jsonDesc": "JSON-Format ist ein Format, das sowohl für Menschen als auch für Maschinen leicht zu lesen und zu schreiben ist.",
+     "nickname": "Spitzname",
+     "useRegexLorebook": "Regex verwenden",
+@@ -1036,7 +1036,7 @@ export const languageGerman = {
+     "menuSideBar": "Menü-Seitenleiste",
+     "home": "Startseite",
+     "showSavingIcon": "Speichersymbol anzeigen",
+-    "pluginVersionWarn": "Dies ist Version {{plugin_version}} des Plugins, die nicht mit dieser Version von PocketRisu kompatibel ist. Bitte aktualisieren Sie das Plugin auf Version {{required_version}}.",
++    "pluginVersionWarn": "Dies ist Version {{plugin_version}} des Plugins, die nicht mit dieser Version von PocketRisu-Alter kompatibel ist. Bitte aktualisieren Sie das Plugin auf Version {{required_version}}.",
+     "imageTranslation": "Bildübersetzung",
+     "banCharacterset": "Bei Zeichensatz automatisch neu generieren",
+     "realmDirectOpen": "Charakter in RisuRealm direkt öffnen",
+@@ -1239,10 +1239,10 @@ export const languageGerman = {
+     "add": "Hinzufügen",
+     "nightlyWarning": "## Nightly Builds\n\nSie verbinden sich mit einem Nightly Build der Software. Diese Version ist zu Testzwecken gedacht und enthält höchstwahrscheinlich Fehler. **In dieser Version unterstützen wir die Lösung von Problemen nicht direkt, auch wenn Sie auf Probleme stoßen.**",
+     "loginSionyw": "Mit Sionyw-Konto anmelden",
+-    "pluginRiskDetectedAlert": "PocketRisu hat Code erkannt, der schädlich sein könnte und IHREN API-SCHLÜSSEL ODER PERSÖNLICHE DATEN STEHLEN KANN. Wir empfehlen Ihnen, DIESES PLUGIN NICHT ZU INSTALLIEREN.",
++    "pluginRiskDetectedAlert": "PocketRisu-Alter hat Code erkannt, der schädlich sein könnte und IHREN API-SCHLÜSSEL ODER PERSÖNLICHE DATEN STEHLEN KANN. Wir empfehlen Ihnen, DIESES PLUGIN NICHT ZU INSTALLIEREN.",
+     "doNotInstall": "Nicht installieren",
+     "continueAnyway": "Trotzdem fortfahren",
+-    "pluginNoRiskButAlert": "PocketRisu hat keinen schädlichen Code erkannt, aber beachten Sie bitte, dass die Installation von Plugins aus nicht vertrauenswürdigen Quellen Sicherheitsrisiken bergen kann.",
++    "pluginNoRiskButAlert": "PocketRisu-Alter hat keinen schädlichen Code erkannt, aber beachten Sie bitte, dass die Installation von Plugins aus nicht vertrauenswürdigen Quellen Sicherheitsrisiken bergen kann.",
+     "pluginRisksInuserFriendly": {
+         "eval": "Code aus Strings auswerten",
+         "globalAccess": "Zugriff auf globale Variablen",
+diff --git a/src/lang/en.ts b/src/lang/en.ts
+index 974ed45d9..8d8c4ff31 100644
+--- a/src/lang/en.ts
++++ b/src/lang/en.ts
+@@ -30,7 +30,7 @@ export const languageEnglish = {
+         vertexAuthError: "Vertex AI authentication details are missing.",
+         networkFetch: "This happens when the network is unstable or the server is down.",
+         networkFetchWeb:
+-            "This can be a CORS error. this only happens when using web version due to limitations of the browser. try using desktop local version, or other version of PocketRisu.",
++            "This can be a CORS error. this only happens when using web version due to limitations of the browser. try using desktop local version, or other version of PocketRisu-Alter.",
+         networkFetchPlain: "This can be a plain fetch error. try disabling force plain fetch option in settings.",
+         requestLogRemoved: "This request log is removed.",
+         requestLogRemovedDesc: "This request log removes when client is refreshed or reloaded.",
+@@ -57,13 +57,13 @@ export const languageEnglish = {
+         themeDescClassic: "Suitable for All devices",
+         texttheme: "Select your text color",
+         inputName: "Lastly, Input your Nickname.",
+-        welcome: "Welcome to PocketRisu! I am Airisu, I am here guide you to setup PocketRisu. First, What may I call you?",
++        welcome: "Welcome to PocketRisu-Alter! I am Airisu, I am here guide you to setup PocketRisu-Alter. First, What may I call you?",
+         welcome2: "Hello {username}! before we start, I will ask you some questions. You can change these settings later in settings.\n\nFirst select the AI provider.",
+         openRouterProvider: "OpenRouter has a lot of models, some of them unfiltered and some of them free, but it is not as good as OpenAI.",
+         hordeProvider: "Horde is a free provider, but the response time is long and the quality is low.",
+         setProviderLater: "There are other providers, but you can set it later in settings. select this if you want to set it later.",
+         setupOpenAI:
+-            "To use OpenAI, you need to get an API key. \n1. go to https://beta.openai.com/ \n2. login with your account \n3. go to https://beta.openai.com/account/api-keys \n4. click 'Create New API Key' and name your key whatever you want. \n5. copy the key in the website.\n6. go back to PocketRisu\n7. paste it, and click send button.",
++            "To use OpenAI, you need to get an API key. \n1. go to https://beta.openai.com/ \n2. login with your account \n3. go to https://beta.openai.com/account/api-keys \n4. click 'Create New API Key' and name your key whatever you want. \n5. copy the key in the website.\n6. go back to PocketRisu-Alter\n7. paste it, and click send button.",
+         setupClaude: "To use Claude, you need to get an API key.",
+         setupClaudeSteps: [
+             "Go to this URL and Login as Google",
+@@ -80,7 +80,7 @@ export const languageEnglish = {
+             "Copy the key, and paste it in here and send it.",
+         ],
+         setupOpenRouter:
+-            "To use OpenRouter, you need to get an API key. \n1. go to https://openrouter.ai/keys\n2. click 'Create Key'\n3. set key name whatever you want.\n4. copy the key in the website\n5. go back to PocketRisu\n6. paste it, and click send button.",
++            "To use OpenRouter, you need to get an API key. \n1. go to https://openrouter.ai/keys\n2. click 'Create Key'\n3. set key name whatever you want.\n4. copy the key in the website\n5. go back to PocketRisu-Alter\n6. paste it, and click send button.",
+         allDone: "All Done! please wait a moment.",
+         setupLaterMessage: "Welcome {username}! do you want me to guide you to setup or do it yourself?",
+         setupMessageOption1: "Guide me to setup",
+@@ -675,8 +675,8 @@ export const languageEnglish = {
+     chatWidthStandard: "Standard",
+     chatWidthWide: "Wide",
+     chatWidthFull: "No Limit",
+-    customCSSWarning: "PocketRisu's UI structure (HTML/CSS) differs from upstream RisuAI, so existing custom CSS may break the layout or behave unexpectedly. Use only when you know what you are overriding.",
+-    customHTMLWarning: "PocketRisu's UI structure (HTML/CSS) differs from upstream RisuAI, so existing custom Chat HTML may not render correctly. Use only when you know what you are overriding.",
++    customCSSWarning: "PocketRisu-Alter's UI structure (HTML/CSS) differs from upstream RisuAI, so existing custom CSS may break the layout or behave unexpectedly. Use only when you know what you are overriding.",
++    customHTMLWarning: "PocketRisu-Alter's UI structure (HTML/CSS) differs from upstream RisuAI, so existing custom Chat HTML may not render correctly. Use only when you know what you are overriding.",
+     sayNothing: "Input 'say nothing' when no string inputed",
+     regexScript: "Regex Script",
+     type: "Type",
+@@ -800,9 +800,9 @@ export const languageEnglish = {
+     proxyAPIKey: "Key/Password",
+     proxyRequestModel: "Request Model",
+     officialWiki: "Official Wiki",
+-    officialWikiDesc: "Official Wiki for PocketRisu. feel free to see.",
++    officialWikiDesc: "Official Wiki for PocketRisu-Alter. feel free to see.",
+     officialDiscord: "Official Discord",
+-    officialDiscordDesc: "Official Discord to talk about PocketRisu",
++    officialDiscordDesc: "Official Discord to talk about PocketRisu-Alter",
+     persona: "Persona",
+     icon: "Icon",
+     account: "Account",
+@@ -919,12 +919,14 @@ export const languageEnglish = {
+     webdeeplwarn: "This option is not recommended for use with web version, as it can cause CORS errors.",
+     saveBackupLocal: "Save Backup Locally",
+     saveBackupForUpstream: "Save Backup for Original RisuAI",
+-    saveBackupForUpstreamConfirm: "This backup is intended for moving your data to the original RisuAI (web/Tauri). Inlay images are excluded because their entry names use a layout that the original RisuAI cannot import. Other data (database, character assets, cold storage) is included.\n\nFor moving data between PocketRisu installations, use the regular local backup instead.\n\nProceed?",
++    saveBackupForUpstreamConfirm: "This backup is intended for moving your data to the original RisuAI (web/Tauri). Inlay images are excluded because their entry names use a layout that the original RisuAI cannot import. Other data (database, character assets, cold storage) is included.\n\nFor moving data between PocketRisu-Alter installations, use the regular local backup instead.\n\nProceed?",
+     loadBackupLocal: "Load Backup Locally",
+     topP: "Top P",
+     genTimes: "Generation Choices",
+     cot: "Chain of Thoughts",
+     forcePlainFetch: "Force Plain Fetch",
++    useBackendChatJobs: "Run Chat Generation on Server",
++    useBackendMultiagent: "Run MultiAgent Pipeline on Server",
+     autoFillRequestURL: "Autofill Request URL",
+     newOAIHandle: "New OpenAI Handling",
+     inlayImage: "Inlay Image Feature",
+@@ -1028,8 +1030,8 @@ export const languageEnglish = {
+     trash: "Trash",
+     trashDesc: "Deleted characters are moved to trash. you can restore or delete them permanently. deleted characters are automatically purged after 3 days.",
+     shareExport: "Share/Export",
+-    risupresetDesc: "Risupreset format is a format specifically designed for PocketRisu presets.",
+-    risuMDesc: "RisuM format is a format that is specifically designed for PocketRisu modules.",
++    risupresetDesc: "Risupreset format is a format specifically designed for PocketRisu-Alter presets.",
++    risuMDesc: "RisuM format is a format that is specifically designed for PocketRisu-Alter modules.",
+     jsonDesc: "JSON format is a format that is easy to read and write for both humans and machines.",
+     nickname: "Nickname",
+     useRegexLorebook: "Use Regex",
+@@ -1250,7 +1252,7 @@ export const languageEnglish = {
+     home: "Home",
+     showSavingIcon: "Show Saving Icon",
+     pluginVersionWarn:
+-        "This is {{plugin_version}} version of the plugin. which is not compatible with this version of PocketRisu. please update the plugin to {{required_version}} version.",
++        "This is {{plugin_version}} version of the plugin. which is not compatible with this version of PocketRisu-Alter. please update the plugin to {{required_version}} version.",
+     imageTranslation: "Image Translation",
+     banCharacterset: "Auto Regenerate On Characterset",
+     realmDirectOpen: "Directly open character in RisuRealm",
+@@ -1471,7 +1473,7 @@ export const languageEnglish = {
+     modelModeLockLegacy: "Lock to legacy model mode",
+     modelModeLockLegacyDesc: "Use the original RisuAI model system",
+     modelModeLockPreset: "Lock to model preset mode",
+-    modelModeLockPresetDesc: "Use PocketRisu's model preset binding system",
++    modelModeLockPresetDesc: "Use PocketRisu-Alter's model preset binding system",
+     modelModeLockNone: "No lock",
+     modelModeLockNoneDesc: "Choose the mode per chat",
+     newChatModelModeLabel: "Default model mode for new chats",
+@@ -1570,10 +1572,10 @@ export const languageEnglish = {
+     nightlyWarning:
+         "## Nightly Builds\n\nYou are connecting to a nightly build of the software. This version is meant for testing and most likely contains bugs. **In this version, even if you encounter issues, we do not support resolving them directly.**",
+     loginSionyw: "Login with Sionyw Account",
+-    pluginRiskDetectedAlert: "PocketRisu detected code that may be harmful which can STOLE YOUR API KEY OR PERSONAL DATA. we recommend you to NOT INSTALL THIS PLUGIN.",
++    pluginRiskDetectedAlert: "PocketRisu-Alter detected code that may be harmful which can STOLE YOUR API KEY OR PERSONAL DATA. we recommend you to NOT INSTALL THIS PLUGIN.",
+     doNotInstall: "Do Not Install",
+     continueAnyway: "Continue Anyway",
+-    pluginNoRiskButAlert: "PocketRisu did not detect harmful code, but please be aware that installing plugins from untrusted sources can pose security risks.",
++    pluginNoRiskButAlert: "PocketRisu-Alter did not detect harmful code, but please be aware that installing plugins from untrusted sources can pose security risks.",
+ 
+     pluginRisksInuserFriendly: {
+         eval: "Evaluating Code from Strings",
+@@ -1630,8 +1632,8 @@ export const languageEnglish = {
+     partialBackupFirstConfirm: "⚠️ WARNING: Partial Local Backup ⚠️\n\nThis backup quickly saves only essential information.\n\nIncluded:\n- Database (chat history, characters, modules, plugins, prompts, settings, etc.)\n- Character profile icons (main images)\n- User icons and custom backgrounds\n- Persona icons\n- Folder images\n- Bot preset images\n\n⚠️ NOT Included:\n- Emotion images\n- Additional character assets\n- VITS voice files\n- All other additional media files\n\nThis backup file does NOT include all character assets!\nIf you need a complete backup, use the regular local backup.\n\nDo you want to continue?",
+     partialBackupSecondConfirm: "⚠️⚠️ FINAL WARNING ⚠️⚠️\n\nThis backup saves only character profile images and does NOT save most other assets!\n\nWhat will be saved:\n- Database (chat history, characters, modules, plugins, prompts, settings, etc.)\n- Character profile icons (main images)\n- User icons and custom backgrounds\n- Persona icons\n- Folder images\n- Bot preset images\n\nWhat will NOT be saved:\n- Emotion images\n- Additional character assets\n- VITS voice files\n- All other media files\n\n⚠️ Proceed ONLY if you don't need character assets in your backup file! ⚠️\n\nAre you really sure you want to proceed with partial backup?",
+     savePartialLocalBackup: "Save Partial Backup Locally (Excluding Character Assets)",
+-    serverBackupHeader: "PocketRisu Server Backup",
+-    serverBackupDesc: "Save and restore backup files directly on the device (server) where PocketRisu is installed, without downloading.",
++    serverBackupHeader: "PocketRisu-Alter Server Backup",
++    serverBackupDesc: "Save and restore backup files directly on the device (server) where PocketRisu-Alter is installed, without downloading.",
+     serverBackupSave: "Save Backup to Server",
+     serverBackupManage: "Manage Server Backups",
+     serverBackupSaving: "Saving backup to server...",
+@@ -1728,7 +1730,7 @@ export const languageEnglish = {
+     togglePresetExported: (name: string) => `Preset "${name}" exported.`,
+     longPressToPopupEditor: "Long press to open popup editor",
+     showInputActionBar: "Show input action bar",
+-    importSaveFolderHeader: "Load Save into PocketRisu",
++    importSaveFolderHeader: "Load Save into PocketRisu-Alter",
+     importSaveZip: "Load from Save Folder (Zip Upload)",
+     importSaveZipDesc: "Compress your existing RisuAI project's save folder into a zip file and upload it here to import your data. Uploading may fail if the zip file is too large — in that case, copy the save folder directly into the server's save directory and restart to migrate automatically.",
+     importSaveFolderScanning: "Scanning save folder...",
+@@ -1789,7 +1791,7 @@ export const languageEnglish = {
+     nanoGPTManualModelSelect: "Manual Model Select",
+     // Remote Access (Cloudflare Quick Tunnel)
+     remoteAccess: "Remote Access",
+-    remoteAccessDesc: "Use a remote access link to connect to this PocketRisu server from another device.",
++    remoteAccessDesc: "Use a remote access link to connect to this PocketRisu-Alter server from another device.",
+     remoteAccessOpen: "Open Remote Access",
+     remoteAccessClose: "Close Remote Access",
+     remoteAccessCloseConfirm: "Close remote access? The link will expire.",
+@@ -1888,7 +1890,7 @@ export const languageEnglish = {
+     storageDiskHeaderUnknown: "Disk size unavailable",
+     storageDiskOther: "Other (system & apps)",
+     storageDiskFree: "Free",
+-    storageDiskRisuTotal: (size: number) => `PocketRisu total: ${(size / 1024 / 1024).toFixed(1)} MB`,
++    storageDiskRisuTotal: (size: number) => `PocketRisu-Alter total: ${(size / 1024 / 1024).toFixed(1)} MB`,
+ 
+     // Per-row labels (shown in the breakdown list with ⓘ explanations)
+     storageRowDbFile: "risuai.db",
+@@ -1920,7 +1922,7 @@ export const languageEnglish = {
+     storageRowReclaimable: (size: number) =>
+         `${(size / 1024 / 1024).toFixed(1)} MB reclaimable — run Optimize to compact.`,
+     storageInternalOnly: "Show with full disk",
+-    storageInternalOnlyHint: "Off shows only PocketRisu items; on includes system & free space relative to the disk.",
++    storageInternalOnlyHint: "Off shows only PocketRisu-Alter items; on includes system & free space relative to the disk.",
+ 
+     // 2 GB BLOB limit (separate section)
+     storageBlobLimit: "2 GB BLOB limit",
+@@ -2001,7 +2003,7 @@ export const languageEnglish = {
+ 
+     // Data migration (formerly "Account & Files")
+     migration: "Data Migration",
+-    migrationDesc: "Move data between RisuAI (or compatible systems) and PocketRisu: import from upstream, or export to upstream-compatible format.",
++    migrationDesc: "Move data between RisuAI (or compatible systems) and PocketRisu-Alter: import from upstream, or export to upstream-compatible format.",
+     migrationInfoBackupMoved: "Server backups, local backups, and DB snapshots have moved to [System → Backups].",
+     migrationGotoBackupTab: "Open Backups tab",
+     migrationLegacyAccordion: "RisuAI-style backup (legacy)",
+diff --git a/src/lang/es.ts b/src/lang/es.ts
+index efea9b458..7c869b010 100644
+--- a/src/lang/es.ts
++++ b/src/lang/es.ts
+@@ -26,7 +26,7 @@ export const languageSpanish = {
+         "emptyText": "El texto está vacío.",
+         "wrongPassword": "Contraseña incorrecta",
+         "networkFetch": "Esto ocurre cuando la red es inestable o el servidor está caído.",
+-        "networkFetchWeb": "Esto puede ser un error de CORS. Esto solo ocurre al usar la versión web debido a las limitaciones del navegador. Intenta usar la versión local de escritorio u otra versión de PocketRisu.",
++        "networkFetchWeb": "Esto puede ser un error de CORS. Esto solo ocurre al usar la versión web debido a las limitaciones del navegador. Intenta usar la versión local de escritorio u otra versión de PocketRisu-Alter.",
+         "networkFetchPlain": "Esto puede ser un error de fetch simple. Intenta desactivar la opción de forzar fetch simple en la configuración.",
+         "requestLogRemoved": "Este registro de solicitud ha sido eliminado.",
+         "requestLogRemovedDesc": "Este registro de solicitud se elimina cuando el cliente se actualiza o recarga.",
+@@ -50,12 +50,12 @@ export const languageSpanish = {
+         "themeDescClassic": "Apto para todos los dispositivos",
+         "texttheme": "Selecciona el color del texto",
+         "inputName": "Por último, ingresa tu apodo.",
+-        "welcome": "¡Bienvenido a PocketRisu! Aquí te guiaré para configurarlo. Primero, ¿cómo puedo llamarte?",
++        "welcome": "¡Bienvenido a PocketRisu-Alter! Aquí te guiaré para configurarlo. Primero, ¿cómo puedo llamarte?",
+         "welcome2": "Hola {username}! Antes de empezar, te haré algunas preguntas. Puedes cambiar estas configuraciones más tarde en la configuración.\n\nPrimero selecciona el proveedor de IA.",
+         "openRouterProvider": "OpenRouter tiene muchos modelos, algunos de ellos sin filtro y algunos gratuitos, pero no es tan bueno como OpenAI.",
+         "hordeProvider": "Horde es un proveedor gratuito, pero el tiempo de respuesta es largo y la calidad es baja.",
+         "setProviderLater": "Hay otros proveedores, pero puedes configurarlo más tarde en la configuración. selecciona esto si deseas configurarlo más tarde.",
+-        "setupOpenAI": "Para usar OpenAI, necesitas obtener una clave API. \n1. ve a https://beta.openai.com/ \n2. inicia sesión con tu cuenta \n3. ve a https://beta.openai.com/account/api-keys \n4. haz clic en 'Crear Nueva Clave API' y nombra tu clave como quieras. \n5. copia la clave en el sitio web.\n6. regresa a PocketRisu\n7. pégala y haz clic en el botón enviar.",
++        "setupOpenAI": "Para usar OpenAI, necesitas obtener una clave API. \n1. ve a https://beta.openai.com/ \n2. inicia sesión con tu cuenta \n3. ve a https://beta.openai.com/account/api-keys \n4. haz clic en 'Crear Nueva Clave API' y nombra tu clave como quieras. \n5. copia la clave en el sitio web.\n6. regresa a PocketRisu-Alter\n7. pégala y haz clic en el botón enviar.",
+         "setupClaude": "Para usar Claude, necesitas obtener una clave API.",
+         "setupClaudeSteps": [
+             "Ve a esta URL e inicia sesión como Google",
+@@ -71,7 +71,7 @@ export const languageSpanish = {
+             "Ingresa tal como en la imagen de arriba y presiona 'Agregar'",
+             "Copia la clave, pégala aquí y envíala."
+         ],
+-        "setupOpenRouter": "Para usar OpenRouter, necesitas obtener una clave API. \n1. ve a https://openrouter.ai/keys\n2. haz clic en 'Crear Clave'\n3. establece el nombre de la clave como quieras.\n4. copia la clave en el sitio web\n5. regresa a PocketRisu\n6. pégala y haz clic en el botón enviar.",
++        "setupOpenRouter": "Para usar OpenRouter, necesitas obtener una clave API. \n1. ve a https://openrouter.ai/keys\n2. haz clic en 'Crear Clave'\n3. establece el nombre de la clave como quieras.\n4. copia la clave en el sitio web\n5. regresa a PocketRisu-Alter\n6. pégala y haz clic en el botón enviar.",
+         "allDone": "¡Todo listo! por favor, espera un momento.",
+         "setupLaterMessage": "¡Bienvenido {username}! ¿Quieres que te guíe para configurar o lo harás tú mismo?",
+         "setupMessageOption1": "Guíame para configurar",
+@@ -672,9 +672,9 @@ export const languageSpanish = {
+     "proxyAPIKey": "Clave/Contraseña del Proxy",
+     "proxyRequestModel": "Modelo de Solicitud",
+     "officialWiki": "Wiki Oficial",
+-    "officialWikiDesc": "Wiki Oficial de PocketRisu. siéntete libre de consultarla.",
++    "officialWikiDesc": "Wiki Oficial de PocketRisu-Alter. siéntete libre de consultarla.",
+     "officialDiscord": "Discord Oficial",
+-    "officialDiscordDesc": "Discord Oficial para hablar sobre PocketRisu",
++    "officialDiscordDesc": "Discord Oficial para hablar sobre PocketRisu-Alter",
+     "persona": "Persona",
+     "icon": "Icono",
+     "account": "Cuenta",
+@@ -893,8 +893,8 @@ export const languageSpanish = {
+     "trash": "Papelera",
+     "trashDesc": "Los personajes eliminados se mueven a la papelera. Puedes restaurarlos o eliminarlos permanentemente. Los personajes eliminados se purgan automáticamente después de 3 días.",
+     "shareExport": "Compartir/Exportar",
+-    "risupresetDesc": "El formato Risupreset es un formato específicamente diseñado para presets de PocketRisu.",
+-    "risuMDesc": "El formato RisuM es un formato diseñado específicamente para módulos de PocketRisu.",
++    "risupresetDesc": "El formato Risupreset es un formato específicamente diseñado para presets de PocketRisu-Alter.",
++    "risuMDesc": "El formato RisuM es un formato diseñado específicamente para módulos de PocketRisu-Alter.",
+     "jsonDesc": "El formato JSON es un formato fácil de leer y escribir tanto para humanos como para máquinas.",
+     "nickname": "Apodo",
+     "useRegexLorebook": "Usar Regex",
+@@ -1036,7 +1036,7 @@ export const languageSpanish = {
+     "menuSideBar": "Barra Lateral del Menú",
+     "home": "Inicio",
+     "showSavingIcon": "Mostrar Icono de Guardado",
+-    "pluginVersionWarn": "Esta es la versión {{plugin_version}} del plugin, que no es compatible con esta versión de PocketRisu. Por favor, actualiza el plugin a la versión {{required_version}}.",
++    "pluginVersionWarn": "Esta es la versión {{plugin_version}} del plugin, que no es compatible con esta versión de PocketRisu-Alter. Por favor, actualiza el plugin a la versión {{required_version}}.",
+     "imageTranslation": "Traducción de Imagen",
+     "banCharacterset": "Regeneración Automática en Conjunto de Caracteres",
+     "realmDirectOpen": "Abrir personaje directamente en RisuRealm",
+@@ -1239,10 +1239,10 @@ export const languageSpanish = {
+     "add": "Agregar",
+     "nightlyWarning": "## Builds Nightly\n\nTe estás conectando a una build nightly del software. Esta versión está destinada a pruebas y muy probablemente contiene errores. **En esta versión, incluso si encuentras problemas, no admitimos resolverlos directamente.**",
+     "loginSionyw": "Iniciar sesión con cuenta de Sionyw",
+-    "pluginRiskDetectedAlert": "PocketRisu detectó código que puede ser dañino y que podría ROBAR TU CLAVE API O DATOS PERSONALES. te recomendamos NO INSTALAR ESTE PLUGIN.",
++    "pluginRiskDetectedAlert": "PocketRisu-Alter detectó código que puede ser dañino y que podría ROBAR TU CLAVE API O DATOS PERSONALES. te recomendamos NO INSTALAR ESTE PLUGIN.",
+     "doNotInstall": "No Instalar",
+     "continueAnyway": "Continuar de Todos Modos",
+-    "pluginNoRiskButAlert": "PocketRisu no detectó código dañino, pero ten en cuenta que instalar plugins de fuentes no confiables puede plantear riesgos de seguridad.",
++    "pluginNoRiskButAlert": "PocketRisu-Alter no detectó código dañino, pero ten en cuenta que instalar plugins de fuentes no confiables puede plantear riesgos de seguridad.",
+     "pluginRisksInuserFriendly": {
+         "eval": "Evaluando Código desde Cadenas",
+         "globalAccess": "Accediendo a Variables Globales",
+diff --git a/src/lang/help.cn.ts b/src/lang/help.cn.ts
+index c7f4b1c52..40cba419f 100644
+--- a/src/lang/help.cn.ts
++++ b/src/lang/help.cn.ts
+@@ -1,5 +1,5 @@
+ /**
+- * PocketRisu NodeOnly — Simplified Chinese help texts (`language.help`).
++ * PocketRisu-Alter NodeOnly — Simplified Chinese help texts (`language.help`).
+  *
+  * Extracted from `src/lang/cn.ts` for maintainability. Entries override the
+  * English defaults in `help.en.ts` via `lodash/merge` (see `src/lang/index.ts`).
+diff --git a/src/lang/help.de.ts b/src/lang/help.de.ts
+index e88993402..989d05cba 100644
+--- a/src/lang/help.de.ts
++++ b/src/lang/help.de.ts
+@@ -1,5 +1,5 @@
+ /**
+- * PocketRisu NodeOnly — German help texts (`language.help`).
++ * PocketRisu-Alter NodeOnly — German help texts (`language.help`).
+  *
+  * Extracted from `src/lang/de.ts` for maintainability. Entries override the
+  * English defaults in `help.en.ts` via `lodash/merge` (see `src/lang/index.ts`).
+@@ -67,7 +67,7 @@ export const helpDe = {
+         "requestretrys": "Diese Option wird verwendet, um die Anzahl der Anfrage-Wiederholungsversuche festzulegen, wenn eine Anfrage fehlschlägt.",
+         "emotionPrompt": "Diese Option wird verwendet, um die Anweisung festzulegen, die zur Erkennung von Emotionen verwendet wird. Wenn sie leer ist, wird die Standardanweisung verwendet.",
+         "additionalParams": "Zusätzliche Parameter, die dem Anfrage-Body hinzugefügt werden. Wenn Sie einige Parameter ausschließen möchten, können Sie `{{none}}` als Wert eingeben. Wenn Sie einen Header anstelle eines Body hinzufügen möchten, können Sie `header::` vor den Schlüssel setzen, z. B. `header::Authorization`. Wenn Sie den Wert als JSON wünschen, können Sie `json::` vor den Wert setzen, z. B. `json::{\"key\":\"value\"}`. Andernfalls wird der Typ des Wertes automatisch bestimmt.",
+-        "antiClaudeOverload": "Wenn eine Claude-Überlastung auftritt, versucht PocketRisu, diese zu verhindern, indem es mit derselben Anweisung fortfährt, wodurch die Wahrscheinlichkeit verringert wird. Funktioniert nur für gestreamte Antworten. Dies funktioniert möglicherweise nicht für inoffizielle API-Endpunkte.",
++        "antiClaudeOverload": "Wenn eine Claude-Überlastung auftritt, versucht PocketRisu-Alter, diese zu verhindern, indem es mit derselben Anweisung fortfährt, wodurch die Wahrscheinlichkeit verringert wird. Funktioniert nur für gestreamte Antworten. Dies funktioniert möglicherweise nicht für inoffizielle API-Endpunkte.",
+         "triggerScript": "Trigger Script ist ein benutzerdefiniertes Skript, das ausgeführt wird, wenn eine Bedingung erfüllt ist. Es kann verwendet werden, um die Chat-Daten zu ändern, einen Befehl auszuführen, eine Variable zu ändern usw. Der Typ hängt davon ab, wann es ausgelöst wird. Es kann auch durch Schaltflächen ausgeführt werden, die mit {{button::Display::TriggerName}} oder HTML-Schaltflächen mit dem Attribut `risu-trigger=\"<TriggerName>\"` verwendet werden können.",
+         "autoContinueChat": "Wenn aktiviert, wird versucht, den Chat fortzusetzen, wenn er nicht mit einem Satzzeichen endet. VERWENDEN SIE DIES NICHT BEI SPRACHEN, DIE KEINE SATZZEICHEN VERWENDEN.",
+         "combineTranslation": "Wenn aktiviert, wird Text, der einen Satz bildet, aber durch HTML-Tags getrennt ist, zusammengefasst und übersetzt. Anschließend wird das Skript 'Modify Display' erneut auf die übersetzte Ausgabe angewendet.\nDies hilft dem Übersetzer, eine korrekte Übersetzung zu erstellen.\nWenn die Benutzeroberfläche bei Aktivierung dieser Option seltsam aussieht, deaktivieren Sie die Option bitte und melden Sie dies.",
+@@ -77,7 +77,7 @@ export const helpDe = {
+         "useRegexLorebook": "Wenn aktiviert, wird Regex anstelle von String-Abgleich für die Lorebook-Suche verwendet. Es verwendet das Format /regex/flags.",
+         "customChainOfThought": "Warnung: Die Verwendung des 'Chain of Thought'-Schalters wird nicht mehr empfohlen. Fügen Sie die 'Chain of Thought'-Anweisung stattdessen in andere Anweisungseinträge ein.",
+         "customPromptTemplateToggle": "Hier können Sie Ihre eigenen Anweisungsschalter definieren. Verwenden Sie das Format `<Schaltervariable>=<Schaltername>`, getrennt durch neue Zeilen. Zum Beispiel `cot=Toggle COT`. Sie können diese Schalter in der Anweisung verwenden, indem Sie `{{getglobalvar::toggle_<Schaltervariable>}}` nutzen, z. B. `{{getglobalvar::toggle_cot}}`.",
+-        "defaultVariables": "Hier können Sie Ihre eigenen Standardvariablen definieren. Verwenden Sie das Format `<Variablenname>=<Variablenwert>`, getrennt durch neue Zeilen. Zum Beispiel `name=PocketRisu`, was dann mit Trigger-Skripten und Variablen-CBS wie `{{getvar::A}}`, `{{setvar::A::B}}` oder `{{? $A + 1}}` verwendet werden kann. Wenn die Standardvariable der Anweisungsvorlage und die Standardvariable des Charakters denselben Namen haben, wird die Standardvariable des Charakters verwendet.",
++        "defaultVariables": "Hier können Sie Ihre eigenen Standardvariablen definieren. Verwenden Sie das Format `<Variablenname>=<Variablenwert>`, getrennt durch neue Zeilen. Zum Beispiel `name=PocketRisu-Alter`, was dann mit Trigger-Skripten und Variablen-CBS wie `{{getvar::A}}`, `{{setvar::A::B}}` oder `{{? $A + 1}}` verwendet werden kann. Wenn die Standardvariable der Anweisungsvorlage und die Standardvariable des Charakters denselben Namen haben, wird die Standardvariable des Charakters verwendet.",
+         "lowLevelAccess": "Wenn aktiviert, wird der Zugriff auf Funktionen ermöglicht, die hohe Rechenleistung erfordern und KI-Modelle über Trigger im Charakter ausführen. Aktivieren Sie dies nur, wenn Sie diese Funktionen wirklich benötigen.",
+         "triggerLLMPrompt": "Eine Anweisung, die an das Modell gesendet wird. Sie können mehrere Runden und Rollen verwenden, indem Sie `@@role user`, `@@role system`, `@@role assistant` nutzen. Zum Beispiel: \n```\n@@role system\nrespond as hello\n@@role assistant\nhello\n@@role user\nhi\n```",
+         "legacyTranslation": "Wenn aktiviert, wird die alte Übersetzungsmethode verwendet, die Markdown und Zitate vor der Übersetzung vorverarbeitet, anstatt sie nach der Übersetzung nachzubearbeiten.",
+@@ -92,7 +92,7 @@ export const helpDe = {
+         "customCSS": "Benutzerdefiniertes CSS für das Styling. Sie können es auch deaktivieren/aktivieren, indem Sie (Strg + .) drücken, wenn etwas schief läuft.",
+         "betaMobileGUI": "Wenn aktiviert, wird die Beta-Mobil-Benutzeroberfläche auf kleinen (weniger als 800px) Bildschirmen verwendet. Erfordert eine Aktualisierung.",
+         "unrecommended": "Dies ist eine nicht empfohlene Einstellung. Es wird nicht empfohlen, diese Einstellung zu verwenden.",
+-        "jsonSchema": "Dies ist ein JSON-Schema, das an das KI-Modell gesendet wird, wenn das KI-Modell JSON-Schema unterstützt.\n\nDa das JSON-Schema jedoch schwer zu erlernen ist, können Sie in PocketRisu anstelle des JSON-Schemas eine Teilmenge der TypeScript-Schnittstelle verwenden. PocketRisu konvertiert es zur Laufzeit. Wenn Sie beispielsweise ein JSON wie dieses senden möchten:\n\n```js\n{\n  \"name\": \"PocketRisu\", //Name muss PocketRisu sein,\n  \"age\": 1, //Alter muss eine Zahl sein,\n  \"icon\": \"slim\", //Icon muss 'slim' oder 'rounded' sein\n  \"thoughts\": [\"Gute Aussicht!\", \"Lorem\"] //thoughts muss ein Array von Strings sein\n}\n```\n\nSie können diese TypeScript-Schnittstelle eingeben:\n\n```typescript\ninterface Schema {\n  name: string;\n  age: number;\n  icon: 'slim'|'rounded'\n  thoughts: string[]\n}\n```\n\nDer Name der Schnittstelle spielt keine Rolle. Weitere Informationen finden Sie in der TypeScript-Dokumentation (https://www.typescriptlang.org/docs/handbook/interfaces.html). Um zu überprüfen, welche Teilmenge von TypeScript unterstützt wird, siehe unten.<details><summary>Unterstützte TypeScript-Teilmenge</summary>\n\nUnterstützte Typen sind `boolean`, `number`, `string`, `Array`. Erweiterte Typisierung wie Einheitstypen, Schnittmengentypen, Vereinigungstypen, optional, Literaltypen usw. werden außer in diesen Fällen nicht unterstützt:\n\n        - Array von primitiven Typen: (z. B. `string[]`, `Array<boolean>)`\n        - Einheitstypen zwischen Strings: (z. B. `'slim'|'rounded'`).\n\n        Eigenschaften müssen in einer Zeile stehen. Wenn sich mehrere Eigenschaften in einer Zeile befinden, wird ein Fehler ausgegeben. Eigenschaften und Name der Schnittstelle dürfen nur lateinische Zeichen im ASCII-Bereich enthalten. Der Name der Eigenschaften darf nicht in Anführungszeichen oder doppelte Anführungszeichen gesetzt werden. Verschachtelung innerhalb der Schnittstelle wird nicht unterstützt. Es ist nicht erlaubt, `{` oder `}` in die Zeile zu setzen, in der Eigenschaften definiert sind. Wenn Sie fortgeschrittenere Typen verwenden möchten, verwenden Sie stattdessen JSON-Schema.\n        </details>",
++        "jsonSchema": "Dies ist ein JSON-Schema, das an das KI-Modell gesendet wird, wenn das KI-Modell JSON-Schema unterstützt.\n\nDa das JSON-Schema jedoch schwer zu erlernen ist, können Sie in PocketRisu-Alter anstelle des JSON-Schemas eine Teilmenge der TypeScript-Schnittstelle verwenden. PocketRisu-Alter konvertiert es zur Laufzeit. Wenn Sie beispielsweise ein JSON wie dieses senden möchten:\n\n```js\n{\n  \"name\": \"PocketRisu-Alter\", //Name muss PocketRisu-Alter sein,\n  \"age\": 1, //Alter muss eine Zahl sein,\n  \"icon\": \"slim\", //Icon muss 'slim' oder 'rounded' sein\n  \"thoughts\": [\"Gute Aussicht!\", \"Lorem\"] //thoughts muss ein Array von Strings sein\n}\n```\n\nSie können diese TypeScript-Schnittstelle eingeben:\n\n```typescript\ninterface Schema {\n  name: string;\n  age: number;\n  icon: 'slim'|'rounded'\n  thoughts: string[]\n}\n```\n\nDer Name der Schnittstelle spielt keine Rolle. Weitere Informationen finden Sie in der TypeScript-Dokumentation (https://www.typescriptlang.org/docs/handbook/interfaces.html). Um zu überprüfen, welche Teilmenge von TypeScript unterstützt wird, siehe unten.<details><summary>Unterstützte TypeScript-Teilmenge</summary>\n\nUnterstützte Typen sind `boolean`, `number`, `string`, `Array`. Erweiterte Typisierung wie Einheitstypen, Schnittmengentypen, Vereinigungstypen, optional, Literaltypen usw. werden außer in diesen Fällen nicht unterstützt:\n\n        - Array von primitiven Typen: (z. B. `string[]`, `Array<boolean>)`\n        - Einheitstypen zwischen Strings: (z. B. `'slim'|'rounded'`).\n\n        Eigenschaften müssen in einer Zeile stehen. Wenn sich mehrere Eigenschaften in einer Zeile befinden, wird ein Fehler ausgegeben. Eigenschaften und Name der Schnittstelle dürfen nur lateinische Zeichen im ASCII-Bereich enthalten. Der Name der Eigenschaften darf nicht in Anführungszeichen oder doppelte Anführungszeichen gesetzt werden. Verschachtelung innerhalb der Schnittstelle wird nicht unterstützt. Es ist nicht erlaubt, `{` oder `}` in die Zeile zu setzen, in der Eigenschaften definiert sind. Wenn Sie fortgeschrittenere Typen verwenden möchten, verwenden Sie stattdessen JSON-Schema.\n        </details>",
+         "strictJsonSchema": "Wenn aktiviert, wird das bereitgestellte Schema für JSON bei einigen Modellen strikt befolgt. Wenn es deaktiviert ist, wird das JSON-Schema möglicherweise ignoriert.",
+         "extractJson": "Wenn es nicht leer ist, werden bestimmte JSON-Daten aus der Antwort extrahiert. Wenn Sie beispielsweise `response.text[0]` in der Antwort `{\"response\": {\"text\": [\"hallo\"]}}` extrahieren möchten, können Sie `response.text.0` eingeben.",
+         "translatorNote": "Hier können Sie für jeden Charakter eine eindeutige Übersetzungsanweisung hinzufügen. Diese Option gilt nur bei Verwendung des Ax.-Modells für die Übersetzung. Fügen Sie dazu `{{slot::tnote}}` in die Spracheinstellungen ein. Es funktioniert nicht in Gruppenchats.",
+diff --git a/src/lang/help.en.ts b/src/lang/help.en.ts
+index b1ded97f4..3a1f58f24 100644
+--- a/src/lang/help.en.ts
++++ b/src/lang/help.en.ts
+@@ -1,5 +1,5 @@
+ /**
+- * PocketRisu NodeOnly — English help texts (`language.help`).
++ * PocketRisu-Alter NodeOnly — English help texts (`language.help`).
+  *
+  * Extracted from `src/lang/en.ts` for maintainability. See
+  * `.agent/notes/help-audit/` (workspace) for the audit, structure rationale,
+@@ -108,6 +108,8 @@ export const helpEn = {
+         useExperimental: "If enabled, it will show some experimental features.",
+         forceProxyAsOpenAI: "If enabled, it will force to use OpenAI format when using reverse proxy.",
+         forcePlainFetch: "If enabled, it will use the browser Fetch API instead of the native HTTP request. This can cause CORS errors.",
++        useBackendMultiagent: "If enabled and Run Chat Generation on Server is active, the MultiAgent RP pipeline runs on the server instead of the browser. Requires the multiagent plugin to be configured (API key set). Falls back gracefully if the pipeline fails.",
++        useBackendChatJobs: "If enabled, the actual AI request is executed by the PocketRisu-Alter server. Generation continues even if you turn off the screen or close the browser, and the completed message is loaded when you reopen the app. Currently OpenAI-compatible providers only.",
+         autoFillRequestURL: "If enabled, it will automatically fill the request URL to match the current model.",
+         localNetworkModeDesc: "Routes private/LAN model URLs through the local server instead of browser direct fetch.\n\n**Purpose**\n- Avoid browser private-network/CORS restrictions\n- Mitigate timeout risk for slow first-token local inference\n\n**How it works**\n- Streaming uses experimental Job+WebSocket relay first (fallback to /proxy2)\n- Non-streaming uses /proxy2 relay\n\n**Constraints**\n- Scope is OpenAI-compatible request paths only",
+         chainOfThought: "If enabled, it will add chain of thought prompt to the prompt.",
+@@ -121,7 +123,7 @@ export const helpEn = {
+         additionalParams:
+             'Additional parameters that would be added to the request body. if you want to exclude some parameters, you can put `{{none}}` to the value. if you want to add a header instead of body, you can put `header::` in front of the key like `header::Authorization`. if you want value as json, you can put `json::` in front of the value like `json::{"key":"value"}`. otherwise, type of the value would be determined automatically.',
+         antiClaudeOverload:
+-            "If Claude overload happens, PocketRisu would try to prevent it by continuing with same prompt, making it less likely to happen. works only for streamed responses. this could not work for non-official api endpoints.",
++            "If Claude overload happens, PocketRisu-Alter would try to prevent it by continuing with same prompt, making it less likely to happen. works only for streamed responses. this could not work for non-official api endpoints.",
+         triggerScript:
+             'Trigger Script is a custom script that runs when a condition is met. it can be used to modify the chat data, run a command, change variable, and etc. the type depends when it is triggered. it can also be run by buttons, which can be used with {{button::Display::TriggerName}}, or HTML buttons with `risu-trigger="<TriggerName>"` attribute.',
+         autoContinueChat: "If enabled, it will try to continue the chat if it doesn't ends with a punctuation. DONT USE THIS WITH LANGUAGES THAT DOESN'T USE PUNCTUATION.",
+@@ -136,7 +138,7 @@ export const helpEn = {
+         customPromptTemplateToggle:
+             "Here you can define your own prompt toggles. use `<toggle variable>=<toggle name>` format, seperated by newline. for example, `cot=Toggle COT`. you can use these toggles in prompt by using `{{getglobalvar::toggle_<toggle variable>}}`. like `{{getglobalvar::toggle_cot}}`.",
+         defaultVariables:
+-            "Here you can define your own default variables. use `<variable name>=<variable value>` format, seperated by newline. for example, `name=PocketRisu`, which then can be used with trigger scripts and variables CBS like `{{getvar::A}}`, `{{setvar::A::B}}` or `{{? $A + 1}}`. if prompt template's default variable and character's default variable has same name, character's default variable will be used.",
++            "Here you can define your own default variables. use `<variable name>=<variable value>` format, seperated by newline. for example, `name=PocketRisu-Alter`, which then can be used with trigger scripts and variables CBS like `{{getvar::A}}`, `{{setvar::A::B}}` or `{{? $A + 1}}`. if prompt template's default variable and character's default variable has same name, character's default variable will be used.",
+         lowLevelAccess:
+             "If enabled, it will enable access to features that requires high computing powers and executing AI model via triggers in the character. do not enable this unless you really need these features.",
+         triggerLLMPrompt:
+@@ -162,8 +164,8 @@ export const helpEn = {
+         enableScrollToActiveChar: "If enabled, pressing the hotkey or holding Ctrl while dragging a character will scroll to the currently active character. Folders will be opened automatically if closed.",
+         unrecommended: "This is a unrecommended setting. it is not recommended to use this setting.",
+         jsonSchema:
+-            "This is a JSON Schema that will be sent to the AI model if AI model supports JSON Schema.\n\nHowever, since JSON Schema is hard to learn, In PocketRisu, you can use subset of TypeScript interface instead of JSON Schema. PocketRisu will convert it in runtime." +
+-            'For example, if you want to send a JSON like this:\n\n```js\n{\n  "name": "PocketRisu", //name must be PocketRisu,\n  "age": 1, //age must be number,\n  "icon": "slim", //icon must be \'slim\' or \'rounded\'\n  "thoughts": ["Good View!", "Lorem"] //thoughts must be array of strings\n}\n```\n\n' +
++            "This is a JSON Schema that will be sent to the AI model if AI model supports JSON Schema.\n\nHowever, since JSON Schema is hard to learn, In PocketRisu-Alter, you can use subset of TypeScript interface instead of JSON Schema. PocketRisu-Alter will convert it in runtime." +
++            'For example, if you want to send a JSON like this:\n\n```js\n{\n  "name": "PocketRisu-Alter", //name must be PocketRisu-Alter,\n  "age": 1, //age must be number,\n  "icon": "slim", //icon must be \'slim\' or \'rounded\'\n  "thoughts": ["Good View!", "Lorem"] //thoughts must be array of strings\n}\n```\n\n' +
+             "You can put this TypeScript interface:\n\n```typescript\ninterface Schema {\n  name: string;\n  age: number;\n  icon: 'slim'|'rounded'\n  thoughts: string[]\n}\n```\n\n" +
+             "Name of the interface doesn't matter. for more information, see the typescript documentation. (https://www.typescriptlang.org/docs/handbook/interfaces.html), and to Check what subset of TypeScript is supported, see the below." +
+             "<details><summary>Supported TypeScript Subset</summary>\n\n" +
+@@ -376,7 +378,7 @@ export const helpEn = {
+         theme: "Overall chat layout theme.",
+         waifuWidth: "Width of the character illustration in the Waifulike theme.",
+         waifuWidth2: "Width of the second character or secondary visual in the Waifulike theme.",
+-        nodeOnlyStandardChatWidth: "Maximum chat card width in the PocketRisu Standard theme.",
++        nodeOnlyStandardChatWidth: "Maximum chat card width in the PocketRisu-Alter Standard theme.",
+         colorScheme: "Color palette used across the Risu UI.",
+         textColor: "Message text color theme.",
+         font: "Message font.",
+@@ -514,7 +516,7 @@ export const helpEn = {
+         cohereKey:
+             "Cohere API key (https://dashboard.cohere.com/api-keys). Required when using Cohere's own models such as `command-r`.",
+         ollamaURL:
+-            "URL of your local or remote Ollama server (e.g. `http://localhost:11434`). Pairs well with PocketRisu's local-network mode for stable access to private LAN LLMs.",
++            "URL of your local or remote Ollama server (e.g. `http://localhost:11434`). Pairs well with PocketRisu-Alter's local-network mode for stable access to private LAN LLMs.",
+         ollamaModel:
+             "Model name to call on the Ollama server. Run `ollama list` to see installed models and copy the name verbatim (e.g. `llama3:8b`).",
+         nanogptKey:
+@@ -625,7 +627,7 @@ export const helpEn = {
+             "Use stop strings. The model's response is cut as soon as one of these strings appears. Useful for blocking patterns where the character impersonates the next speaker (e.g. `{{user}}: ...`).",
+ 
+         memType:
+-            "Long-term memory mode.\n\n- **None**: disabled (chat is sent as-is up to the max context limit)\n- **HypaV3**: PocketRisu's long-term memory that auto-summarizes and retrieves older chat to inject into the context. Slightly more cost / latency, but consistency in long chats improves a lot.",
++            "Long-term memory mode.\n\n- **None**: disabled (chat is sent as-is up to the max context limit)\n- **HypaV3**: PocketRisu-Alter's long-term memory that auto-summarizes and retrieves older chat to inject into the context. Slightly more cost / latency, but consistency in long chats improves a lot.",
+         hypaV3SummaryModel:
+             "Model used to summarize chat.\n\n- **subModel**: use the auxiliary model (most common)\n- **Qwen3 4B/14B**: free local summarization (runs in the browser or Node instance directly, downloads on first use)\n\nUsing a lighter model than the main model saves cost.",
+         hypaV3Preset:
+@@ -783,5 +785,5 @@ export const helpEn = {
+             "Reference image mode (None / Upload / Use Character Image). Works only when the model supports image input.",
+ 
+         bootBackupReminder:
+-            "When enabled, PocketRisu prompts you on every boot whether to create a server backup right away. Useful as a lightweight safety net before opening the app each session. Confirming runs a full server backup (the loading screen waits while it finishes); skipping continues straight to the app.",
++            "When enabled, PocketRisu-Alter prompts you on every boot whether to create a server backup right away. Useful as a lightweight safety net before opening the app each session. Confirming runs a full server backup (the loading screen waits while it finishes); skipping continues straight to the app.",
+ }
+diff --git a/src/lang/help.es.ts b/src/lang/help.es.ts
+index f22248d5f..421a02b51 100644
+--- a/src/lang/help.es.ts
++++ b/src/lang/help.es.ts
+@@ -1,5 +1,5 @@
+ /**
+- * PocketRisu NodeOnly — Spanish help texts (`language.help`).
++ * PocketRisu-Alter NodeOnly — Spanish help texts (`language.help`).
+  *
+  * Extracted from `src/lang/es.ts` for maintainability. Entries override the
+  * English defaults in `help.en.ts` via `lodash/merge` (see `src/lang/index.ts`).
+@@ -67,7 +67,7 @@ export const helpEs = {
+         "requestretrys": "Esta opción se utiliza para establecer el número de reintentos de solicitud cuando la solicitud falla.",
+         "emotionPrompt": "Esta opción se utiliza para establecer el prompt que se usa para detectar la emoción. Si está en blanco, usará el prompt predeterminado.",
+         "additionalParams": "Parámetros adicionales que se agregarán al cuerpo de la solicitud. Si deseas excluir algunos parámetros, puedes poner `{{none}}` en el valor. Si deseas agregar un encabezado en lugar de un cuerpo, puedes poner `header::` delante de la clave, como `header::Authorization`. Si deseas el valor como JSON, puedes poner `json::` delante del valor, como `json::{\"key\":\"value\"}`. De lo contrario, el tipo del valor se determinará automáticamente.",
+-        "antiClaudeOverload": "Si ocurre sobrecarga de Claude, PocketRisu intentará evitarla continuando con el mismo prompt, haciéndolo menos probable que ocurra. Funciona solo para respuestas transmitidas. Esto podría no funcionar para endpoints de API no oficiales.",
++        "antiClaudeOverload": "Si ocurre sobrecarga de Claude, PocketRisu-Alter intentará evitarla continuando con el mismo prompt, haciéndolo menos probable que ocurra. Funciona solo para respuestas transmitidas. Esto podría no funcionar para endpoints de API no oficiales.",
+         "triggerScript": "Trigger Script es un script personalizado que se ejecuta cuando se cumple una condición. Se puede usar para modificar los datos del chat, ejecutar un comando, cambiar variables, etc. El tipo depende de cuándo se activa. También puede ejecutarse mediante botones, que se pueden usar con {{button::Display::TriggerName}}, o botones HTML con el atributo `risu-trigger=\"<TriggerName>\"`.",
+         "autoContinueChat": "Si está habilitado, intentará continuar el chat si no termina con un signo de puntuación. NO USES ESTO CON IDIOMAS QUE NO USAN SIGNOS DE PUNTUACIÓN.",
+         "combineTranslation": "Si está habilitado, el texto que es una oración pero está separado por etiquetas HTML se combinará y se traducirá, luego se volverá a aplicar el script de Modificar Visualización a la respuesta traducida.\nEsto ayuda al traductor a realizar la traducción correcta.\nSi la interfaz de usuario se vuelve extraña cuando activas esta opción, desactiva la opción e informa sobre el problema.",
+@@ -77,7 +77,7 @@ export const helpEs = {
+         "useRegexLorebook": "Si está habilitado, usará regex para la búsqueda en el lorebook, en lugar de coincidencia de cadenas. Usa el formato /regex/flags.",
+         "customChainOfThought": "Advertencia: el interruptor de cadena de pensamientos ya no se recomienda. Pon el prompt de cadena de pensamientos en otras entradas de prompt en su lugar.",
+         "customPromptTemplateToggle": "Aquí puedes definir tus propios interruptores de prompt. Usa el formato `<variable del interruptor>=<nombre del interruptor>`, separado por nueva línea. Por ejemplo, `cot=Toggle COT`. Puedes usar estos interruptores en el prompt usando `{{getglobalvar::toggle_<variable del interruptor>}}`. Como `{{getglobalvar::toggle_cot}}`.",
+-        "defaultVariables": "Aquí puedes definir tus propias variables predeterminadas. Usa el formato `<nombre de la variable>=<valor de la variable>`, separado por nueva línea. Por ejemplo, `name=PocketRisu`, que luego se puede usar con scripts de activación y variables CBS como `{{getvar::A}}`, `{{setvar::A::B}}` o `{{? $A + 1}}`. Si la variable predeterminada del template del prompt y la variable predeterminada del personaje tienen el mismo nombre, se usará la variable predeterminada del personaje.",
++        "defaultVariables": "Aquí puedes definir tus propias variables predeterminadas. Usa el formato `<nombre de la variable>=<valor de la variable>`, separado por nueva línea. Por ejemplo, `name=PocketRisu-Alter`, que luego se puede usar con scripts de activación y variables CBS como `{{getvar::A}}`, `{{setvar::A::B}}` o `{{? $A + 1}}`. Si la variable predeterminada del template del prompt y la variable predeterminada del personaje tienen el mismo nombre, se usará la variable predeterminada del personaje.",
+         "lowLevelAccess": "Si está habilitado, permitirá el acceso a funciones que requieren altas potencias de computación y ejecutar el modelo de IA a través de activadores en el personaje. No habilites esto a menos que realmente necesites estas características.",
+         "triggerLLMPrompt": "Un prompt que se enviará al modelo. Puedes usar múltiples turnos y roles usando `@@role usuario`, `@@role sistema`, `@@role asistente`. Por ejemplo, \n```\n@@role sistema\nresponde como hola\n@@role asistente\nhola\n@@role usuario\nhola\n```",
+         "legacyTranslation": "Si está habilitado, usará el método de traducción antiguo, que preprocesa Markdown y citas antes de las traducciones en lugar de postprocesar después de las traducciones.",
+@@ -92,7 +92,7 @@ export const helpEs = {
+         "customCSS": "CSS personalizado para estilos. También puedes desactivarlo/activarlo presionando (Ctrl + .) si algo sale mal.",
+         "betaMobileGUI": "Si está habilitado, usará la GUI móvil beta en pantallas pequeñas (menos de 800px). Requiere recargar.",
+         "unrecommended": "Esta es una configuración no recomendada. No se recomienda usar esta configuración.",
+-        "jsonSchema": "Este es un esquema JSON que se enviará al modelo de IA si el modelo admite JSON Schema.\n\nSin embargo, dado que JSON Schema es difícil de aprender, en PocketRisu puedes usar un subconjunto de la interfaz TypeScript en lugar de JSON Schema. PocketRisu lo convertirá en tiempo de ejecución. Por ejemplo, si quieres enviar un JSON como este:\n\n```js\n{\n  \"name\": \"PocketRisu\", //name must be PocketRisu,\n  \"age\": 1, //age must be number,\n  \"icon\": \"slim\", //icon must be 'slim' or 'rounded'\n  \"thoughts\": [\"Good View!\", \"Lorem\"] //thoughts must be array of strings\n}\n```\n\nPuedes poner esta interfaz TypeScript:\n\n```typescript\ninterface Schema {\n  name: string;\n  age: number;\n  icon: 'slim'|'rounded'\n  thoughts: string[]\n}\n```\n\nEl nombre de la interfaz no importa. Para más información, consulta la documentación de TypeScript (https://www.typescriptlang.org/docs/handbook/interfaces.html), y para verificar qué subconjunto de TypeScript es compatible, consulta a continuación.<details><summary>Subconjunto de TypeScript Compatible</summary>\n\nLos tipos compatibles son `boolean`, `number`, `string`, `Array`. Tipos avanzados como tipos unitarios, tipos de intersección, tipos de unión, opcionales, tipos literales, etc., no son compatibles excepto en estos casos:\n\n        - Array de tipos primitivos: (ej. `string[]`, `Array<boolean>)`\n        - Tipos unitarios entre cadenas: (ej. `'slim'|'rounded'`).\n\n        Las propiedades deben estar una por línea. Si hay múltiples propiedades en una línea, arrojará un error. Las propiedades y el nombre de la interfaz deben estar solo en caracteres latinos, en el rango ASCII. El nombre de las propiedades no debe estar entre comillas o comillas dobles. No se admite anidamiento dentro de la interfaz. No se permite poner `{` o `}` en la línea donde se definen las propiedades. Si deseas usar tipos más avanzados, usa JSON Schema en su lugar.\n        </details>",
++        "jsonSchema": "Este es un esquema JSON que se enviará al modelo de IA si el modelo admite JSON Schema.\n\nSin embargo, dado que JSON Schema es difícil de aprender, en PocketRisu-Alter puedes usar un subconjunto de la interfaz TypeScript en lugar de JSON Schema. PocketRisu-Alter lo convertirá en tiempo de ejecución. Por ejemplo, si quieres enviar un JSON como este:\n\n```js\n{\n  \"name\": \"PocketRisu-Alter\", //name must be PocketRisu-Alter,\n  \"age\": 1, //age must be number,\n  \"icon\": \"slim\", //icon must be 'slim' or 'rounded'\n  \"thoughts\": [\"Good View!\", \"Lorem\"] //thoughts must be array of strings\n}\n```\n\nPuedes poner esta interfaz TypeScript:\n\n```typescript\ninterface Schema {\n  name: string;\n  age: number;\n  icon: 'slim'|'rounded'\n  thoughts: string[]\n}\n```\n\nEl nombre de la interfaz no importa. Para más información, consulta la documentación de TypeScript (https://www.typescriptlang.org/docs/handbook/interfaces.html), y para verificar qué subconjunto de TypeScript es compatible, consulta a continuación.<details><summary>Subconjunto de TypeScript Compatible</summary>\n\nLos tipos compatibles son `boolean`, `number`, `string`, `Array`. Tipos avanzados como tipos unitarios, tipos de intersección, tipos de unión, opcionales, tipos literales, etc., no son compatibles excepto en estos casos:\n\n        - Array de tipos primitivos: (ej. `string[]`, `Array<boolean>)`\n        - Tipos unitarios entre cadenas: (ej. `'slim'|'rounded'`).\n\n        Las propiedades deben estar una por línea. Si hay múltiples propiedades en una línea, arrojará un error. Las propiedades y el nombre de la interfaz deben estar solo en caracteres latinos, en el rango ASCII. El nombre de las propiedades no debe estar entre comillas o comillas dobles. No se admite anidamiento dentro de la interfaz. No se permite poner `{` o `}` en la línea donde se definen las propiedades. Si deseas usar tipos más avanzados, usa JSON Schema en su lugar.\n        </details>",
+         "strictJsonSchema": "Si está habilitado, seguirá estrictamente el esquema proporcionado para JSON en algunos modelos. Si está deshabilitado, puede ignorar el esquema JSON.",
+         "extractJson": "Si no está en blanco, extraerá datos JSON específicos de la respuesta. Por ejemplo, si deseas extraer `response.text[0]` en la respuesta `{\"response\": {\"text\": [\"hello\"]}}`, puedes poner `response.text.0`.",
+         "translatorNote": "Aquí puedes agregar un prompt de traducción único para cada personaje. Esta opción solo se aplica al usar el modelo Ax. para traducción. Para aplicarlo, incluye `{{slot::tnote}}` en la configuración de idioma. No funciona en chats grupales.",
+diff --git a/src/lang/help.ko.ts b/src/lang/help.ko.ts
+index 5de6fe622..38f4649a2 100644
+--- a/src/lang/help.ko.ts
++++ b/src/lang/help.ko.ts
+@@ -1,5 +1,5 @@
+ /**
+- * PocketRisu NodeOnly — Korean help texts (`language.help`).
++ * PocketRisu-Alter NodeOnly — Korean help texts (`language.help`).
+  *
+  * Extracted from `src/lang/ko.ts` for maintainability. Entries override the
+  * English defaults in `help.en.ts` via `lodash/merge` (see `src/lang/index.ts`).
+@@ -72,6 +72,8 @@ export const helpKo = {
+         "localNetworkModeDesc": "사설망/LAN 모델 URL을 브라우저 직접 요청 대신 로컬 서버를 통해 라우팅합니다.\n\n**목적**\n- 브라우저 사설망/CORS 제한 우회\n- 로컬 모델의 느린 첫 토큰 응답에 대한 타임아웃 위험 완화\n\n**동작 방식**\n- 스트리밍: Job+WebSocket 릴레이 우선 (실패 시 /proxy2 폴백)\n- 비스트리밍: /proxy2 릴레이\n\n**제약사항**\n- OpenAI 호환 요청 경로에만 적용",
+         "keepSessionAlive": "브라우저에서 비활동 시 탭이 만료되지 않도록 세션을 유지합니다. 적용에 새로고침이 필요할 수 있습니다.\n\n- **Via Sound**: 일정 간격으로 무음 오디오를 재생해 세션을 유지합니다. 대부분의 브라우저에서 가장 호환성이 높고 효과적인 방식입니다.",
+         "forcePlainFetch": "활성화되면 네이티브 HTTP 요청 대신 브라우저 Fetch API를 사용합니다. 이로 인해 CORS 오류가 발생할 수 있습니다.",
++        "useBackendMultiagent": "활성화되면 서버 채팅 실행 모드에서 MultiAgent RP 파이프라인을 브라우저 대신 서버가 실행합니다. 멀티에이전트 플러그인에 API 키가 설정되어 있어야 합니다. 파이프라인 실패 시 원본 메시지로 진행합니다.",
++        "useBackendChatJobs": "활성화되면 실제 AI 요청을 PocketRisu-Alter 서버가 실행합니다. 화면을 끄거나 브라우저를 닫아도 생성은 계속되며, 다시 실행하면 완성된 메시지를 불러옵니다. 현재 OpenAI 호환 제공자만 지원됩니다.",
+         "autoFillRequestURL": "활성화되면 요청 URL을 현재 모델과 일치하도록 자동으로 채웁니다.",
+         "chainOfThought": "활성화되면 생각의 사슬 프롬프트를 프롬프트에 추가합니다.",
+         "gptVisionQuality": "이 옵션은 이미지 감지 모델의 품질을 설정하는 데 사용됩니다. 품질이 높을수록 감지가 더 정확하지만 토큰이 더 많이 사용됩니다.",
+@@ -81,7 +83,7 @@ export const helpKo = {
+         "chatLoadAdditionalPages": "위로 스크롤할 때마다 추가로 렌더링할 이전 채팅 메시지 개수입니다. 값이 높을수록 반복 로딩은 줄지만 한 번의 로딩이 무거워질 수 있습니다.",
+         "emotionPrompt": "이 옵션은 감정을 감지하는 데 사용되는 프롬프트를 설정하는 데 사용됩니다. 비어 있으면 기본 프롬프트를 사용합니다.",
+         "additionalParams": "요청 본문에 추가될 파라미터입니다. 일부 파라미터를 제외하려면 `{{none}}`을 값으로 입력하세요. 본문 대신 헤더에 추가하려면 키 앞에 `header::Authorization`처럼 `header::`를 붙이세요. 값을 JSON으로 보내려면 값 앞에 `json::{\"key\":\"value\"}`처럼 `json::`을 붙이세요. 그렇지 않으면 값의 타입은 자동으로 결정됩니다.",
+-        "antiClaudeOverload": "Claude 과부하가 발생하면, PocketRisu는 동일한 프롬프트로 계속 진행하여 과부하 발생 가능성을 줄이려고 시도합니다. 스트리밍 응답에서만 작동합니다. 공식 API 엔드포인트가 아닌 경우 작동하지 않을 수 있습니다.",
++        "antiClaudeOverload": "Claude 과부하가 발생하면, PocketRisu-Alter는 동일한 프롬프트로 계속 진행하여 과부하 발생 가능성을 줄이려고 시도합니다. 스트리밍 응답에서만 작동합니다. 공식 API 엔드포인트가 아닌 경우 작동하지 않을 수 있습니다.",
+         "triggerScript": "트리거 스크립트는 조건이 충족될 때 실행되는 커스텀 스크립트입니다. 채팅 데이터를 수정하거나, 명령어를 실행하거나, 변수를 변경하는 등의 작업에 사용할 수 있습니다. 실행 시점은 타입에 따라 다릅니다. {{button::Display::TriggerName}}을 사용하여 버튼으로 실행하거나, `risu-trigger=\"<TriggerName>\"` 속성이 있는 HTML 버튼으로도 실행할 수 있습니다.",
+         "autoContinueChat": "활성화되면 문장 부호로 끝나지 않을 경우 채팅을 계속 이어가려고 시도합니다. 문장 부호를 사용하지 않는 언어에서는 사용하지 마세요.",
+         "combineTranslation": "활성화된 경우, 한 문장이지만 HTML 태그로 분리된 텍스트를 모두 합쳐서 번역한 후, 번역된 결과에 다시 디스플레이 수정 스크립트를 적용합니다.\n이를 통해 번역기가 올바른 번역을 하도록 도와줍니다.\n이 옵션을 활성화하고 UI가 이상해지면 옵션을 끄고 제보해 주세요.",
+@@ -91,7 +93,7 @@ export const helpKo = {
+         "useRegexLorebook": "활성화되면 로어북 검색에 문자열 일치 대신 정규식을 사용합니다. /regex/flags 형식을 사용합니다.",
+         "customChainOfThought": "경고: 생각의 사슬 토글 사용은 더 이상 권장되지 않습니다. 대신 다른 프롬프트 항목에 생각의 사슬 프롬프트를 입력하세요.",
+         "customPromptTemplateToggle": "여기서 고유한 프롬프트 토글을 정의할 수 있습니다. 개행으로 구분하여 `<토글 변수>=<토글 이름>` 형식을 사용하세요. 예: `cot=COT 토글`. 프롬프트에서 `{{getglobalvar::toggle_<토글 변수>}}`를 사용하여 이 토글을 사용할 수 있습니다. 예: `{{getglobalvar::toggle_cot}}`.",
+-        "defaultVariables": "여기에서는 기본 변수를 정의할 수 있습니다. `<변수 이름>=<변수 값>` 형식으로 작성하고 개행으로 구분합니다. 예를 들어, `name=PocketRisu`는 트리거 스크립트 및 변수 CBS와 함께 `{{getvar::A}}`, `{{setvar::A::B}}` 또는 `{{? $A + 1}}`과 같이 사용할 수 있습니다. 프롬프트 템플릿의 기본 변수와 캐릭터의 기본 변수가 동일한 이름을 가진 경우 캐릭터의 기본 변수가 사용됩니다.",
++        "defaultVariables": "여기에서는 기본 변수를 정의할 수 있습니다. `<변수 이름>=<변수 값>` 형식으로 작성하고 개행으로 구분합니다. 예를 들어, `name=PocketRisu-Alter`는 트리거 스크립트 및 변수 CBS와 함께 `{{getvar::A}}`, `{{setvar::A::B}}` 또는 `{{? $A + 1}}`과 같이 사용할 수 있습니다. 프롬프트 템플릿의 기본 변수와 캐릭터의 기본 변수가 동일한 이름을 가진 경우 캐릭터의 기본 변수가 사용됩니다.",
+         "lowLevelAccess": "활성화되면 높은 컴퓨팅 파워가 필요한 기능과 캐릭터 트리거를 통한 AI 모델 실행에 대한 접근이 허용됩니다. 꼭 필요한 경우가 아니면 활성화하지 마세요.",
+         "triggerLLMPrompt": "모델에 전송될 프롬프트입니다. `@@role user`, `@@role system`, `@@role assistant`를 사용하여 멀티 턴과 역할을 사용할 수 있습니다. 예:\n```\n@@role system\nrespond as hello\n@@role assistant\nhello\n@@role user\nhi\n```",
+         "legacyTranslation": "활성화되면 번역 후 후처리 대신 번역 전 마크다운과 따옴표를 전처리하는 이전 번역 방식을 사용합니다.",
+@@ -107,7 +109,7 @@ export const helpKo = {
+         "betaMobileGUI": "활성화되면 작은 화면(800px 미만)에서 베타 모바일 GUI를 사용합니다. 새로고침이 필요합니다.",
+         "enableScrollToActiveChar": "활성화되면 단축키를 누르거나 캐릭터를 드래그하는 동안 Ctrl을 누르면 현재 활성 캐릭터로 스크롤합니다. 폴더가 닫혀있으면 자동으로 열립니다.",
+         "unrecommended": "비권장 설정입니다. 이 설정을 사용하는 것은 권장되지 않습니다.",
+-        "jsonSchema": "AI 모델이 JSON 스키마를 지원하는 경우 AI 모델로 전송될 JSON 스키마입니다.\n\n하지만 JSON 스키마는 배우기 어렵기 때문에, PocketRisu에서는 JSON 스키마 대신 TypeScript 인터페이스의 하위 집합을 사용할 수 있습니다. PocketRisu가 런타임에 이를 변환합니다. 예를 들어 다음과 같은 JSON을 보내고 싶다면:\n\n```js\n{\n  \"name\": \"PocketRisu\", //이름은 PocketRisu여야 함,\n  \"age\": 1, //나이는 숫자여야 함,\n  \"icon\": \"slim\", //아이콘은 'slim' 또는 'rounded'여야 함\n  \"thoughts\": [\"Good View!\", \"Lorem\"] //생각은 문자열 배열이어야 함\n}\n```\n\n다음과 같이 TypeScript 인터페이스를 입력할 수 있습니다:\n\n```typescript\ninterface Schema {\n  name: string;\n  age: number;\n  icon: 'slim'|'rounded'\n  thoughts: string[]\n}\n```\n\n인터페이스의 이름은 중요하지 않습니다. 자세한 내용은 TypeScript 문서를 참조하세요. (https://www.typescriptlang.org/docs/handbook/interfaces.html), 지원되는 TypeScript 하위 집합을 확인하려면 아래를 참조하세요.<details><summary>지원되는 TypeScript 하위 집합</summary>\n\n지원되는 타입은 `boolean`, `number`, `string`, `Array`입니다. 유닛 타입, 교차 타입, 유니온 타입, 옵셔널, 리터럴 타입 등 고급 타이핑은 다음 경우를 제외하고 지원되지 않습니다:\n\n        - 원시 타입의 배열: (예: `string[]`, `Array<boolean>)`\n        - 문자열 간의 유닛 타입: (예: `'slim'|'rounded'`).\n\n        속성은 한 줄에 하나씩 있어야 합니다. 한 줄에 여러 속성이 있으면 오류가 발생합니다. 속성 이름과 인터페이스 이름은 ASCII 범위 내의 라틴 문자만 사용해야 합니다. 속성 이름은 따옴표나 큰따옴표로 감싸지 않아야 합니다. 인터페이스 내부 중첩은 지원되지 않습니다. 속성이 정의된 줄에 `{` 또는 `}`를 넣을 수 없습니다. 더 고급 타입을 사용하려면 대신 JSON 스키마를 사용하세요.\n        </details>",
++        "jsonSchema": "AI 모델이 JSON 스키마를 지원하는 경우 AI 모델로 전송될 JSON 스키마입니다.\n\n하지만 JSON 스키마는 배우기 어렵기 때문에, PocketRisu-Alter에서는 JSON 스키마 대신 TypeScript 인터페이스의 하위 집합을 사용할 수 있습니다. PocketRisu-Alter가 런타임에 이를 변환합니다. 예를 들어 다음과 같은 JSON을 보내고 싶다면:\n\n```js\n{\n  \"name\": \"PocketRisu-Alter\", //이름은 PocketRisu-Alter여야 함,\n  \"age\": 1, //나이는 숫자여야 함,\n  \"icon\": \"slim\", //아이콘은 'slim' 또는 'rounded'여야 함\n  \"thoughts\": [\"Good View!\", \"Lorem\"] //생각은 문자열 배열이어야 함\n}\n```\n\n다음과 같이 TypeScript 인터페이스를 입력할 수 있습니다:\n\n```typescript\ninterface Schema {\n  name: string;\n  age: number;\n  icon: 'slim'|'rounded'\n  thoughts: string[]\n}\n```\n\n인터페이스의 이름은 중요하지 않습니다. 자세한 내용은 TypeScript 문서를 참조하세요. (https://www.typescriptlang.org/docs/handbook/interfaces.html), 지원되는 TypeScript 하위 집합을 확인하려면 아래를 참조하세요.<details><summary>지원되는 TypeScript 하위 집합</summary>\n\n지원되는 타입은 `boolean`, `number`, `string`, `Array`입니다. 유닛 타입, 교차 타입, 유니온 타입, 옵셔널, 리터럴 타입 등 고급 타이핑은 다음 경우를 제외하고 지원되지 않습니다:\n\n        - 원시 타입의 배열: (예: `string[]`, `Array<boolean>)`\n        - 문자열 간의 유닛 타입: (예: `'slim'|'rounded'`).\n\n        속성은 한 줄에 하나씩 있어야 합니다. 한 줄에 여러 속성이 있으면 오류가 발생합니다. 속성 이름과 인터페이스 이름은 ASCII 범위 내의 라틴 문자만 사용해야 합니다. 속성 이름은 따옴표나 큰따옴표로 감싸지 않아야 합니다. 인터페이스 내부 중첩은 지원되지 않습니다. 속성이 정의된 줄에 `{` 또는 `}`를 넣을 수 없습니다. 더 고급 타입을 사용하려면 대신 JSON 스키마를 사용하세요.\n        </details>",
+         "strictJsonSchema": "활성화되면 일부 모델에서 제공된 JSON 스키마를 엄격하게 따릅니다. 비활성화되면 JSON 스키마를 무시할 수도 있습니다.",
+         "extractJson": "비워두지 않으면 응답에서 특정 JSON 데이터를 추출합니다. 예를 들어 `{\"response\": {\"text\": [\"hello\"]}}` 응답에서 `response.text[0]`을 추출하려면 `response.text.0`을 입력하세요.",
+         "translatorNote": "여기에서 캐릭터마다 별도의 번역 프롬프트를 넣을 수 있습니다. 해당 옵션은  Ax. model 번역을 사용할 때만 적용됩니다. 언어 설정에서 `{{slot::tnote}}`를 넣으세요. 그룹챗에서는 작동하지 않습니다.",
+@@ -225,7 +227,7 @@ export const helpKo = {
+         "theme": "전체 채팅 화면 레이아웃 테마입니다.",
+         "waifuWidth": "Waifulike 테마에서 캐릭터 일러스트의 너비입니다.",
+         "waifuWidth2": "Waifulike 테마의 두 번째 캐릭터(또는 보조 요소)의 너비입니다.",
+-        "nodeOnlyStandardChatWidth": "PocketRisu Standard 테마에서 메시지 카드의 최대 가로폭입니다.",
++        "nodeOnlyStandardChatWidth": "PocketRisu-Alter Standard 테마에서 메시지 카드의 최대 가로폭입니다.",
+         "colorScheme": "Risu UI 전체에 적용되는 색상 팔레트입니다.",
+         "textColor": "메시지 본문 텍스트 색 테마입니다.",
+         "font": "메시지 폰트입니다.",
+@@ -311,7 +313,7 @@ export const helpKo = {
+         "proxyRequestModel": "프록시에 보낼 모델 이름. 일부 OpenAI 호환 프록시는 자체 모델 이름 규칙을 쓰므로 여기에 그 이름을 정확히 입력합니다 (예: `gpt-4o`, `claude-3-5-sonnet-20241022`).",
+         "proxyFormat": "프록시에 보낼 요청 본문 형식.\n\n- **OpenAI Compatible**: 가장 일반적, OpenAI Chat Completions 형식\n- **OpenAI Response API**: 새 Response API (지원 모델 전용)\n- **Anthropic**: Claude API 형식\n- **Mistral**: Mistral 자체 형식\n- **Google Cloud**: Vertex/Gemini\n- **Cohere**: Cohere 자체 형식\n\n프록시가 어느 형식을 받는지에 맞춰 선택. 모르면 OpenAI Compatible로 시작.",
+         "cohereKey": "Cohere API 키 (`https://dashboard.cohere.com/api-keys`). Cohere 자체 모델(`command-r` 등) 사용 시 필요.",
+-        "ollamaURL": "로컬 또는 원격 Ollama 서버의 URL (예: `http://localhost:11434`). PocketRisu의 \"로컬 네트워크 모드\"와 함께 쓰면 사설망 LLM도 안정적으로 호출됩니다.",
++        "ollamaURL": "로컬 또는 원격 Ollama 서버의 URL (예: `http://localhost:11434`). PocketRisu-Alter의 \"로컬 네트워크 모드\"와 함께 쓰면 사설망 LLM도 안정적으로 호출됩니다.",
+         "ollamaModel": "Ollama 서버에서 호출할 모델 이름. `ollama list` 명령으로 설치된 모델 이름을 확인 후 그대로 입력하세요 (예: `llama3:8b`).",
+         "nanogptKey": "NanoGPT API 키 (https://nano-gpt.com). Pay-per-message 또는 구독 방식 두 가지가 있으며, 구독 사용 시 아래 토글을 함께 켜세요.",
+         "nanoGPTUseSubscriptionEndpoint": "NanoGPT 구독 플랜 사용자가 켭니다. Pay-per-message 엔드포인트 대신 구독 엔드포인트로 요청이 전송되어 별도 충전 차감 없이 사용 가능. 구독 미사용자가 켜면 요청이 거부될 수 있습니다.",
+@@ -357,7 +359,7 @@ export const helpKo = {
+         "botIcon": "봇 자체에 사용할 기본 아이콘. 캐릭터 카드의 아이콘과 별개로, 어시스턴트 메시지의 기본 표시에 사용됩니다.",
+         "botPromptTemplate": "프롬프트 템플릿 선택. 템플릿은 메인/탈옥/노트보다 정교한 프롬프트 구성을 가능하게 합니다. \"프롬프트 템플릿 사용\" 토글이 켜졌을 때만 동작합니다.",
+ 
+-        "memType": "장기 메모리 방식 선택.\n\n- **None**: 사용 안 함 (max context 한도까지 채팅 그대로 사용)\n- **HypaV3**: 오래된 채팅을 자동으로 요약·검색해 컨텍스트에 주입하는 PocketRisu의 장기 메모리. 비용/지연이 약간 늘지만 긴 채팅에서 일관성이 크게 향상됩니다.",
++        "memType": "장기 메모리 방식 선택.\n\n- **None**: 사용 안 함 (max context 한도까지 채팅 그대로 사용)\n- **HypaV3**: 오래된 채팅을 자동으로 요약·검색해 컨텍스트에 주입하는 PocketRisu-Alter의 장기 메모리. 비용/지연이 약간 늘지만 긴 채팅에서 일관성이 크게 향상됩니다.",
+         "hypaV3SummaryModel": "채팅을 요약하는 데 사용할 모델.\n\n- **subModel**: 보조 모델 사용 (가장 흔한 선택)\n- **Qwen3 4B/14B**: 무료 로컬 요약 (브라우저 또는 Node 인스턴스에서 직접 실행, 첫 사용 시 다운로드)\n\n메인 모델보다 가벼운 모델로 두면 비용 절감.",
+         "hypaV3Preset": "HypaV3 설정 프리셋. 자주 쓰는 설정 묶음을 저장/불러올 수 있고, 프리셋을 바꾸면 위 모든 비율·모델 옵션이 함께 바뀝니다.",
+         "embeddingOpenAIKey": "임베딩 모델로 OpenAI를 선택했을 때 사용할 API 키. 메인 모델용 키와 분리해서 관리하고 싶을 때 입력. 비워두면 메인 모델용 OpenAI 키를 사용합니다.",
+diff --git a/src/lang/help.vi.ts b/src/lang/help.vi.ts
+index 8f63eeccc..4b2a469dc 100644
+--- a/src/lang/help.vi.ts
++++ b/src/lang/help.vi.ts
+@@ -1,5 +1,5 @@
+ /**
+- * PocketRisu NodeOnly — Vietnamese help texts (`language.help`).
++ * PocketRisu-Alter NodeOnly — Vietnamese help texts (`language.help`).
+  *
+  * Extracted from `src/lang/vi.ts` for maintainability. Entries override the
+  * English defaults in `help.en.ts` via `lodash/merge` (see `src/lang/index.ts`).
+@@ -67,7 +67,7 @@ export const helpVi = {
+         "requestretrys": "Tùy chọn này được sử dụng để đặt số lần thử lại yêu cầu khi yêu cầu thất bại.",
+         "emotionPrompt": "Tùy chọn này được sử dụng để đặt lời nhắc được sử dụng để phát hiện cảm xúc. Nếu để trống, nó sẽ sử dụng lời nhắc mặc định.",
+         "additionalParams": "Các tham số bổ sung sẽ được thêm vào phần thân yêu cầu. Nếu bạn muốn loại trừ một số tham số, bạn có thể đặt `{{none}}` vào giá trị. Nếu bạn muốn thêm tiêu đề thay vì phần thân, bạn có thể đặt `header::` ở trước khóa như `header::Authorization`. Nếu bạn muốn giá trị ở dạng json, bạn có thể đặt `json::` ở trước giá trị như `json::{\"key\":\"value\"}`. Nếu không, loại giá trị sẽ được xác định tự động.",
+-        "antiClaudeOverload": "Nếu xảy ra quá tải Claude, PocketRisu sẽ cố gắng ngăn chặn bằng cách tiếp tục với cùng một lời nhắc, giúp giảm khả năng xảy ra lỗi. Chỉ hoạt động với các phản hồi được truyền trực tuyến. Điều này có thể không hoạt động đối với các điểm cuối api không chính thức.",
++        "antiClaudeOverload": "Nếu xảy ra quá tải Claude, PocketRisu-Alter sẽ cố gắng ngăn chặn bằng cách tiếp tục với cùng một lời nhắc, giúp giảm khả năng xảy ra lỗi. Chỉ hoạt động với các phản hồi được truyền trực tuyến. Điều này có thể không hoạt động đối với các điểm cuối api không chính thức.",
+         "triggerScript": "Trigger Script là tập lệnh tùy chỉnh chạy khi điều kiện được đáp ứng. Nó có thể được sử dụng để sửa đổi dữ liệu trò chuyện, chạy lệnh, thay đổi biến, v.v. Loại kích hoạt phụ thuộc vào thời điểm kích hoạt. Nó cũng có thể được chạy bằng các nút, có thể được sử dụng với {{button::Display::TriggerName}} hoặc các nút HTML có thuộc tính `risu-trigger=\"<TriggerName>\"`.",
+         "autoContinueChat": "Nếu được bật, nó sẽ cố gắng tiếp tục cuộc trò chuyện nếu nó không kết thúc bằng dấu câu. KHÔNG SỬ DỤNG TÍNH NĂNG NÀY VỚI CÁC NGÔN NGỮ KHÔNG SỬ DỤNG DẤU CÂU.",
+         "combineTranslation": "Nếu được bật, văn bản là một câu nhưng bị tách bởi các thẻ HTML sẽ được kết hợp lại và dịch, sau đó tập lệnh Sửa đổi hiển thị sẽ được áp dụng lại cho đầu ra đã dịch.\nĐiều này giúp trình dịch thực hiện bản dịch chính xác.\nNếu giao diện người dùng trở nên kỳ lạ khi bạn bật tùy chọn này, hãy tắt tùy chọn và báo cáo.",
+@@ -77,7 +77,7 @@ export const helpVi = {
+         "useRegexLorebook": "Nếu được bật, nó sẽ sử dụng regex để tìm kiếm lorebook, thay vì khớp chuỗi. Nó sử dụng định dạng /regex/flags.",
+         "customChainOfThought": "Cảnh báo: chuyển đổi chuỗi suy nghĩ không còn được khuyến nghị sử dụng. Hãy đặt lời nhắc chuỗi suy nghĩ vào các mục lời nhắc khác.",
+         "customPromptTemplateToggle": "Tại đây bạn có thể xác định các chuyển đổi lời nhắc của riêng mình. Sử dụng định dạng `<biến chuyển đổi>=<tên chuyển đổi>`, phân tách bằng dòng mới. Ví dụ, `cot=Bật/tắt COT`. Bạn có thể sử dụng các chuyển đổi này trong lời nhắc bằng cách sử dụng `{{getglobalvar::toggle_<biến chuyển đổi>}}`. Chẳng hạn như `{{getglobalvar::toggle_cot}}`.",
+-        "defaultVariables": "Tại đây bạn có thể xác định các biến mặc định của riêng mình. Sử dụng định dạng `<tên biến>=<giá trị biến>`, phân tách bằng dòng mới. Ví dụ, `name=PocketRisu`, sau đó có thể được sử dụng với các tập lệnh kích hoạt và biến CBS như `{{getvar::A}}`, `{{setvar::A::B}}` hoặc `{{? $A + 1}}`. Nếu biến mặc định của mẫu lời nhắc và biến mặc định của nhân vật có cùng tên, biến mặc định của nhân vật sẽ được sử dụng.",
++        "defaultVariables": "Tại đây bạn có thể xác định các biến mặc định của riêng mình. Sử dụng định dạng `<tên biến>=<giá trị biến>`, phân tách bằng dòng mới. Ví dụ, `name=PocketRisu-Alter`, sau đó có thể được sử dụng với các tập lệnh kích hoạt và biến CBS như `{{getvar::A}}`, `{{setvar::A::B}}` hoặc `{{? $A + 1}}`. Nếu biến mặc định của mẫu lời nhắc và biến mặc định của nhân vật có cùng tên, biến mặc định của nhân vật sẽ được sử dụng.",
+         "lowLevelAccess": "Nếu được bật, nó sẽ cho phép truy cập vào các tính năng yêu cầu sức mạnh tính toán cao và thực thi mô hình AI thông qua các trình kích hoạt trong nhân vật. Đừng bật tính năng này trừ khi bạn thực sự cần các tính năng này.",
+         "triggerLLMPrompt": "Lời nhắc sẽ được gửi đến mô hình. Bạn có thể sử dụng nhiều lượt và vai trò bằng cách sử dụng `@@role user`, `@@role system`, `@@role assistant`. Ví dụ, \n```\n@@role system\nrespond as hello\n@@role assistant\nhello\n@@role user\nhi\n```",
+         "legacyTranslation": "Nếu được bật, nó sẽ sử dụng phương pháp dịch cũ, xử lý trước markdown và dấu ngoặc kép trước khi dịch thay vì xử lý sau khi dịch.",
+@@ -92,7 +92,7 @@ export const helpVi = {
+         "customCSS": "CSS tùy chỉnh để tạo kiểu. Bạn cũng có thể tắt/bật nó bằng cách nhấn (Ctrl + .) nếu có sự cố.",
+         "betaMobileGUI": "Nếu được bật, nó sẽ sử dụng GUI di động beta trên màn hình nhỏ (nhỏ hơn 800px). Cần làm mới.",
+         "unrecommended": "Đây là cài đặt không được khuyến nghị. Không nên sử dụng cài đặt này.",
+-        "jsonSchema": "Đây là JSON Schema sẽ được gửi đến mô hình AI nếu mô hình AI hỗ trợ JSON Schema.\n\nTuy nhiên, vì JSON Schema khó học, trong PocketRisu, bạn có thể sử dụng tập hợp con của giao diện TypeScript thay vì JSON Schema. PocketRisu sẽ chuyển đổi nó trong thời gian chạy. Ví dụ, nếu bạn muốn gửi một JSON như thế này:\n\n```js\n{\n  \"name\": \"PocketRisu\", //tên phải là PocketRisu,\n  \"age\": 1, //tuổi phải là số,\n  \"icon\": \"slim\", //biểu tượng phải là 'slim' hoặc 'rounded'\n  \"thoughts\": [\"Good View!\", \"Lorem\"] //suy nghĩ phải là mảng chuỗi\n}\n```\n\nBạn có thể đặt giao diện TypeScript này:\n\n```typescript\ninterface Schema {\n  name: string;\n  age: number;\n  icon: 'slim'|'rounded'\n  thoughts: string[]\n}\n```\n\nTên của giao diện không quan trọng. Để biết thêm thông tin, xem tài liệu typescript. (https://www.typescriptlang.org/docs/handbook/interfaces.html), và để kiểm tra tập hợp con nào của TypeScript được hỗ trợ, hãy xem bên dưới.<details><summary>Tập hợp con TypeScript được hỗ trợ</summary>\n\nCác loại được hỗ trợ là `boolean`, `number`, `string`, `Array`. Các kiểu nâng cao như kiểu đơn vị, kiểu giao nhau, kiểu hợp, tùy chọn, kiểu chữ, v.v. không được hỗ trợ ngoại trừ các trường hợp sau:\n\n        - Mảng các kiểu nguyên thủy: (ví dụ: `string[]`, `Array<boolean>)`\n        - Kiểu đơn vị giữa các chuỗi: (ví dụ: `'slim'|'rounded'`).\n\n        Các thuộc tính phải nằm trên một dòng. Nếu có nhiều thuộc tính trên một dòng, nó sẽ báo lỗi. Thuộc tính và tên của giao diện chỉ được dùng các ký tự latin, trong phạm vi ASCII. Tên của các thuộc tính không được bao quanh bởi dấu ngoặc đơn hoặc dấu ngoặc kép. Lồng nhau bên trong giao diện không được hỗ trợ. Không được phép đặt `{` hoặc `}` trong dòng mà các thuộc tính được xác định. Nếu bạn muốn sử dụng các kiểu nâng cao hơn, hãy sử dụng JSON Schema thay thế.\n        </details>",
++        "jsonSchema": "Đây là JSON Schema sẽ được gửi đến mô hình AI nếu mô hình AI hỗ trợ JSON Schema.\n\nTuy nhiên, vì JSON Schema khó học, trong PocketRisu-Alter, bạn có thể sử dụng tập hợp con của giao diện TypeScript thay vì JSON Schema. PocketRisu-Alter sẽ chuyển đổi nó trong thời gian chạy. Ví dụ, nếu bạn muốn gửi một JSON như thế này:\n\n```js\n{\n  \"name\": \"PocketRisu-Alter\", //tên phải là PocketRisu-Alter,\n  \"age\": 1, //tuổi phải là số,\n  \"icon\": \"slim\", //biểu tượng phải là 'slim' hoặc 'rounded'\n  \"thoughts\": [\"Good View!\", \"Lorem\"] //suy nghĩ phải là mảng chuỗi\n}\n```\n\nBạn có thể đặt giao diện TypeScript này:\n\n```typescript\ninterface Schema {\n  name: string;\n  age: number;\n  icon: 'slim'|'rounded'\n  thoughts: string[]\n}\n```\n\nTên của giao diện không quan trọng. Để biết thêm thông tin, xem tài liệu typescript. (https://www.typescriptlang.org/docs/handbook/interfaces.html), và để kiểm tra tập hợp con nào của TypeScript được hỗ trợ, hãy xem bên dưới.<details><summary>Tập hợp con TypeScript được hỗ trợ</summary>\n\nCác loại được hỗ trợ là `boolean`, `number`, `string`, `Array`. Các kiểu nâng cao như kiểu đơn vị, kiểu giao nhau, kiểu hợp, tùy chọn, kiểu chữ, v.v. không được hỗ trợ ngoại trừ các trường hợp sau:\n\n        - Mảng các kiểu nguyên thủy: (ví dụ: `string[]`, `Array<boolean>)`\n        - Kiểu đơn vị giữa các chuỗi: (ví dụ: `'slim'|'rounded'`).\n\n        Các thuộc tính phải nằm trên một dòng. Nếu có nhiều thuộc tính trên một dòng, nó sẽ báo lỗi. Thuộc tính và tên của giao diện chỉ được dùng các ký tự latin, trong phạm vi ASCII. Tên của các thuộc tính không được bao quanh bởi dấu ngoặc đơn hoặc dấu ngoặc kép. Lồng nhau bên trong giao diện không được hỗ trợ. Không được phép đặt `{` hoặc `}` trong dòng mà các thuộc tính được xác định. Nếu bạn muốn sử dụng các kiểu nâng cao hơn, hãy sử dụng JSON Schema thay thế.\n        </details>",
+         "strictJsonSchema": "Nếu được bật, nó sẽ tuân thủ nghiêm ngặt Schema được cung cấp cho JSON trên một số mô hình. Nếu tắt, nó có thể bỏ qua JSON Schema.",
+         "extractJson": "Nếu không trống, nó sẽ trích xuất dữ liệu JSON cụ thể từ phản hồi. Ví dụ, nếu bạn muốn trích xuất `response.text[0]` trong phản hồi `{\"response\": {\"text\": [\"hello\"]}}`, bạn có thể đặt `response.text.0`.",
+         "translatorNote": "Tại đây, bạn có thể thêm lời nhắc dịch duy nhất cho mỗi nhân vật. Tùy chọn này chỉ áp dụng khi sử dụng mô hình Ax. để dịch. Để áp dụng, bao gồm `{{slot::tnote}}` trong cài đặt ngôn ngữ. Nó không hoạt động trong các cuộc trò chuyện nhóm.",
+diff --git a/src/lang/help.zh-Hant.ts b/src/lang/help.zh-Hant.ts
+index 65ac89726..56609ac83 100644
+--- a/src/lang/help.zh-Hant.ts
++++ b/src/lang/help.zh-Hant.ts
+@@ -1,5 +1,5 @@
+ /**
+- * PocketRisu NodeOnly — Traditional Chinese help texts (`language.help`).
++ * PocketRisu-Alter NodeOnly — Traditional Chinese help texts (`language.help`).
+  *
+  * Extracted from `src/lang/zh-Hant.ts` for maintainability. Entries override the
+  * English defaults in `help.en.ts` via `lodash/merge` (see `src/lang/index.ts`).
+@@ -67,7 +67,7 @@ export const helpZhHant = {
+         "requestretrys": "設定請求失敗時的重試次數。",
+         "emotionPrompt": "此選項用於設定情緒檢測的提示詞。留空將使用預設提示詞。",
+         "additionalParams": "此選項允許將附加的參數加入至請求主體（Request body）中。若要排除某些參數，可以將值設為 `{{none}}`。若要加入標頭（Request header）而非主體，可以在鍵前加上 `header::`，如 `header::Authorization`。若要將值作為 JSON，可以在值前加上 `json::`，如 `json::{\"key\":\"value\"}`。其他情況下，系統將自動判定值的類型。",
+-        "antiClaudeOverload": "當 Claude 發生過載時，PocketRisu 會嘗試繼續發送相同的提示詞以防止請求中斷，藉此減少過載機率。此功能僅適用於串流回應 (Streamed Responses)，對非官方 API 端點可能無效。",
++        "antiClaudeOverload": "當 Claude 發生過載時，PocketRisu-Alter 會嘗試繼續發送相同的提示詞以防止請求中斷，藉此減少過載機率。此功能僅適用於串流回應 (Streamed Responses)，對非官方 API 端點可能無效。",
+         "triggerScript": "觸發式（Trigger）是一個自訂腳本，在符合條件時執行。可用於修改對話資料、執行指令、更改變數等。類型取決於觸發時的情況，也可由按鈕觸發，如 {{button::Display::TriggerName}} 或帶有 risu-trigger=\"<TriggerName>\" 屬性的 HTML 按鈕。",
+         "autoContinueChat": "啟用後，當角色回應未以標點符號結尾時，系統將自動嘗試接續生成。請勿在標點不規範的情境下啟用。",
+         "combineTranslation": "啟用後，將把被 HTML 標籤分隔但屬於同一句的文字合併後進行翻譯，並在翻譯結果上重新套用「修改顯示」（Modify Display）。這有助於提高翻譯的準確性。若啟用此功能後介面出現異常，請關閉此選項並回報問題。",
+@@ -77,7 +77,7 @@ export const helpZhHant = {
+         "useRegexLorebook": "啟用後，Lorebook 將改用正規表達式（Regex）搜尋，而不再使用字串匹配。格式為 /regex/flags。",
+         "customChainOfThought": "警告：不再建議使用思維鏈（CoT, Chain-of-Thought）切換功能。請將相關提示詞移至其他提示詞欄位。",
+         "customPromptTemplateToggle": "可在此處設定自訂提示詞切換功能。使用 `<toggle variable>=<toggle name>` 格式，每行一個，例如：`cot=Toggle COT`。您可以在提示詞中透過 `{{getglobalvar::toggle_<toggle variable>}}` 語法來使用這些切換功能，如：`{{getglobalvar::toggle_cot}}`。",
+-        "defaultVariables": "可在此處設定自訂預設變數。使用 `<variable name>=<variable value>` 格式，每行一個。例如：`name=PocketRisu`，可在觸發式和 CBS 變數中使用，如：`{{getvar::A}}`、`{{setvar::A::B}}` 或 `{{? $A + 1}}`。若提示詞模板的預設變數與角色的預設變數名稱相同，系統將使用角色的預設變數。",
++        "defaultVariables": "可在此處設定自訂預設變數。使用 `<variable name>=<variable value>` 格式，每行一個。例如：`name=PocketRisu-Alter`，可在觸發式和 CBS 變數中使用，如：`{{getvar::A}}`、`{{setvar::A::B}}` 或 `{{? $A + 1}}`。若提示詞模板的預設變數與角色的預設變數名稱相同，系統將使用角色的預設變數。",
+         "lowLevelAccess": "啟用後，將開放高計算需求的功能，並允許透過角色觸發式執行 AI 模型。除非確有需求，否則不要啟用。",
+         "triggerLLMPrompt": "這是將發送到模型的提示詞。您可以使用 `@@role user`、`@@role system`、`@@role assistant` 來設定多輪對話及角色。例如：\n```\n@@role system\nrespond as hello\n@@role assistant\nhello\n@@role user\nhi\n```",
+         "legacyTranslation": "啟用後，將使用舊版翻譯方法，在翻譯前對 Markdown 和引號進行預處理，而非在翻譯後處理。",
+@@ -93,7 +93,7 @@ export const helpZhHant = {
+         "betaMobileGUI": "啟用後，將在小於 800px 的螢幕上使用測試版行動介面，需重新整理頁面。",
+         "enableScrollToActiveChar": "若已啟用，按下快捷鍵或在拖曳角色時按住 Ctrl 鍵將捲動至目前選取的角色。若資料夾已關閉，則會自動開啟。",
+         "unrecommended": "這是不建議使用的設定，建議保持關閉。",
+-        "jsonSchema": "JSON Schema 將在 AI 模型支援時發送給模型。\n\n然而，由於 JSON Schema 的學習成本較高，在 PocketRisu 中，您可以使用 TypeScript 介面的子集來代替 JSON Schema。PocketRisu 將在運行時進行轉換。例如，如果您想發送如下的 JSON：\n\n```js\n{\n  \"name\": \"PocketRisu\", // name 必須是 PocketRisu，\n  \"age\": 1, // age 必須是數字，\n  \"icon\": \"slim\", // icon 必須是 ’slim‘ 或 ’rounded‘\n  \"thoughts\": [\"Good View!\", \"Lorem\"] // thoughts 必須是字串陣列\n}\n```\n\n您可以使用以下 TypeScript 介面：\n\n```typescript\ninterface Schema {\n  name: string;\n  age: number;\n  icon: ’slim‘|’rounded‘\n  thoughts: string[]\n}\n```\n\n介面名稱不重要。欲了解更多資訊，請參閱 TypeScript 說明文件：https://www.typescriptlang.org/docs/handbook/interfaces.html 。要檢查支援的 TypeScript 子集，請查看以下內容。<details><summary>支援的 TypeScript 子集</summary>\n\n支援的類型包括 `boolean`、`number`、`string` 和 `Array`。進階類型不被支援（如：單元類型、交集類型、聯合類型、可選類型、字面量類型等），除了以下幾種情況：\n\n        - 原始資料型別（Primitive Type）的陣列（Array）：（如 `string[]`、`Array<boolean>`）\n        - 字串之間的單值類型（Unit Types）：（例如 `’slim‘|’rounded‘`）\n\n        屬性必須在同一行內定義。若一行中有多個屬性，將會產生錯誤。屬性和介面名稱僅可使用拉丁字符，並在 ASCII 範圍內。屬性名稱不得以單引號或雙引號包裹。介面內部不支援巢狀。在定義屬性的行中，不能包含 `{` 或 `}`。如果想使用更進階的類型，請使用 JSON Schema。\n        </details>",
++        "jsonSchema": "JSON Schema 將在 AI 模型支援時發送給模型。\n\n然而，由於 JSON Schema 的學習成本較高，在 PocketRisu-Alter 中，您可以使用 TypeScript 介面的子集來代替 JSON Schema。PocketRisu-Alter 將在運行時進行轉換。例如，如果您想發送如下的 JSON：\n\n```js\n{\n  \"name\": \"PocketRisu-Alter\", // name 必須是 PocketRisu-Alter，\n  \"age\": 1, // age 必須是數字，\n  \"icon\": \"slim\", // icon 必須是 ’slim‘ 或 ’rounded‘\n  \"thoughts\": [\"Good View!\", \"Lorem\"] // thoughts 必須是字串陣列\n}\n```\n\n您可以使用以下 TypeScript 介面：\n\n```typescript\ninterface Schema {\n  name: string;\n  age: number;\n  icon: ’slim‘|’rounded‘\n  thoughts: string[]\n}\n```\n\n介面名稱不重要。欲了解更多資訊，請參閱 TypeScript 說明文件：https://www.typescriptlang.org/docs/handbook/interfaces.html 。要檢查支援的 TypeScript 子集，請查看以下內容。<details><summary>支援的 TypeScript 子集</summary>\n\n支援的類型包括 `boolean`、`number`、`string` 和 `Array`。進階類型不被支援（如：單元類型、交集類型、聯合類型、可選類型、字面量類型等），除了以下幾種情況：\n\n        - 原始資料型別（Primitive Type）的陣列（Array）：（如 `string[]`、`Array<boolean>`）\n        - 字串之間的單值類型（Unit Types）：（例如 `’slim‘|’rounded‘`）\n\n        屬性必須在同一行內定義。若一行中有多個屬性，將會產生錯誤。屬性和介面名稱僅可使用拉丁字符，並在 ASCII 範圍內。屬性名稱不得以單引號或雙引號包裹。介面內部不支援巢狀。在定義屬性的行中，不能包含 `{` 或 `}`。如果想使用更進階的類型，請使用 JSON Schema。\n        </details>",
+         "strictJsonSchema": "啟用後，某些模型將嚴格遵循提供的 JSON Schema。若停用，可能會忽略 JSON Schema。",
+         "extractJson": "此欄位不為空時，將從回應中提取特定 JSON 資料。例如：要從回應 `{\"response\": {\"text\": [\"hello\"]}}` 提取 `response.text[0]`，請填寫 `response.text.0`。",
+         "translatorNote": "可在此處為每個角色加入獨特的翻譯備註，但僅適用於使用 Ax. 模型進行翻譯。要啟用此功能，請在語言設定中包含 `{{slot::tnote}}`。此功能不適用群組對話。",
+diff --git a/src/lang/ko.ts b/src/lang/ko.ts
+index ed585a767..de49eefd5 100644
+--- a/src/lang/ko.ts
++++ b/src/lang/ko.ts
+@@ -28,7 +28,7 @@ export const languageKorean = {
+     networkFetch:
+       "네트워크가 불안정하거나 서버가 응답하지 않을 때 자주 발생합니다.",
+     networkFetchWeb:
+-      "이것은 CORS 오류일 수 있습니다. 이는 브라우저의 제한으로 인해 웹 버전을 사용할 때만 발생합니다. 데스크톱 로컬 버전이나 다른 버전의 PocketRisu를 사용해보세요.",
++      "이것은 CORS 오류일 수 있습니다. 이는 브라우저의 제한으로 인해 웹 버전을 사용할 때만 발생합니다. 데스크톱 로컬 버전이나 다른 버전의 PocketRisu-Alter를 사용해보세요.",
+     networkFetchPlain:
+       "이것은 요청 오류일 수 있습니다. 설정에서 직접 요청 보내기 옵션을 비활성화해 보세요.",
+     requestLogRemoved: "요청 로그가 삭제되었습니다.",
+@@ -66,9 +66,9 @@ export const languageKorean = {
+     texttheme: "텍스트 색상을 선택해주세요",
+     inputName: "마지막으로, 닉네임을 입력해 주세요",
+     welcome:
+-      "PocketRisu에 오신 것을 환영해요! 저는 PocketRisu 셋업을 도와줄 아이리스라고 해요. 먼저 닉네임을 입력해 주세요!",
++      "PocketRisu-Alter에 오신 것을 환영해요! 저는 PocketRisu-Alter 셋업을 도와줄 아이리스라고 해요. 먼저 닉네임을 입력해 주세요!",
+     welcome2:
+-      "{username}님 안녕하세요! PocketRisu를 시작하려면 몇 가지 설정만 하시면 되요. Ai 제공자를 선택해 주세요!",
++      "{username}님 안녕하세요! PocketRisu-Alter를 시작하려면 몇 가지 설정만 하시면 되요. Ai 제공자를 선택해 주세요!",
+     openRouterProvider:
+       "OpenRouter는 여러 무료/유료 모델이 있습니다. 기본적으로 무료로 설정됩니다.",
+     hordeProvider:
+@@ -749,9 +749,9 @@ export const languageKorean = {
+   chatWidthWide: "넓게",
+   chatWidthFull: "제한 없음",
+   customCSSWarning:
+-    "PocketRisu는 원본 RisuAI와 UI 구성(HTML/CSS)이 다르기 때문에, 기존에 쓰던 커스텀 CSS가 레이아웃을 깨거나 의도와 다르게 동작할 수 있습니다. 어떤 부분을 덮어쓰는지 정확히 아는 경우에만 사용하세요.",
++    "PocketRisu-Alter는 원본 RisuAI와 UI 구성(HTML/CSS)이 다르기 때문에, 기존에 쓰던 커스텀 CSS가 레이아웃을 깨거나 의도와 다르게 동작할 수 있습니다. 어떤 부분을 덮어쓰는지 정확히 아는 경우에만 사용하세요.",
+   customHTMLWarning:
+-    "PocketRisu는 원본 RisuAI와 UI 구성(HTML/CSS)이 다르기 때문에, 기존에 쓰던 커스텀 Chat HTML이 정상적으로 렌더되지 않을 수 있습니다. 어떤 부분을 덮어쓰는지 정확히 아는 경우에만 사용하세요.",
++    "PocketRisu-Alter는 원본 RisuAI와 UI 구성(HTML/CSS)이 다르기 때문에, 기존에 쓰던 커스텀 Chat HTML이 정상적으로 렌더되지 않을 수 있습니다. 어떤 부분을 덮어쓰는지 정확히 아는 경우에만 사용하세요.",
+   sayNothing: "어떤 문자열도 입력되지 않을 시 'say nothing' 입력",
+   regexScript: "정규식 스크립트",
+   type: "타입",
+@@ -1008,6 +1008,8 @@ export const languageKorean = {
+   cot: "생각의 사슬",
+   forcePlainFetch: "직접 요청 보내기",
+   autoFillRequestURL: "요청 URL 자동 채우기",
++  useBackendChatJobs: "채팅 생성을 서버에서 실행",
++  useBackendMultiagent: "MultiAgent 파이프라인을 서버에서 실행",
+   newOAIHandle: "새로운 OpenAI 방식 적용",
+   inlayImage: "인레이 이미지",
+   nativeAutomark: "실험적 네이티브 오토마크 사용",
+@@ -1122,8 +1124,8 @@ export const languageKorean = {
+     "삭제된 캐릭터는 휴지통에 보관됩니다. 복구하거나 영구 삭제할 수 있습니다. 3일 후에는 자동으로 영구 삭제됩니다.",
+   shareExport: "공유/엑스포트",
+   risupresetDesc:
+-    "Risupreset 포맷은 포맷을 공유하기 위한 PocketRisu 전용 포맷입니다.",
+-  risuMDesc: "RisuM 포맷은 PocketRisu 모듈을 위해 특별히 설계된 포맷입니다.",
++    "Risupreset 포맷은 포맷을 공유하기 위한 PocketRisu-Alter 전용 포맷입니다.",
++  risuMDesc: "RisuM 포맷은 PocketRisu-Alter 모듈을 위해 특별히 설계된 포맷입니다.",
+   jsonDesc: "JSON은 데이터를 저장하고 불러오기 위한 일반적인 포맷입니다.",
+   nickname: "닉네임",
+   useRegexLorebook: "정규식 사용",
+@@ -1359,7 +1361,7 @@ export const languageKorean = {
+   home: "홈",
+   showSavingIcon: "저장 아이콘 표시",
+   pluginVersionWarn:
+-    "이 플러그인은 {{plugin_version}} 버전입니다. 이 버전의 PocketRisu와 호환되지 않습니다. 플러그인을 {{required_version}} 버전으로 업데이트하세요.",
++    "이 플러그인은 {{plugin_version}} 버전입니다. 이 버전의 PocketRisu-Alter와 호환되지 않습니다. 플러그인을 {{required_version}} 버전으로 업데이트하세요.",
+   imageTranslation: "이미지 번역",
+   banCharacterset: "문자 집합으로 자동 재생성",
+   realmDirectOpen: "RisuRealm 미리보기에서 바로 열기",
+@@ -1695,11 +1697,11 @@ export const languageKorean = {
+     "## 나이틀리 빌드\n\n나이틀리 빌드에 연결하려고 합니다. 이 버전은 테스트용이며 버그가 포함되어 있을 수 있습니다. **이 버전에서는 버그 등 문제가 발생하더라도 직접적으로 해결하는 것을 지원하지 않습니다.**",
+   loginSionyw: "Sionyw 계정으로 로그인",
+   pluginRiskDetectedAlert:
+-    "PocketRisu가 API 키나 개인 데이터를 훔칠 수도 있는 위험한 코드를 감지했습니다. 이 플러그인을 설치하지 않는 것을 권장합니다.",
++    "PocketRisu-Alter가 API 키나 개인 데이터를 훔칠 수도 있는 위험한 코드를 감지했습니다. 이 플러그인을 설치하지 않는 것을 권장합니다.",
+   doNotInstall: "설치하지 않음",
+   continueAnyway: "무시하고 계속",
+   pluginNoRiskButAlert:
+-    "PocketRisu가 위험한 코드를 감지하지 못했지만, 신뢰할 수 없는 출처의 플러그인을 설치하면 보안 위험이 발생할 수 있습니다.",
++    "PocketRisu-Alter가 위험한 코드를 감지하지 못했지만, 신뢰할 수 없는 출처의 플러그인을 설치하면 보안 위험이 발생할 수 있습니다.",
+   pluginRisksInuserFriendly: {
+     eval: "문자열에서 코드 실행",
+     globalAccess: "글로벌 변수 접근",
+@@ -2046,12 +2048,12 @@ export const languageKorean = {
+   storageDiskOther: "기타 (시스템 및 다른 앱)",
+   storageDiskFree: "여유 공간",
+   storageDiskRisuTotal: (size: number) =>
+-    `PocketRisu 합계: ${(size / 1024 / 1024).toFixed(1)} MB`,
++    `PocketRisu-Alter 합계: ${(size / 1024 / 1024).toFixed(1)} MB`,
+ 
+   // 항목별 라벨 (분포 리스트의 ⓘ 설명)
+   storageRowDbFile: "risuai.db",
+   storageRowDbFileDesc:
+-    "PocketRisu의 메인 SQLite 데이터베이스 파일. 모든 채팅·캐릭터·에셋·설정이 여기 들어갑니다.",
++    "PocketRisu-Alter의 메인 SQLite 데이터베이스 파일. 모든 채팅·캐릭터·에셋·설정이 여기 들어갑니다.",
+   storageRowWal: "WAL (Write-Ahead Log)",
+   storageRowWalDesc:
+     "임시 트랜잭션 로그. 저장이 먼저 여기 기록된 뒤 본 파일에 통합됩니다. 사용 중엔 정상적으로 존재.",
+@@ -2090,7 +2092,7 @@ export const languageKorean = {
+     `${(size / 1024 / 1024).toFixed(1)} MB 회수 가능 — Optimize로 압축.`,
+   storageInternalOnly: "저장공간과 함께보기",
+   storageInternalOnlyHint:
+-    "끄면 PocketRisu 내부 항목만, 켜면 기타 시스템·여유 공간까지 디스크 전체 기준으로 표시합니다.",
++    "끄면 PocketRisu-Alter 내부 항목만, 켜면 기타 시스템·여유 공간까지 디스크 전체 기준으로 표시합니다.",
+ 
+   // 2 GB BLOB 한계 (별도 섹션)
+   storageBlobLimit: "2 GB BLOB 한계",
+@@ -2186,7 +2188,7 @@ export const languageKorean = {
+   // 데이터 이전 (구 "계정 & 파일")
+   migration: "데이터 이전",
+   migrationDesc:
+-    "원본 RisuAI(또는 호환 시스템)에서 데이터를 가져오거나 PocketRisu 데이터를 원본 호환 형식으로 내보냅니다.",
++    "원본 RisuAI(또는 호환 시스템)에서 데이터를 가져오거나 PocketRisu-Alter 데이터를 원본 호환 형식으로 내보냅니다.",
+   migrationInfoBackupMoved:
+     "서버 백업, 로컬 백업, 자동 스냅샷 관리는 [시스템 → 백업] 탭으로 이동했습니다.",
+   migrationGotoBackupTab: "백업 탭 열기",
+@@ -2195,7 +2197,7 @@ export const languageKorean = {
+     "원본 RisuAI 호환 포맷으로 백업·내보내기를 수행하는 보조 기능들입니다. 일반적인 백업 작업은 백업 탭을 사용하세요.",
+   migrationSaveFolderAccordion: "노드리스에서 save 폴더 가져오기",
+   migrationSaveFolderDesc:
+-    "이전에 사용하던 노드리스/RisuAI 인스턴스의 save 폴더를 PocketRisu로 가져올 때 사용합니다.",
++    "이전에 사용하던 노드리스/RisuAI 인스턴스의 save 폴더를 PocketRisu-Alter로 가져올 때 사용합니다.",
+   migrationLoadUpstreamBackup: "원본 리스 로컬 백업 불러오기",
+ 
+   // 시스템 → 백업 탭
+diff --git a/src/lang/vi.ts b/src/lang/vi.ts
+index 257613a10..bb23afbb4 100644
+--- a/src/lang/vi.ts
++++ b/src/lang/vi.ts
+@@ -26,7 +26,7 @@ export const languageVietnamese = {
+         "emptyText": "Text is empty.",
+         "wrongPassword": "Wrong Password",
+         "networkFetch": "This happens when the network is unstable or the server is down.",
+-        "networkFetchWeb": "This can be a CORS error. this only happens when using web version dude to limitations of the browser. try using desktop local version, or other version of PocketRisu.",
++        "networkFetchWeb": "This can be a CORS error. this only happens when using web version dude to limitations of the browser. try using desktop local version, or other version of PocketRisu-Alter.",
+         "networkFetchPlain": "This can be a plain fetch error. try disabling force plain fetch option in settings.",
+         "requestLogRemoved": "This request log is removed.",
+         "requestLogRemovedDesc": "This request log removes when client is refreshed or reloaded.",
+@@ -50,12 +50,12 @@ export const languageVietnamese = {
+         "themeDescClassic": "Thích hợp cho mọi thiết bị",
+         "texttheme": "Chọn màu văn bản của bạn",
+         "inputName": "Cuối cùng, nhập Biệt hiệu của bạn.",
+-        "welcome": "Chào mừng đến với PocketRisu! Tôi là Airisu, tôi ở đây để hướng dẫn bạn cài đặt PocketRisu. Trước tiên, tôi có thể gọi bạn là gì?",
++        "welcome": "Chào mừng đến với PocketRisu-Alter! Tôi là Airisu, tôi ở đây để hướng dẫn bạn cài đặt PocketRisu-Alter. Trước tiên, tôi có thể gọi bạn là gì?",
+         "welcome2": "Xin chào {username}! Trước khi bắt đầu, tôi sẽ hỏi bạn một số câu hỏi. Bạn có thể thay đổi các cài đặt này sau trong phần cài đặt.\n\nĐầu tiên hãy chọn nhà cung cấp AI.",
+         "openRouterProvider": "OpenRouter có rất nhiều mô hình, một số không được lọc và một số miễn phí, nhưng nó không tốt bằng OpenAI.",
+         "hordeProvider": "Horde là nhà cung cấp miễn phí, nhưng thời gian phản hồi lâu và chất lượng thấp.",
+         "setProviderLater": "Có các nhà cung cấp khác, nhưng bạn có thể cài đặt sau trong phần cài đặt. Chọn mục này nếu bạn muốn cài đặt sau.",
+-        "setupOpenAI": "Để sử dụng OpenAI, bạn cần lấy khóa API. \n1. đi tới https://beta.openai.com/ \n2. đăng nhập bằng tài khoản của bạn \n3. đi tới https://beta.openai.com/account/api-keys \n4. nhấp vào 'Create New API Key' và đặt tên cho khóa của bạn bất cứ điều gì bạn muốn. \n5. sao chép khóa trên trang web.\n6. quay lại PocketRisu\n7. dán nó và nhấp vào nút gửi.",
++        "setupOpenAI": "Để sử dụng OpenAI, bạn cần lấy khóa API. \n1. đi tới https://beta.openai.com/ \n2. đăng nhập bằng tài khoản của bạn \n3. đi tới https://beta.openai.com/account/api-keys \n4. nhấp vào 'Create New API Key' và đặt tên cho khóa của bạn bất cứ điều gì bạn muốn. \n5. sao chép khóa trên trang web.\n6. quay lại PocketRisu-Alter\n7. dán nó và nhấp vào nút gửi.",
+         "setupClaude": "Để sử dụng Claude, bạn cần lấy khóa API.",
+         "setupClaudeSteps": [
+             "Truy cập URL này và Đăng nhập bằng Google",
+@@ -71,7 +71,7 @@ export const languageVietnamese = {
+             "Nhập giống như hình trên và nhấn 'Add'",
+             "Sao chép khóa và dán vào đây và gửi đi."
+         ],
+-        "setupOpenRouter": "Để sử dụng OpenRouter, bạn cần lấy khóa API. \n1. đi tới https://openrouter.ai/keys\n2. nhấp vào 'Create Key'\n3. đặt tên khóa bất cứ điều gì bạn muốn.\n4. sao chép khóa trên trang web\n5. quay lại PocketRisu\n6. dán nó và nhấp vào nút gửi.",
++        "setupOpenRouter": "Để sử dụng OpenRouter, bạn cần lấy khóa API. \n1. đi tới https://openrouter.ai/keys\n2. nhấp vào 'Create Key'\n3. đặt tên khóa bất cứ điều gì bạn muốn.\n4. sao chép khóa trên trang web\n5. quay lại PocketRisu-Alter\n6. dán nó và nhấp vào nút gửi.",
+         "allDone": "Xong tất cả! vui lòng đợi một chút.",
+         "setupLaterMessage": "Chào mừng {username}! bạn muốn tôi hướng dẫn cài đặt hay tự làm?",
+         "setupMessageOption1": "Hướng dẫn tôi cài đặt",
+@@ -672,9 +672,9 @@ export const languageVietnamese = {
+     "proxyAPIKey": "Khóa/Mật khẩu",
+     "proxyRequestModel": "Mô hình yêu cầu proxy",
+     "officialWiki": "Wiki chính thức",
+-    "officialWikiDesc": "Wiki chính thức của PocketRisu. cứ thoải mái xem nhé.",
++    "officialWikiDesc": "Wiki chính thức của PocketRisu-Alter. cứ thoải mái xem nhé.",
+     "officialDiscord": "Bất hòa chính thức",
+-    "officialDiscordDesc": "Discord chính thức nói về PocketRisu",
++    "officialDiscordDesc": "Discord chính thức nói về PocketRisu-Alter",
+     "persona": "nhân cách",
+     "icon": "Biểu tượng",
+     "account": "Tài khoản",
+@@ -893,8 +893,8 @@ export const languageVietnamese = {
+     "trash": "Thùng rác",
+     "trashDesc": "Các nhân vật đã xóa sẽ được chuyển vào thùng rác. Bạn có thể khôi phục hoặc xóa vĩnh viễn chúng. Các nhân vật đã xóa sẽ tự động bị xóa sau 3 ngày.",
+     "shareExport": "Chia sẻ/Xuất",
+-    "risupresetDesc": "Định dạng Risupreset là định dạng được thiết kế dành riêng cho các cài đặt trước PocketRisu.",
+-    "risuMDesc": "Định dạng RisuM là định dạng được thiết kế dành riêng cho các mô-đun PocketRisu.",
++    "risupresetDesc": "Định dạng Risupreset là định dạng được thiết kế dành riêng cho các cài đặt trước PocketRisu-Alter.",
++    "risuMDesc": "Định dạng RisuM là định dạng được thiết kế dành riêng cho các mô-đun PocketRisu-Alter.",
+     "jsonDesc": "Định dạng JSON là định dạng dễ đọc và viết cho cả con người và máy móc.",
+     "nickname": "Biệt danh",
+     "useRegexLorebook": "Sử dụng Regex",
+@@ -1036,7 +1036,7 @@ export const languageVietnamese = {
+     "menuSideBar": "Thanh bên menu",
+     "home": "Trang chủ",
+     "showSavingIcon": "Hiển thị biểu tượng đang lưu",
+-    "pluginVersionWarn": "Đây là phiên bản {{plugin_version}} của plugin, không tương thích với phiên bản PocketRisu này. Vui lòng cập nhật plugin lên phiên bản {{required_version}}.",
++    "pluginVersionWarn": "Đây là phiên bản {{plugin_version}} của plugin, không tương thích với phiên bản PocketRisu-Alter này. Vui lòng cập nhật plugin lên phiên bản {{required_version}}.",
+     "imageTranslation": "Dịch hình ảnh",
+     "banCharacterset": "Tự động tạo lại khi gặp bộ ký tự",
+     "realmDirectOpen": "Mở trực tiếp nhân vật trong RisuRealm",
+@@ -1239,10 +1239,10 @@ export const languageVietnamese = {
+     "add": "Thêm",
+     "nightlyWarning": "## Bản dựng Nightly\n\nBạn đang kết nối với bản dựng Nightly của phần mềm. Phiên bản này dùng để thử nghiệm và rất có thể có lỗi. **Trong phiên bản này, ngay cả khi bạn gặp sự cố, chúng tôi không hỗ trợ giải quyết trực tiếp.**",
+     "loginSionyw": "Đăng nhập bằng tài khoản Sionyw",
+-    "pluginRiskDetectedAlert": "PocketRisu phát hiện mã có thể gây hại, có thể ĂN CẮP KHÓA API HOẶC DỮ LIỆU CÁ NHÂN CỦA BẠN. Chúng tôi khuyên bạn KHÔNG NÊN CÀI ĐẶT PLUGIN NÀY.",
++    "pluginRiskDetectedAlert": "PocketRisu-Alter phát hiện mã có thể gây hại, có thể ĂN CẮP KHÓA API HOẶC DỮ LIỆU CÁ NHÂN CỦA BẠN. Chúng tôi khuyên bạn KHÔNG NÊN CÀI ĐẶT PLUGIN NÀY.",
+     "doNotInstall": "Không cài đặt",
+     "continueAnyway": "Vẫn tiếp tục",
+-    "pluginNoRiskButAlert": "PocketRisu không phát hiện mã độc hại, nhưng xin lưu ý rằng việc cài đặt plugin từ các nguồn không tin cậy có thể gây rủi ro bảo mật.",
++    "pluginNoRiskButAlert": "PocketRisu-Alter không phát hiện mã độc hại, nhưng xin lưu ý rằng việc cài đặt plugin từ các nguồn không tin cậy có thể gây rủi ro bảo mật.",
+     "pluginRisksInuserFriendly": {
+         "eval": "Đánh giá mã từ chuỗi",
+         "globalAccess": "Truy cập biến toàn cục",
+diff --git a/src/lang/zh-Hant.ts b/src/lang/zh-Hant.ts
+index 66563eb83..8fdb369c8 100644
+--- a/src/lang/zh-Hant.ts
++++ b/src/lang/zh-Hant.ts
+@@ -26,7 +26,7 @@ export const languageChineseTraditional = {
+         "emptyText": "文字內容為空。",
+         "wrongPassword": "密碼錯誤",
+         "networkFetch": "這通常是由於網路連線不穩定或伺服器故障引起的。",
+-        "networkFetchWeb": "這可能是由 CORS 錯誤引起的。這種情況只會在使用網頁版時發生，因為瀏覽器存在一些限制。請嘗試使用桌面版或其他版本的 PocketRisu。",
++        "networkFetchWeb": "這可能是由 CORS 錯誤引起的。這種情況只會在使用網頁版時發生，因為瀏覽器存在一些限制。請嘗試使用桌面版或其他版本的 PocketRisu-Alter。",
+         "networkFetchPlain": "這可能是一次資料抓取（Fetch）錯誤。請嘗試在設定中關閉強制抓取。",
+         "requestLogRemoved": "該請求記錄已被刪除。",
+         "requestLogRemovedDesc": "當用戶端重新整理或重新載入時，該請求記錄會被刪除。",
+@@ -52,12 +52,12 @@ export const languageChineseTraditional = {
+         "themeDescClassic": "適用於所有裝置",
+         "texttheme": "設定文字顏色",
+         "inputName": "最後，請輸入您的暱稱。",
+-        "welcome": "歡迎使用 PocketRisu！我將引導您進行設定。請問我該如何稱呼您？",
++        "welcome": "歡迎使用 PocketRisu-Alter！我將引導您進行設定。請問我該如何稱呼您？",
+         "welcome2": "您好，{username}！在開始之前，我會問您一些問題，稍後可在設定中進行修改。\n\n首先，請選擇 AI 供應商。",
+         "openRouterProvider": "OpenRouter 提供許多模型，部分免費且未經內容過濾。",
+         "hordeProvider": "Horde 提供免費服務，但回應時間較長且品質較低。",
+         "setProviderLater": "還有其他供應商，您可以稍後在設定中設定。如想稍後設定，請選擇此選項。",
+-        "setupOpenAI": "使用 OpenAI，需要取得 API 金鑰。\n1. 前往 https://beta.openai.com/ \n2. 使用帳號登入 \n3. 前往 https://beta.openai.com/account/api-keys \n4. 點擊「Create New API Key」，並命名金鑰。 \n5. 複製該金鑰。 \n6. 回到 PocketRisu\n7. 貼上金鑰並點擊「發送」。",
++        "setupOpenAI": "使用 OpenAI，需要取得 API 金鑰。\n1. 前往 https://beta.openai.com/ \n2. 使用帳號登入 \n3. 前往 https://beta.openai.com/account/api-keys \n4. 點擊「Create New API Key」，並命名金鑰。 \n5. 複製該金鑰。 \n6. 回到 PocketRisu-Alter\n7. 貼上金鑰並點擊「發送」。",
+         "setupClaude": "使用 Claude 需要取得 API 金鑰。",
+         "setupClaudeSteps": [
+             "請前往此連結並使用 Google 帳號登入",
+@@ -73,7 +73,7 @@ export const languageChineseTraditional = {
+             "如上圖所示輸入後點擊「Add」",
+             "複製金鑰並貼上，然後點擊「發送」。",
+         ],
+-        "setupOpenRouter": "使用 OpenRouter 需要取得 API 金鑰。\n1. 前往 https://openrouter.ai/keys\n2. 點擊「Create Key」\n3. 任意命名金鑰名稱。\n4. 複製該金鑰。\n5. 回到 PocketRisu\n6. 貼上金鑰並點擊「發送」。",
++        "setupOpenRouter": "使用 OpenRouter 需要取得 API 金鑰。\n1. 前往 https://openrouter.ai/keys\n2. 點擊「Create Key」\n3. 任意命名金鑰名稱。\n4. 複製該金鑰。\n5. 回到 PocketRisu-Alter\n6. 貼上金鑰並點擊「發送」。",
+         "allDone": "完成所有設定！請稍待片刻。",
+         "setupLaterMessage": "歡迎，{username}！您希望我引導您完成設定還是自行設定？",
+         "setupMessageOption1": "引導我完成設定",
+@@ -741,9 +741,9 @@ export const languageChineseTraditional = {
+     "proxyAPIKey": "代理金鑰/密碼",
+     "proxyRequestModel": "請求模型",
+     "officialWiki": "官方 Wiki",
+-    "officialWikiDesc": "歡迎查看 PocketRisu 官方的 Wiki。",
++    "officialWikiDesc": "歡迎查看 PocketRisu-Alter 官方的 Wiki。",
+     "officialDiscord": "官方 Discord",
+-    "officialDiscordDesc": "PocketRisu 官方的 Discord 伺服器",
++    "officialDiscordDesc": "PocketRisu-Alter 官方的 Discord 伺服器",
+     "persona": "人設",
+     "icon": "圖示",
+     "account": "帳號",
+@@ -961,8 +961,8 @@ export const languageChineseTraditional = {
+     "trash": "垃圾桶",
+     "trashDesc": "刪除的角色將移至垃圾桶，您可選擇還原或永久刪除。垃圾桶內的資料將於 3 天後自動永久刪除。",
+     "shareExport": "分享/匯出",
+-    "risupresetDesc": "Risupreset 是專為 PocketRisu 預設設計的格式。",
+-    "risuMDesc": "RisuM 是專為 PocketRisu 模組設計的格式。",
++    "risupresetDesc": "Risupreset 是專為 PocketRisu-Alter 預設設計的格式。",
++    "risuMDesc": "RisuM 是專為 PocketRisu-Alter 模組設計的格式。",
+     "jsonDesc": "JSON 是一種易於人類與機器讀寫的純文字格式。",
+     "nickname": "暱稱",
+     "useRegexLorebook": "使用正規表達式",
+@@ -1107,7 +1107,7 @@ export const languageChineseTraditional = {
+     "menuSideBar": "選單側邊欄",
+     "home": "首頁",
+     "showSavingIcon": "顯示儲存圖示",
+-    "pluginVersionWarn": "這是 {{plugin_version}} 版本的外掛，與目前 PocketRisu 版本不相容。請更新外掛至 {{required_version}} 版本。",
++    "pluginVersionWarn": "這是 {{plugin_version}} 版本的外掛，與目前 PocketRisu-Alter 版本不相容。請更新外掛至 {{required_version}} 版本。",
+     "imageTranslation": "圖像翻譯",
+     "banCharacterset": "自動重新生成字元集",
+     "realmDirectOpen": "在 RisuRealm 中直接開啟角色",
+@@ -1320,10 +1320,10 @@ export const languageChineseTraditional = {
+     "add": "新增",
+     "nightlyWarning": "## Nightly Builds\n\n您正在連接至軟體的 Nightly 測試版本。此版本僅供測試，且極有可能包含錯誤。**請注意，我們不直接提供此版本的任何問題排解或技術支援。**",
+     "loginSionyw": "使用 Sionyw 帳號登入",
+-    "pluginRiskDetectedAlert": "PocketRisu 偵測到可能有害的程式碼，該外掛可能**竊取您的 API 金鑰或個人資料**。強烈建議**不要安裝此外掛**。",
++    "pluginRiskDetectedAlert": "PocketRisu-Alter 偵測到可能有害的程式碼，該外掛可能**竊取您的 API 金鑰或個人資料**。強烈建議**不要安裝此外掛**。",
+     "doNotInstall": "不要安裝",
+     "continueAnyway": "無論如何都要繼續",
+-    "pluginNoRiskButAlert": "PocketRisu 未偵測到有害的程式碼，但請注意，從不受信任的來源安裝外掛可能存在安全風險。",
++    "pluginNoRiskButAlert": "PocketRisu-Alter 未偵測到有害的程式碼，但請注意，從不受信任的來源安裝外掛可能存在安全風險。",
+     "pluginRisksInuserFriendly": {
+         "eval": "從字串執行程式碼",
+         "globalAccess": "存取全域變數",
+@@ -1374,8 +1374,8 @@ export const languageChineseTraditional = {
+     "partialBackupFirstConfirm": "⚠️ 警告：部分本機備份 ⚠️\n\n此備份僅快速儲存必要資訊。\n\n包含：\n- 資料庫（對話記錄、角色、模組、外掛、提示詞、設定等）\n- 角色頭像（主要圖片）\n- 人設頭像及自訂背景\n- 資料夾圖片\n- 角色預設圖片\n\n⚠️ 不包含：\n- 表情圖片\n- 額外角色資源\n- VITS 語音檔案\n- 所有其他額外媒體檔案\n\n此備份不包含所有角色資源！\n如需完整備份，請使用一般本機備份。\n\n是否繼續？",
+     "partialBackupSecondConfirm": "⚠️⚠️ 最終警告 ⚠️⚠️\n\n此備份僅儲存角色的頭像圖片，不儲存大多數其他資源！\n\n將儲存：\n- 資料庫（對話記錄、角色、模組、外掛、提示詞、設定等）\n- 角色頭像（主要圖片）\n- 人設頭像及自訂背景\n- 資料夾圖片\n- 角色預設圖片\n\n不會儲存：\n- 表情圖片\n- 額外角色資源\n- VITS 語音檔案\n- 所有其他媒體檔案\n\n⚠️ 僅在備份檔案不需要角色資源時才繼續執行！⚠️\n\n您確定要進行部分備份嗎？",
+     "savePartialLocalBackup": "儲存部分本機備份（不含角色資源）",
+-    "serverBackupHeader": "PocketRisu 伺服器備份",
+-    "serverBackupDesc": "直接在安裝 PocketRisu 的裝置（伺服器）上儲存與還原備份檔案，無需下載。",
++    "serverBackupHeader": "PocketRisu-Alter 伺服器備份",
++    "serverBackupDesc": "直接在安裝 PocketRisu-Alter 的裝置（伺服器）上儲存與還原備份檔案，無需下載。",
+     "serverBackupSave": "儲存備份至伺服器",
+     "serverBackupManage": "管理伺服器備份",
+     "serverBackupSaving": "正在儲存備份至伺服器...",
+@@ -1463,9 +1463,9 @@ export const languageChineseTraditional = {
+     "togglePresetImported": (name: string) => `已匯入預設「${name}」。`,
+     "togglePresetImportError": "切換預設檔案無效。",
+     "longPressToPopupEditor": "長按以開啟彈出編輯器",
+-    "importSaveFolderHeader": "將存檔載入至 PocketRisu",
++    "importSaveFolderHeader": "將存檔載入至 PocketRisu-Alter",
+     "importSaveZip": "從存檔資料夾載入（Zip 上傳）",
+-    "importSaveZipDesc": "將現有 PocketRisu 專案的存檔資料夾壓縮為 zip 檔案，並在此上傳以匯入資料。zip 檔案過大可能導致上傳失敗 —— 此時請將存檔資料夾直接複製到伺服器的存檔目錄中，然後重新啟動以自動完成遷移。",
++    "importSaveZipDesc": "將現有 PocketRisu-Alter 專案的存檔資料夾壓縮為 zip 檔案，並在此上傳以匯入資料。zip 檔案過大可能導致上傳失敗 —— 此時請將存檔資料夾直接複製到伺服器的存檔目錄中，然後重新啟動以自動完成遷移。",
+     "importSaveFolderScanning": "正在掃描存檔資料夾...",
+     "importSaveFolderImporting": "正在匯入存檔資料夾...",
+     "importSaveFolderConfirmZip": (name: string, size: string) => `上傳「${name}」（${size}）並匯入？這將取代您目前的資料。`,
+@@ -1519,7 +1519,7 @@ export const languageChineseTraditional = {
+     "nanoGPTManualInput": "手動輸入",
+     "nanoGPTManualModelSelect": "手動模型選擇",
+     "remoteAccess": "遠端存取",
+-    "remoteAccessDesc": "透過遠端存取連結，您可以從其他裝置連線至此 PocketRisu 伺服器。",
++    "remoteAccessDesc": "透過遠端存取連結，您可以從其他裝置連線至此 PocketRisu-Alter 伺服器。",
+     "remoteAccessOpen": "開啟遠端存取",
+     "remoteAccessClose": "關閉遠端存取",
+     "remoteAccessCloseConfirm": "關閉遠端存取？連結將會失效。",
+@@ -1542,8 +1542,8 @@ export const languageChineseTraditional = {
+     "clearTranslationCacheSuccess": "翻譯快取已清除。",
+     "copyChatConfirm": "建立副本：",
+     "copyChatSuccess": "對話已複製",
+-    "customCSSWarning": "PocketRisu 的 UI 結構（HTML/CSS）與上游 RisuAI 不同，因此既有自訂 CSS 可能破壞版面或產生非預期行為。請只在您清楚知道要覆寫哪些內容時使用。",
+-    "customHTMLWarning": "PocketRisu 的 UI 結構（HTML/CSS）與上游 RisuAI 不同，因此既有自訂 Chat HTML 可能無法正確渲染。請只在您清楚知道要覆寫哪些內容時使用。",
++    "customCSSWarning": "PocketRisu-Alter 的 UI 結構（HTML/CSS）與上游 RisuAI 不同，因此既有自訂 CSS 可能破壞版面或產生非預期行為。請只在您清楚知道要覆寫哪些內容時使用。",
++    "customHTMLWarning": "PocketRisu-Alter 的 UI 結構（HTML/CSS）與上游 RisuAI 不同，因此既有自訂 Chat HTML 可能無法正確渲染。請只在您清楚知道要覆寫哪些內容時使用。",
+     "exportTranslationCacheSuccess": "翻譯快取已成功匯出。",
+     "hideLeftBarCollapseButton": "隱藏左側欄摺疊按鈕",
+     "importTranslationCacheFailed": "已匯入 {0} 筆項目，但有 {1} 筆無法儲存。儲存空間可能已滿。",
+@@ -1552,7 +1552,7 @@ export const languageChineseTraditional = {
+     "resetPluginPermissionConfirm": "清除外掛「{}」所有已儲存的權限回應（允許 / 拒絕紀錄）？\n\n下次此外掛請求權限時，系統會再次詢問。",
+     "resetPluginPermissionDone": "外掛「{}」的權限回應已重設",
+     "saveBackupForUpstream": "儲存供原版 RisuAI 使用的備份",
+-    "saveBackupForUpstreamConfirm": "此備份用於將資料移轉到原版 RisuAI（Web/Tauri）。內嵌圖片不會包含在內，因為其項目名稱使用原版 RisuAI 無法匯入的結構。其他資料（資料庫、角色資源、冷儲存）會包含在內。\n\n若要在 PocketRisu 安裝之間移轉資料，請使用一般本機備份。\n\n是否繼續？",
++    "saveBackupForUpstreamConfirm": "此備份用於將資料移轉到原版 RisuAI（Web/Tauri）。內嵌圖片不會包含在內，因為其項目名稱使用原版 RisuAI 無法匯入的結構。其他資料（資料庫、角色資源、冷儲存）會包含在內。\n\n若要在 PocketRisu-Alter 安裝之間移轉資料，請使用一般本機備份。\n\n是否繼續？",
+     "system": "系統",
+     "systemLogs": "系統日誌",
+     "systemLogsClearAll": "全部清除",

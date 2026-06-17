@@ -1,0 +1,120 @@
+diff --git a/src/ts/preset/registry/bundled/base-providers/anthropic-compatible.json b/src/ts/preset/registry/bundled/base-providers/anthropic-compatible.json
+index cec270bd2..c6802a98a 100644
+--- a/src/ts/preset/registry/bundled/base-providers/anthropic-compatible.json
++++ b/src/ts/preset/registry/bundled/base-providers/anthropic-compatible.json
+@@ -244,6 +244,6 @@
+     "sourceUrls": [
+       "https://platform.claude.com/docs/en/api/messages"
+     ],
+-    "notes": "Model-dependent provider. Context and output token limits vary by the upstream endpoint and selected model, so PocketRisu uses a number input instead of a fixed-limit slider."
++    "notes": "Model-dependent provider. Context and output token limits vary by the upstream endpoint and selected model, so PocketRisu-Alter uses a number input instead of a fixed-limit slider."
+   }
+ }
+diff --git a/src/ts/preset/registry/bundled/base-providers/bedrock.json b/src/ts/preset/registry/bundled/base-providers/bedrock.json
+index 67a6eb215..81d57a4dc 100644
+--- a/src/ts/preset/registry/bundled/base-providers/bedrock.json
++++ b/src/ts/preset/registry/bundled/base-providers/bedrock.json
+@@ -242,6 +242,6 @@
+     "sourceUrls": [
+       "https://docs.aws.amazon.com/bedrock/latest/userguide/inference-chat-completions-mantle.html"
+     ],
+-    "notes": "Model-dependent provider. Context and output token limits vary by selected model or deployment, so PocketRisu uses a number input instead of a fixed-limit slider."
++    "notes": "Model-dependent provider. Context and output token limits vary by selected model or deployment, so PocketRisu-Alter uses a number input instead of a fixed-limit slider."
+   }
+ }
+diff --git a/src/ts/preset/registry/bundled/base-providers/deepinfra.json b/src/ts/preset/registry/bundled/base-providers/deepinfra.json
+index 9f69e010c..d94131695 100644
+--- a/src/ts/preset/registry/bundled/base-providers/deepinfra.json
++++ b/src/ts/preset/registry/bundled/base-providers/deepinfra.json
+@@ -281,6 +281,6 @@
+     "sourceUrls": [
+       "https://deepinfra.com/docs/advanced/openai_api"
+     ],
+-    "notes": "Model-dependent provider. Context and output token limits vary by selected model or deployment, so PocketRisu uses a number input instead of a fixed-limit slider."
++    "notes": "Model-dependent provider. Context and output token limits vary by selected model or deployment, so PocketRisu-Alter uses a number input instead of a fixed-limit slider."
+   }
+ }
+diff --git a/src/ts/preset/registry/bundled/base-providers/nanogpt.json b/src/ts/preset/registry/bundled/base-providers/nanogpt.json
+index d65e7f543..d08e00014 100644
+--- a/src/ts/preset/registry/bundled/base-providers/nanogpt.json
++++ b/src/ts/preset/registry/bundled/base-providers/nanogpt.json
+@@ -279,6 +279,6 @@
+     "sourceUrls": [
+       "https://nano-gpt.com/docs"
+     ],
+-    "notes": "Model-dependent provider. Context and output token limits vary by selected model or deployment, so PocketRisu uses a number input instead of a fixed-limit slider."
++    "notes": "Model-dependent provider. Context and output token limits vary by selected model or deployment, so PocketRisu-Alter uses a number input instead of a fixed-limit slider."
+   }
+ }
+diff --git a/src/ts/preset/registry/bundled/base-providers/ollama-cloud.json b/src/ts/preset/registry/bundled/base-providers/ollama-cloud.json
+index 6ad879868..8f0af2235 100644
+--- a/src/ts/preset/registry/bundled/base-providers/ollama-cloud.json
++++ b/src/ts/preset/registry/bundled/base-providers/ollama-cloud.json
+@@ -302,6 +302,6 @@
+       "https://ollama.com/search?c=cloud",
+       "https://docs.ollama.com/api/openai-compatibility"
+     ],
+-    "notes": "Model-dependent provider. Context and output token limits vary by selected model or deployment, so PocketRisu uses a number input instead of a fixed-limit slider."
++    "notes": "Model-dependent provider. Context and output token limits vary by selected model or deployment, so PocketRisu-Alter uses a number input instead of a fixed-limit slider."
+   }
+ }
+diff --git a/src/ts/preset/registry/bundled/base-providers/ollama.json b/src/ts/preset/registry/bundled/base-providers/ollama.json
+index afbe8d3a4..4246f0aa0 100644
+--- a/src/ts/preset/registry/bundled/base-providers/ollama.json
++++ b/src/ts/preset/registry/bundled/base-providers/ollama.json
+@@ -393,6 +393,6 @@
+       "https://raw.githubusercontent.com/ollama/ollama/main/docs/openai.md",
+       "https://raw.githubusercontent.com/ollama/ollama/main/docs/modelfile.md"
+     ],
+-    "notes": "Model-dependent provider. Context and output token limits vary by selected model or deployment, so PocketRisu uses a number input instead of a fixed-limit slider."
++    "notes": "Model-dependent provider. Context and output token limits vary by selected model or deployment, so PocketRisu-Alter uses a number input instead of a fixed-limit slider."
+   }
+ }
+diff --git a/src/ts/preset/registry/bundled/base-providers/openai-compatible.json b/src/ts/preset/registry/bundled/base-providers/openai-compatible.json
+index f8db5aa13..540afc826 100644
+--- a/src/ts/preset/registry/bundled/base-providers/openai-compatible.json
++++ b/src/ts/preset/registry/bundled/base-providers/openai-compatible.json
+@@ -323,6 +323,6 @@
+     "sourceUrls": [
+       "https://platform.openai.com/docs/api-reference/chat"
+     ],
+-    "notes": "Model-dependent provider. Context and output token limits vary by selected model or deployment, so PocketRisu uses a number input instead of a fixed-limit slider."
++    "notes": "Model-dependent provider. Context and output token limits vary by selected model or deployment, so PocketRisu-Alter uses a number input instead of a fixed-limit slider."
+   }
+ }
+diff --git a/src/ts/preset/registry/bundled/base-providers/openrouter.json b/src/ts/preset/registry/bundled/base-providers/openrouter.json
+index 185908e93..9b939478a 100644
+--- a/src/ts/preset/registry/bundled/base-providers/openrouter.json
++++ b/src/ts/preset/registry/bundled/base-providers/openrouter.json
+@@ -488,6 +488,6 @@
+       "https://openrouter.ai/docs",
+       "https://raw.githubusercontent.com/vercel/ai/main/packages/openrouter-provider/"
+     ],
+-    "notes": "Model-dependent provider. Context and output token limits vary by selected model or deployment, so PocketRisu uses a number input instead of a fixed-limit slider."
++    "notes": "Model-dependent provider. Context and output token limits vary by selected model or deployment, so PocketRisu-Alter uses a number input instead of a fixed-limit slider."
+   }
+ }
+diff --git a/src/ts/preset/registry/bundled/base-providers/vercel.json b/src/ts/preset/registry/bundled/base-providers/vercel.json
+index 8fe53a76d..c9da7e55b 100644
+--- a/src/ts/preset/registry/bundled/base-providers/vercel.json
++++ b/src/ts/preset/registry/bundled/base-providers/vercel.json
+@@ -305,6 +305,6 @@
+       "https://vercel.com/docs/ai-gateway/sdks-and-apis/openai-chat-completions/chat-completions",
+       "https://raw.githubusercontent.com/vercel/ai/main/packages/gateway/"
+     ],
+-    "notes": "Model-dependent provider. Context and output token limits vary by selected model or deployment, so PocketRisu uses a number input instead of a fixed-limit slider."
++    "notes": "Model-dependent provider. Context and output token limits vary by selected model or deployment, so PocketRisu-Alter uses a number input instead of a fixed-limit slider."
+   }
+ }
+diff --git a/src/ts/preset/registry/bundled/base-providers/vertex-openai.json b/src/ts/preset/registry/bundled/base-providers/vertex-openai.json
+index 963e1ae73..c5e6a421f 100644
+--- a/src/ts/preset/registry/bundled/base-providers/vertex-openai.json
++++ b/src/ts/preset/registry/bundled/base-providers/vertex-openai.json
+@@ -391,6 +391,6 @@
+       "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/start/openai",
+       "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/reference/rest/v1/projects.locations.endpoints.chat/completions"
+     ],
+-    "notes": "Model-dependent provider. Context and output token limits vary by selected model or deployment, so PocketRisu uses a number input instead of a fixed-limit slider."
++    "notes": "Model-dependent provider. Context and output token limits vary by selected model or deployment, so PocketRisu-Alter uses a number input instead of a fixed-limit slider."
+   }
+ }

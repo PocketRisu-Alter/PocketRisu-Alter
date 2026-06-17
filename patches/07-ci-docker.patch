@@ -1,0 +1,186 @@
+diff --git a/.github/workflows/docker-build.yml b/.github/workflows/docker-build.yml
+index 76053003a..5585691df 100644
+--- a/.github/workflows/docker-build.yml
++++ b/.github/workflows/docker-build.yml
+@@ -5,6 +5,8 @@ on:
+   push:
+     tags:
+       - 'v*'
++    branches:
++      - main
+ 
+ env:
+   REGISTRY: ghcr.io
+@@ -125,41 +127,14 @@ jobs:
+             TAGS="-t ${IMAGE}:latest"
+             TAGS="$TAGS -t ${IMAGE}:v${{ steps.version.outputs.version }}"
+             TAGS="$TAGS -t ${IMAGE}:v${{ steps.version.outputs.minor }}"
++          elif [[ "${{ github.ref }}" == "refs/heads/multiagent-backend" ]]; then
++            TAGS="-t ${IMAGE}:multiagent"
+           else
+             TAGS="-t ${IMAGE}:${{ steps.version.outputs.version }}"
+           fi
+           docker buildx imagetools create $TAGS \
+             $(printf "${IMAGE}@sha256:%s " *)
+ 
+-      # Dual publish to legacy GHCR path for v1.5.x Docker users
+-      # (ghcr.io/mrbart3885/risuai-nodeonly). PAT belongs to mrbart3885 account.
+-      # Required: if the PAT is missing/rotated, this step fails loudly so we don't
+-      # silently leave existing Docker users on a stale image. Verify GHCR_LEGACY_PAT
+-      # is set before tagging a release.
+-      - name: Log in to legacy GHCR
+-        uses: docker/login-action@v4
+-        with:
+-          registry: ${{ env.REGISTRY }}
+-          username: mrbart3885
+-          password: ${{ secrets.GHCR_LEGACY_PAT }}
+-
+-      - name: Create legacy manifest list and push
+-        working-directory: /tmp/digests
+-        shell: bash
+-        run: |
+-          NEW="${{ env.REGISTRY }}/${{ steps.lower.outputs.image_name }}"
+-          LEGACY="${{ env.REGISTRY }}/mrbart3885/risuai-nodeonly"
+-          TAGS=""
+-          if [[ "${{ steps.version.outputs.is_tag }}" == "true" ]]; then
+-            TAGS="-t ${LEGACY}:latest"
+-            TAGS="$TAGS -t ${LEGACY}:v${{ steps.version.outputs.version }}"
+-            TAGS="$TAGS -t ${LEGACY}:v${{ steps.version.outputs.minor }}"
+-          else
+-            TAGS="-t ${LEGACY}:${{ steps.version.outputs.version }}"
+-          fi
+-          docker buildx imagetools create $TAGS \
+-            $(printf "${NEW}@sha256:%s " *)
+-
+   cleanup-old-images:
+     needs: merge
+     if: startsWith(github.ref, 'refs/tags/v')
+diff --git a/Dockerfile b/Dockerfile
+index f96bfe17b..8750f9300 100644
+--- a/Dockerfile
++++ b/Dockerfile
+@@ -1,5 +1,8 @@
+-# ------------------------------------------------------------------------------------------
++# syntax=docker/dockerfile:1.7
+ 
++# ------------------------------------------------------------------------------------------
++# Shared Node + pnpm base. Keep package files out of this stage so the runtime and
++# cloudflared layers remain cached when dependencies change.
+ FROM node:24-slim AS base
+ WORKDIR /app
+ ENV PNPM_HOME="/pnpm"
+@@ -12,40 +15,47 @@ RUN corepack enable
+ RUN corepack install --global pnpm@10.34.1
+ 
+ # ------------------------------------------------------------------------------------------
+-
++# Install all dependencies once. Source changes no longer invalidate this layer.
+ FROM base AS deps
+-# better-sqlite3 requires native build tools on Node 24
+-RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
+-# Install only prod deps
+-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
++COPY package.json pnpm-lock.yaml ./
++# better-sqlite3 may require native compilation on Node 24.
++RUN apt-get update \
++    && apt-get install -y --no-install-recommends python3 make g++ \
++    && rm -rf /var/lib/apt/lists/*
++RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
++    pnpm install --frozen-lockfile
+ 
+-# ------------------------------------------------------------------------------------------
++# Produce the production-only node_modules tree without downloading dependencies again.
++FROM deps AS prod-deps
++RUN pnpm prune --prod
+ 
++# ------------------------------------------------------------------------------------------
+ FROM deps AS builder
+ COPY . .
+-# Install including dev deps
+-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+ ENV NODE_OPTIONS="--max-old-space-size=4096"
+-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm build
++# The normal package script creates source maps. They are not shipped or needed in
++# the production container, so use the Vite production build directly here.
++RUN pnpm exec vite build
+ 
+ # ------------------------------------------------------------------------------------------
+-
+-FROM base AS runtime
++# Download cloudflared in an independent stage so package/source changes do not
++# invalidate this network layer.
++FROM base AS cloudflared
+ ARG TARGETARCH
+-WORKDIR /app
+-
+-# Install cloudflared for remote access tunnel support
+ RUN apt-get update \
+     && apt-get install -y --no-install-recommends curl ca-certificates \
+     && curl -fsSL "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-${TARGETARCH}" \
+        -o /usr/local/bin/cloudflared \
+     && chmod +x /usr/local/bin/cloudflared \
+-    && apt-get purge -y curl \
+-    && apt-get autoremove -y \
+     && rm -rf /var/lib/apt/lists/*
+ 
+-COPY package.json .
+-COPY --from=deps /app/node_modules /app/node_modules
++# ------------------------------------------------------------------------------------------
++FROM base AS runtime
++WORKDIR /app
++
++COPY package.json ./
++COPY --from=cloudflared /usr/local/bin/cloudflared /usr/local/bin/cloudflared
++COPY --from=prod-deps /app/node_modules /app/node_modules
+ COPY --from=builder /app/server ./server
+ COPY --from=builder /app/dist ./dist
+ 
+@@ -53,5 +63,3 @@ ENV NODE_ENV=production
+ EXPOSE 6001
+ 
+ CMD ["pnpm", "runserver"]
+-
+-# ------------------------------------------------------------------------------------------
+diff --git a/docker-compose.yml b/docker-compose.yml
+index 3b8b96195..8ae093ff7 100644
+--- a/docker-compose.yml
++++ b/docker-compose.yml
+@@ -1,22 +1,23 @@
+-# Project and container names are kept as historical 'risuai-nodeonly' so existing
+-# v1.5.x users transition without port/container collisions. Brand identity lives
+-# in the image path, README, and in-app UI — these compose internals are infra
+-# identifiers and stay stable on purpose.
+-name: risuai-nodeonly
++# PocketRisu-dedicated compose stack. Names are split from the historical
++# 'risuai-nodeonly' identifiers so this container/volume pair never collides
++# with any pre-existing risuai-nodeonly deployment.
++name: pocketrisu
+ 
+ services:
+-  risuai:
+-    container_name: risuai-nodeonly
+-    image: ghcr.io/pocketrisu/pocketrisu:latest
++  pocketrisu:
++    container_name: pocketrisu
++    image: ghcr.io/pocketrisu-alter/pocketrisu-alter:latest
+     restart: always
+     ports:
+-      - 6001:6001
++      # Host 7860 -> container 6001. The app listens on 6001 internally;
++      # 7860 is a common external port for local AI frontends.
++      - 7860:6001
++      # Keep the original port as well if you want both available locally:
++      # - 6001:6001
+     volumes:
+-      - risuai-save:/app/save
++      - pocketrisu-save:/app/save
+ 
+ volumes:
+-  risuai-save:
+-    # Explicit name preserves the existing volume from v1.5.0 (project name was 'risuai-nodeonly').
+-    # Without this, the new project name 'pocketrisu' would prefix the volume as
+-    # 'pocketrisu_risuai-save', creating an empty save folder for existing users.
+-    name: risuai-nodeonly_risuai-save
++  pocketrisu-save:
++    # Dedicated volume name so it never shares data with risuai-nodeonly.
++    name: pocketrisu_save

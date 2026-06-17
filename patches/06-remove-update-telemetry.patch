@@ -1,0 +1,609 @@
+diff --git a/src/App.svelte b/src/App.svelte
+index 607816888..a1544c405 100644
+--- a/src/App.svelte
++++ b/src/App.svelte
+@@ -30,7 +30,6 @@
+     import HypaV3Progress from './lib/Others/HypaV3Progress.svelte';
+     import PluginAlertModal from './lib/Others/PluginAlertModal.svelte';
+     import PopupEditor from './lib/Others/PopupEditor.svelte';
+-    import UpdatePopup from './lib/Others/UpdatePopup.svelte';
+     import BootBackupPrompt from './lib/Others/BootBackupPrompt.svelte';
+     import PopupList from './lib/UI/PopupList.svelte';
+     import LoadingOverlay from './lib/Others/LoadingOverlay.svelte';
+@@ -46,7 +45,19 @@
+ 
+ <!-- svelte-ignore a11y_click_events_have_key_events -->
+ <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+-<main class="flex bg-bg w-full h-full max-w-100vw text-textcolor" ondragover={(e) => {
++<main class="flex bg-bg w-full h-full max-w-100vw text-textcolor" ondragstart={(e) => {
++    const target = e.target as HTMLElement
++    if(target && (
++        target.tagName === 'IMG' ||
++        target.tagName === 'VIDEO' ||
++        target.tagName === 'AUDIO' ||
++        target.tagName === 'CANVAS' ||
++        target.tagName === 'SVG' ||
++        target.closest('a')
++    )){
++        e.preventDefault()
++    }
++}} ondragover={(e) => {
+     e.preventDefault()
+     e.dataTransfer.dropEffect = 'link'
+ }} ondrop={async (e) => {
+@@ -159,7 +170,7 @@
+                             aprilFoolsPage = 0
+                             aprilFools = false
+                         }}>
+-                            PocketRisu  
++                            PocketRisu-Alter  
+                         </a>
+                     </p>
+ 
+@@ -240,7 +251,6 @@
+     {/if}
+     <PluginAlertModal />
+     <LoadingOverlay />
+-    <UpdatePopup />
+     <BootBackupPrompt />
+     {#if popupStore.children}
+         <PopupList />
+diff --git a/src/etc/patchNote.ts b/src/etc/patchNote.ts
+deleted file mode 100644
+index f0c04bd6e..000000000
+--- a/src/etc/patchNote.ts
++++ /dev/null
+@@ -1,25 +0,0 @@
+-export const patchNote = {
+-    version: "1.110",
+-    content: 
+-`
+-# Update 1.110 (Modules Update)
+-- Improved module GUI
+-  - Added search bar
+-  - Now modules are ordered by name
+-  - Now global modules are ordered in the end of the list in the chat GUI
+-- Added module export and import from Realm
+-- Added preset import from Realm
+-- Added \`{{position::<name>}}\` CBS
+-   - This CBS will be replaced to lorebooks that uses \`@@position pt_<name>\` decorator
+-`
+-}
+-
+-export function getPatchNote(version: string){
+-    if(patchNote.version.split(".")[1] === version.split(".")[1] && patchNote.version.split(".")[0] === version.split(".")[0]){
+-        return patchNote
+-    }
+-return {
+-        version: version.split(".")[0] + "." + version.split(".")[1],
+-        content: ""
+-    }
+-}
+\ No newline at end of file
+diff --git a/src/lib/Others/UpdatePopup.svelte b/src/lib/Others/UpdatePopup.svelte
+deleted file mode 100644
+index c17f12554..000000000
+--- a/src/lib/Others/UpdatePopup.svelte
++++ /dev/null
+@@ -1,169 +0,0 @@
+-<script lang="ts">
+-    import { updatePopupStore, dismissUpdatePopup, selfUpdateProgressStore, executeSelfUpdate, type UpdateInfo, type SelfUpdateProgress } from "src/ts/update";
+-    import { openURL } from "src/ts/globalApi.svelte";
+-    import { SaveServerBackup } from "src/ts/drive/backuplocal";
+-    import { language } from "src/lang";
+-    import { ArrowUpCircle, AlertTriangle, Download, Loader, CheckCircle, XCircle, SaveIcon } from "@lucide/svelte";
+-    import ShDialog from "src/lib/UI/GUI/ShDialog.svelte";
+-    import ShButton from "src/lib/UI/GUI/ShButton.svelte";
+-
+-    const info: UpdateInfo | null = $derived($updatePopupStore);
+-    const progress: SelfUpdateProgress | null = $derived($selfUpdateProgressStore);
+-
+-    /** True while a self-update is running (or just finished/failed) */
+-    const isUpdating = $derived(progress != null);
+-
+-    /** Closable iff idle, or the update reached its terminal state. */
+-    const canClose = $derived(!isUpdating || progress?.step === 'done' || progress?.step === 'error');
+-
+-    function getTitle(severity: string): string {
+-        if (severity === 'required') return language.updatePopupTitleRequired
+-        if (severity === 'outdated') return language.updatePopupTitleOutdated
+-        return language.updatePopupTitle
+-    }
+-
+-    function handleSelfUpdate() {
+-        executeSelfUpdate()
+-    }
+-
+-    function handleDone() {
+-        const isDone = progress?.step === 'done'
+-        selfUpdateProgressStore.set(null)
+-        dismissUpdatePopup()
+-        if (isDone) {
+-            location.reload()
+-        }
+-    }
+-
+-    /** ShDialog.onOpenChange close path — routes through handleDone when an
+-     *  update has finished (so reload fires) and through dismiss otherwise. */
+-    function handleClose() {
+-        if (isUpdating) handleDone()
+-        else dismissUpdatePopup()
+-    }
+-</script>
+-
+-<!--
+-    tier="base" so any alertError / alertConfirm fired during the update
+-    surfaces above this popup. closeOnOutsideClick stays false because
+-    showUpdatePopupOnce() persists the dismiss before render — accidental
+-    backdrop clicks would silently drop the version forever. ESC stays
+-    blocked per branch convention.
+--->
+-{#if info}
+-    <ShDialog
+-        open={true}
+-        onOpenChange={(v) => { if (!v) handleClose() }}
+-        closable={canClose}
+-        closeOnEscape={false}
+-        closeOnOutsideClick={false}
+-        tier="base"
+-        size="sm"
+-        footer={canClose ? footerActions : undefined}
+-    >
+-        {#snippet title()}
+-            <span class="inline-flex items-center gap-2.5">
+-                {#if isUpdating}
+-                    {#if progress?.step === 'error'}
+-                        <span class="p-2 rounded-full bg-draculared/20" aria-hidden="true">
+-                            <XCircle size={20} class="text-red-400" />
+-                        </span>
+-                    {:else if progress?.step === 'done'}
+-                        <span class="p-2 rounded-full bg-success/20" aria-hidden="true">
+-                            <CheckCircle size={20} class="text-success" />
+-                        </span>
+-                    {:else}
+-                        <span class="p-2 rounded-full bg-borderc/20" aria-hidden="true">
+-                            <Loader size={20} class="text-borderc animate-spin" />
+-                        </span>
+-                    {/if}
+-                {:else if info.severity === 'optional'}
+-                    <span class="p-2 rounded-full bg-success/20" aria-hidden="true">
+-                        <ArrowUpCircle size={20} class="text-success" />
+-                    </span>
+-                {:else}
+-                    <span class="p-2 rounded-full bg-draculared/20" aria-hidden="true">
+-                        <AlertTriangle size={20} class="text-red-400" />
+-                    </span>
+-                {/if}
+-                <span>
+-                    {#if isUpdating}
+-                        {progress?.step === 'done' ? language.selfUpdateDone
+-                            : progress?.step === 'error' ? language.selfUpdateFailed
+-                            : language.selfUpdateInProgress}
+-                    {:else}
+-                        {getTitle(info.severity)}
+-                    {/if}
+-                </span>
+-            </span>
+-        {/snippet}
+-
+-        {#if isUpdating}
+-            <p class="text-sm text-textcolor2 leading-relaxed">{progress?.message}</p>
+-            {#if progress?.step === 'done'}
+-                <p class="mt-2 text-sm text-textcolor2">{language.selfUpdateReloadHint}</p>
+-            {/if}
+-            {#if progress?.step === 'downloading' && progress.progress != null}
+-                <div class="mt-3 w-full bg-selected rounded-full h-2 overflow-hidden">
+-                    <div class="h-full bg-borderc rounded-full transition-all duration-300"
+-                        style="width: {progress.progress}%"></div>
+-                </div>
+-                <p class="mt-1 text-xs text-textcolor2 text-right">{progress.progress}%</p>
+-            {/if}
+-        {:else}
+-            <p class="text-sm text-textcolor2 leading-relaxed">
+-                {@html language.updatePopupDesc
+-                    .replace('{{latest}}', info.latestVersion)
+-                    .replace('{{current}}', info.currentVersion)}
+-            </p>
+-
+-            {#if info.releaseName}
+-                <p class="mt-2 text-sm text-textcolor">{info.releaseName}</p>
+-            {/if}
+-
+-            {#if info.popupMessage}
+-                <div class="mt-3 text-sm text-textcolor2 leading-relaxed whitespace-pre-line border-t border-darkborderc pt-3">
+-                    {info.popupMessage}
+-                </div>
+-            {/if}
+-        {/if}
+-    </ShDialog>
+-{/if}
+-
+-{#snippet footerActions()}
+-    {#if isUpdating}
+-        {#if progress?.step === 'done'}
+-            <ShButton variant="success" onclick={handleDone}>
+-                {language.selfUpdateReload}
+-            </ShButton>
+-        {:else if progress?.step === 'error'}
+-            <ShButton variant="outline" onclick={handleDone}>
+-                {language.close}
+-            </ShButton>
+-        {/if}
+-    {:else if info}
+-        <ShButton variant="outline" onclick={dismissUpdatePopup}>
+-            {language.updatePopupLater}
+-        </ShButton>
+-        <ShButton variant="outline" onclick={() => SaveServerBackup()}>
+-            <SaveIcon size={14} />
+-            {language.updatePopupBackup}
+-        </ShButton>
+-        {#if info.canSelfUpdate}
+-            <ShButton
+-                variant={info.severity === 'optional' ? 'success' : 'destructive'}
+-                onclick={handleSelfUpdate}
+-            >
+-                <Download size={14} />
+-                {language.selfUpdateNow}
+-            </ShButton>
+-        {:else}
+-            <ShButton
+-                variant={info.severity === 'optional' ? 'success' : 'destructive'}
+-                onclick={() => { openURL(info.releaseUrl); dismissUpdatePopup(); }}
+-            >
+-                {language.updatePopupViewRelease}
+-            </ShButton>
+-        {/if}
+-    {/if}
+-{/snippet}
+diff --git a/src/lib/UI/MainMenu.svelte b/src/lib/UI/MainMenu.svelte
+index e6a4a42d5..dcefc1e68 100644
+--- a/src/lib/UI/MainMenu.svelte
++++ b/src/lib/UI/MainMenu.svelte
+@@ -9,8 +9,6 @@
+     import { getRisuHub, hubAdditionalHTML } from "src/ts/characterCards";
+     import RisuHubIcon from "./Realm/RealmHubIcon.svelte";
+     import Title from "./Title.svelte";
+-    import { updateInfoStore, updatePopupStore } from "src/ts/update";
+-    import { publicStatsStore } from "src/ts/publicStats";
+     import { isSecureContext } from "src/ts/secureContext";
+     import { openSettings, SettingsRoute } from "src/ts/routing";
+     import ShButton from "./GUI/ShButton.svelte";
+@@ -24,34 +22,6 @@
+     {#if !$OpenRealmStore}
+       <Title />
+       <h3 class="text-textcolor2 mt-1">v{getVersionString()}</h3>
+-      {#if $updateInfoStore?.hasUpdate}
+-        <button
+-          class="mt-1.5 px-3 py-1 rounded-full text-sm font-medium transition-colors
+-            {$updateInfoStore.severity === 'optional'
+-              ? 'bg-green-900/30 text-green-400 border border-green-800/50 hover:bg-green-900/50'
+-              : 'bg-red-900/30 text-red-400 border border-red-800/50 hover:bg-red-900/50'}"
+-          onclick={() => updatePopupStore.set($updateInfoStore)}
+-        >
+-          {#if $updateInfoStore.severity === 'outdated'}
+-            ⚠ {language.updateOutdated.replace('{{version}}', $updateInfoStore.latestVersion)}
+-          {:else if $updateInfoStore.severity === 'required'}
+-            ⚠ {language.updateRequired.replace('{{version}}', $updateInfoStore.latestVersion)}
+-          {:else}
+-            {language.updateAvailable.replace('{{version}}', $updateInfoStore.latestVersion)}
+-          {/if}
+-        </button>
+-      {/if}
+-      {#if $publicStatsStore}
+-      <div class="mt-3 flex gap-2 flex-wrap justify-center">
+-        <span class="px-3 py-1 rounded-full text-xs bg-darkbg border border-selected text-textcolor2">
+-          👥 {language.statsUsersToday.replace('{{count}}', $publicStatsStore.dau.toLocaleString())}
+-          <span class="text-textcolor2/60">({language.statsYesterday.replace('{{count}}', $publicStatsStore.yesterdayDau.toLocaleString())})</span>
+-        </span>
+-        <span class="px-3 py-1 rounded-full text-xs bg-darkbg border border-selected text-textcolor2">
+-          📊 {language.statsVisitsToday.replace('{{count}}', $publicStatsStore.visits.toLocaleString())}
+-        </span>
+-      </div>
+-      {/if}
+     {/if}
+     <div class="w-full flex p-4 flex-col text-textcolor max-w-4xl">
+       {#if !$OpenRealmStore}
+diff --git a/src/lib/_dev/DevPanel.svelte b/src/lib/_dev/DevPanel.svelte
+index 6fd4fe464..5ae6d7418 100644
+--- a/src/lib/_dev/DevPanel.svelte
++++ b/src/lib/_dev/DevPanel.svelte
+@@ -27,13 +27,6 @@
+     import { alertStore } from "src/ts/stores.svelte";
+     import { sleep } from "src/ts/util";
+     import { resetAllPluginPermissions } from "src/ts/plugins/apiV3/v3.svelte";
+-    import {
+-        updatePopupStore,
+-        selfUpdateProgressStore,
+-        dismissUpdatePopup,
+-        type UpdateInfo,
+-        type SelfUpdateProgress,
+-    } from "src/ts/update";
+     import ShDialog from "src/lib/UI/GUI/ShDialog.svelte";
+     import ShButton from "src/lib/UI/GUI/ShButton.svelte";
+     import ShBadge from "src/lib/UI/GUI/ShBadge.svelte";
+@@ -355,40 +348,6 @@ function hello(): string {
+ 
+     // ─── Section 5: Reset utilities ──────────────────────────────────────────
+ 
+-    // ─── Section 6: UpdatePopup simulation ───────────────────────────────────
+-    // Drives updatePopupStore + selfUpdateProgressStore directly so the real
+-    // <UpdatePopup /> mounted in App.svelte renders. dismissUpdatePopup()
+-    // does NOT touch the per-version dismissed key (only showUpdatePopupOnce
+-    // does), so triggering demos here is safe — real updates are not lost.
+-    const SAMPLE_UPDATE_BASE: UpdateInfo = {
+-        currentVersion: '1.3.0',
+-        latestVersion: '99.99.99-demo',
+-        hasUpdate: true,
+-        severity: 'optional',
+-        releaseUrl: 'https://github.com/PocketRisu/PocketRisu/releases',
+-        releaseName: 'v99.99.99-demo (Dev Panel sample)',
+-        publishedAt: new Date().toISOString(),
+-        canSelfUpdate: true,
+-        deploymentType: 'portable',
+-    };
+-    const SAMPLE_POPUP_MESSAGE = '- 채팅 로딩 속도 개선\n- 백업 안정성 향상\n- shadcn 기반 다이얼로그 도입';
+-
+-    function showUpdate(overrides: Partial<UpdateInfo> = {}) {
+-        selfUpdateProgressStore.set(null);
+-        updatePopupStore.set({ ...SAMPLE_UPDATE_BASE, ...overrides });
+-    }
+-
+-    function showProgress(progress: SelfUpdateProgress, infoOverrides: Partial<UpdateInfo> = {}) {
+-        updatePopupStore.set({ ...SAMPLE_UPDATE_BASE, ...infoOverrides });
+-        selfUpdateProgressStore.set(progress);
+-    }
+-
+-    function forceCloseUpdate() {
+-        selfUpdateProgressStore.set(null);
+-        dismissUpdatePopup();
+-        setResult('UpdatePopup: 강제 닫힘');
+-    }
+-
+     // ─── Section 7: Component gallery ────────────────────────────────────────
+     // Live preview of the Sh* components in their current vega-derived spec.
+     // Buttons are no-ops; widgets bind to local state for interaction feel.
+@@ -511,47 +470,6 @@ function hello(): string {
+         </div>
+     </div>
+ 
+-    <!-- Section 6 -->
+-    <div class="mt-4 flex flex-col gap-2">
+-        <h3 class="text-sm font-semibold text-textcolor">6. UpdatePopup 시뮬레이션</h3>
+-        <p class="text-xs text-textcolor2">
+-            실제 <code class="bg-bgcolor px-1 py-0.5 rounded">&lt;UpdatePopup /&gt;</code>
+-            (App.svelte에 항상 마운트)을 직접 띄웁니다. <strong class="text-textcolor">"Reload" 버튼은 진짜 페이지 reload</strong>를
+-            일으키니 데모 중에는 누르지 마세요. 끝나면 "강제 닫기"로 정리.
+-        </p>
+-
+-        <div class="mt-1 flex flex-col gap-1.5">
+-            <span class="text-xs text-textcolor2">Idle 상태</span>
+-            <div class="flex flex-wrap gap-2">
+-                <ShButton size="sm" onclick={() => showUpdate()}>Optional + Self-update</ShButton>
+-                <ShButton size="sm" onclick={() => showUpdate({ severity: 'required' })}>Required + Self-update</ShButton>
+-                <ShButton size="sm" onclick={() => showUpdate({ canSelfUpdate: false })}>Optional + View Release only</ShButton>
+-                <ShButton size="sm" onclick={() => showUpdate({ severity: 'required', canSelfUpdate: false })}>Required + View Release only</ShButton>
+-                <ShButton size="sm" onclick={() => showUpdate({ popupMessage: SAMPLE_POPUP_MESSAGE })}>+ popupMessage</ShButton>
+-            </div>
+-        </div>
+-
+-        <div class="mt-1 flex flex-col gap-1.5">
+-            <span class="text-xs text-textcolor2">진행 단계 (X 숨김 / 블로킹)</span>
+-            <div class="flex flex-wrap gap-2">
+-                <ShButton size="sm" onclick={() => showProgress({ step: 'checking', progress: 0, message: '업데이트 정보 확인 중...' })}>checking</ShButton>
+-                <ShButton size="sm" onclick={() => showProgress({ step: 'downloading', progress: 50, message: 'v99.99.99-demo 다운로드 중... (3.2 MB / 6.4 MB)' })}>downloading 50%</ShButton>
+-                <ShButton size="sm" onclick={() => showProgress({ step: 'extracting', progress: null, message: '아카이브 추출 중...' })}>extracting</ShButton>
+-                <ShButton size="sm" onclick={() => showProgress({ step: 'replacing', progress: null, message: '실행 파일 교체 중...' })}>replacing</ShButton>
+-                <ShButton size="sm" onclick={() => showProgress({ step: 'restarting', progress: null, message: '서버 재시작 대기 중...' })}>restarting</ShButton>
+-            </div>
+-        </div>
+-
+-        <div class="mt-1 flex flex-col gap-1.5">
+-            <span class="text-xs text-textcolor2">종료 단계 (X 노출 / 닫기 가능)</span>
+-            <div class="flex flex-wrap gap-2">
+-                <ShButton size="sm" variant="success" onclick={() => showProgress({ step: 'done', progress: 100, message: '업데이트 완료.' })}>done (Reload 주의)</ShButton>
+-                <ShButton size="sm" variant="destructive" onclick={() => showProgress({ step: 'error', progress: null, message: '업데이트 실패: 서버 응답 없음 (HTTP 502)' })}>error</ShButton>
+-                <ShButton size="sm" variant="ghost" onclick={forceCloseUpdate}>강제 닫기</ShButton>
+-            </div>
+-        </div>
+-    </div>
+-
+     <!-- Section 7 -->
+     <div class="mt-4 flex flex-col gap-3">
+         <h3 class="text-sm font-semibold text-textcolor">7. 컴포넌트 갤러리</h3>
+diff --git a/src/ts/publicStats.ts b/src/ts/publicStats.ts
+deleted file mode 100644
+index c6ea708e4..000000000
+--- a/src/ts/publicStats.ts
++++ /dev/null
+@@ -1,21 +0,0 @@
+-import { writable } from "svelte/store"
+-
+-export interface PublicStats {
+-    dau: number
+-    yesterdayDau: number
+-    visits: number
+-    timezone: string
+-}
+-
+-export const publicStatsStore = writable<PublicStats | null>(null)
+-
+-export async function fetchPublicStats(): Promise<void> {
+-    try {
+-        const res = await fetch('/api/public-stats')
+-        if (!res.ok) return
+-        const data: PublicStats = await res.json()
+-        publicStatsStore.set(data)
+-    } catch {
+-        // silently ignore
+-    }
+-}
+diff --git a/src/ts/setting/accessibilitySettingsData.ts b/src/ts/setting/accessibilitySettingsData.ts
+index 31c9d49b0..6bf4d71c9 100644
+--- a/src/ts/setting/accessibilitySettingsData.ts
++++ b/src/ts/setting/accessibilitySettingsData.ts
+@@ -49,14 +49,6 @@ export const accessibilitySettingsItems: SettingItem[] = [
+         },
+         keywords: ['send', 'enter', 'keyboard', 'submit', 'mobile']
+     },
+-    {
+-        id: 'acc.fixedChatTextarea',
+-        type: 'check',
+-        labelKey: 'fixedChatTextarea',
+-        bindKey: 'fixedChatTextarea',
+-        helpKey: 'fixedChatTextarea',
+-        keywords: ['fixed', 'chat', 'textarea', 'input']
+-    },
+     {
+         id: 'acc.clickToEdit',
+         type: 'check',
+@@ -366,7 +358,6 @@ export const accessibilityEditingItems = pick([
+     'acc.confirmReroll',
+     'acc.sendKeyPC',
+     'acc.sendKeyMobile',
+-    'acc.fixedChatTextarea',
+     'acc.clickToEdit',
+     'acc.enableBlockPartialEdit',
+     'acc.enableDragPartialEdit',
+diff --git a/src/ts/update.ts b/src/ts/update.ts
+deleted file mode 100644
+index 5d1dc4fce..000000000
+--- a/src/ts/update.ts
++++ /dev/null
+@@ -1,137 +0,0 @@
+-import { writable, get } from "svelte/store"
+-import { forageStorage } from "./globalApi.svelte"
+-import { DBState } from "./stores.svelte"
+-
+-export interface UpdateInfo {
+-    currentVersion: string
+-    latestVersion: string
+-    hasUpdate: boolean
+-    severity: 'none' | 'optional' | 'required' | 'outdated'
+-    releaseUrl: string
+-    releaseName: string
+-    publishedAt: string
+-    popupMessage?: string
+-    disabled?: boolean
+-    deploymentType?: 'portable' | 'git' | 'docker'
+-    canSelfUpdate?: boolean
+-    manualOnly?: boolean
+-}
+-
+-export interface SelfUpdateProgress {
+-    step: 'checking' | 'downloading' | 'extracting' | 'replacing' | 'restarting' | 'done' | 'error' | 'reconnecting'
+-    progress: number | null
+-    message: string
+-}
+-
+-/** Reactive store for update info — used by home screen and popup */
+-export const updateInfoStore = writable<UpdateInfo | null>(null)
+-
+-/** Independent store for the update popup — does not collide with alertStore */
+-export const updatePopupStore = writable<UpdateInfo | null>(null)
+-
+-/** Self-update progress — non-null while an update is running */
+-export const selfUpdateProgressStore = writable<SelfUpdateProgress | null>(null)
+-
+-export async function checkRisuUpdate(): Promise<UpdateInfo | null> {
+-    try {
+-        const lang = encodeURIComponent(DBState.db?.language || '')
+-        const res = await fetch(`/api/update-check?lang=${lang}`)
+-        if (!res.ok) return null
+-        const data: UpdateInfo = await res.json()
+-        updateInfoStore.set(data)
+-
+-        if (data.hasUpdate) {
+-            showUpdatePopupOnce(data)
+-        }
+-
+-        return data
+-    } catch {
+-        return null
+-    }
+-}
+-
+-const DISMISSED_KEY = 'risuNodeOnly_dismissedUpdateVersion'
+-
+-function showUpdatePopupOnce(info: UpdateInfo) {
+-    const dismissed = localStorage.getItem(DISMISSED_KEY)
+-    if (dismissed === info.latestVersion) return
+-
+-    localStorage.setItem(DISMISSED_KEY, info.latestVersion)
+-    updatePopupStore.set(info)
+-}
+-
+-export function dismissUpdatePopup() {
+-    updatePopupStore.set(null)
+-}
+-
+-/** Execute self-update (portable only). Streams NDJSON progress, then waits for server restart. */
+-export async function executeSelfUpdate(): Promise<void> {
+-    const set = (p: SelfUpdateProgress) => selfUpdateProgressStore.set(p)
+-    set({ step: 'checking', progress: 0, message: 'Starting update...' })
+-
+-    try {
+-        const auth = await forageStorage.createAuth()
+-        const res = await fetch('/api/self-update', {
+-            method: 'POST',
+-            headers: { 'risu-auth': auth },
+-        })
+-
+-        if (!res.ok) {
+-            const err = await res.json().catch(() => ({ error: 'Unknown error' }))
+-            throw new Error(err.error || `HTTP ${res.status}`)
+-        }
+-
+-        // Read NDJSON stream
+-        const reader = res.body!.getReader()
+-        const decoder = new TextDecoder()
+-        let buf = ''
+-
+-        while (true) {
+-            const { done, value } = await reader.read()
+-            if (done) break
+-            buf += decoder.decode(value, { stream: true })
+-            const lines = buf.split('\n')
+-            buf = lines.pop()! // keep incomplete line in buffer
+-            for (const line of lines) {
+-                if (!line) continue
+-                try {
+-                    const progress: SelfUpdateProgress = JSON.parse(line)
+-                    set(progress)
+-                    if (progress.step === 'error') throw new Error(progress.message)
+-                } catch (e) {
+-                    if (e instanceof SyntaxError) continue
+-                    throw e
+-                }
+-            }
+-        }
+-
+-        // Server is restarting — poll until the new version is actually running
+-        set({ step: 'reconnecting', progress: null, message: 'Waiting for server to restart...' })
+-        const expectedVersion = get(updateInfoStore)?.latestVersion ?? ''
+-        await waitForServerRestart(expectedVersion)
+-
+-        set({ step: 'done', progress: 100, message: 'Update complete!' })
+-    } catch (e: any) {
+-        set({ step: 'error', progress: null, message: e.message || 'Update failed' })
+-    }
+-}
+-
+-async function waitForServerRestart(expectedVersion: string, timeoutMs = 60000): Promise<void> {
+-    const start = Date.now()
+-    // Give the server a moment to shut down before polling
+-    await new Promise(r => setTimeout(r, 3000))
+-
+-    while (Date.now() - start < timeoutMs) {
+-        try {
+-            const res = await fetch('/api/update-check')
+-            if (res.ok) {
+-                const data: UpdateInfo = await res.json()
+-                // Verify the new server is actually running the updated version,
+-                // not the old process still alive after a failed restart
+-                if (data.currentVersion === expectedVersion) return
+-            }
+-        } catch { /* server not yet up */ }
+-        await new Promise(r => setTimeout(r, 2000))
+-    }
+-    throw new Error('Server did not restart within timeout')
+-}

@@ -1,0 +1,1375 @@
+diff --git a/src/lib/ChatScreens/Chat.svelte b/src/lib/ChatScreens/Chat.svelte
+index 03406bde3..48f4fa848 100644
+--- a/src/lib/ChatScreens/Chat.svelte
++++ b/src/lib/ChatScreens/Chat.svelte
+@@ -10,8 +10,7 @@
+     import { DBState, ReloadChatPointer, CurrentTriggerIdStore, popupStore } from 'src/ts/stores.svelte'
+ 
+     import { capitalize, getUserIcon, getUserName, sleep } from "src/ts/util"
+-    import { onDestroy, onMount } from "svelte"
+-    import { type Unsubscriber } from "svelte/store"
++
+     import { v4 as uuidv4, v4 } from 'uuid'
+     import { language } from "../../lang"
+     import { alertClear, alertConfirm, alertConfirmMulti, alertInput, alertRequestData, alertWait, notifyInfo, notifySuccess, type AlertAction } from "../../ts/alert"
+@@ -80,10 +79,23 @@
+         disabled = false,
+     }: Props = $props();
+ 
+-    let msgDisplay = $state('')
+     let translated = $state(false)
+     let partialEditEnabled = $state(true)
+ 
++    // Derived display text: risuChatParser is expensive on long messages, so let
++    // Svelte memoize it across unchanged dependencies. Include ReloadGUIPointer so
++    // external "refresh GUI" signals still re-render.
++    let msgDisplay = $derived.by(() => {
++        void $ReloadGUIPointer;
++        return risuChatParser(message, {
++            chara: name,
++            chatID: idx,
++            rmVar: true,
++            visualize: true,
++            cbsConditions: getCbsCondition()
++        })
++    })
++
+     async function rm(){
+         const messages = DBState.db.characters[selIdState.selId].chats[DBState.db.characters[selIdState.selId].chatPage].message
+         const cascadeCount = messages.length - idx
+@@ -127,7 +139,8 @@
+             if (msg.swipes && msg.swipeId !== undefined) {
+                 msg.swipes[msg.swipeId] = e.detail.newData
+             }
+-            displaya(e.detail.newData)
++            // msgDisplay is now derived from `message`, so the assignment above
++            // already triggers a re-parse automatically.
+         }
+     }
+ 
+@@ -170,10 +183,6 @@
+         editTranslationMode = false
+     }
+ 
+-    function displaya(message:string){
+-        msgDisplay = risuChatParser(message, {chara: name, chatID: idx, rmVar: true, visualize: true, cbsConditions: getCbsCondition()})
+-    }
+-
+     const setStatusMessage = (message:string, timeout:number = 0)=>{
+         statusMessage = message
+         if(timeout === 0) return
+@@ -185,22 +194,6 @@
+ 
+     let blankMessage = $derived((message === '{{none}}' || message === '{{blank}}' || message === '') && idx === -1 && !altGreeting || isComment)
+ 
+-    $effect.pre(() => {
+-        displaya(message)
+-    });
+-
+-    const unsubscribers:Unsubscriber[] = []
+-
+-    onMount(()=>{
+-        unsubscribers.push(ReloadGUIPointer.subscribe((v) => {
+-            displaya(message)
+-        }))
+-    })
+-
+-    onDestroy(()=>{
+-        unsubscribers.forEach(u => u())
+-    })
+-
+     function RenderGUIHtml(html:string){
+         try {
+             const parser = new DOMParser()
+@@ -316,10 +309,9 @@
+ {#snippet genInfo()}
+     <div class="flex flex-col items-end">
+         {#if messageGenerationInfo && (DBState.db.requestInfoInsideChat || aiLawApplies())}
+-            <button class="text-sm p-1 text-textcolor2 border-darkborderc float-end mr-2 my-1
+-                    hover:ring-darkbutton hover:ring-3 rounded-md hover:text-textcolor transition-all flex justify-center items-center" 
++            <button class="rs-meta-chip text-xs px-2 py-1 text-textcolor2 border border-darkborderc float-end mr-2 my-1 rounded-md hover:text-textcolor hover:border-borderc hover:bg-selected/30 transition-colors duration-150 ease-out flex justify-center items-center"
+                     onclick={() => {
+-                        const currentGenerationInfo = idx >= 0 ? 
++                        const currentGenerationInfo = idx >= 0 ?
+                             DBState.db.characters[$selectedCharID].chats[DBState.db.characters[$selectedCharID].chatPage].message[idx].generationInfo :
+                             messageGenerationInfo
+ 
+@@ -329,25 +321,24 @@
+                         })
+                     }}
+             >
+-                <BotIcon size={20} />
++                <BotIcon size={14} />
+                 <span class="ml-1 max-w-[288px] truncate">
+                     {capitalize(getModelInfo(messageGenerationInfo.model).shortName.replace(/^pluginmodel:::/, ''))}
+                 </span>
+             </button>
+         {/if}
+         {#if DBState.db.translatorType === 'llm' && translated}
+-            <button class="text-sm p-1 text-textcolor2 border-darkborderc float-end mr-2 my-1
+-                            hover:ring-darkbutton hover:ring-3 rounded-md hover:text-textcolor transition-all flex justify-center items-center"
++            <button class="rs-meta-chip text-xs px-2 py-1 text-textcolor2 border border-darkborderc float-end mr-2 my-1 rounded-md hover:text-textcolor hover:border-borderc hover:bg-selected/30 transition-colors duration-150 ease-out flex justify-center items-center"
+                     onclick={() => {
+                         retranslate = true
+                     }}
+             >
+-                <RefreshCcwIcon size={20} />
++                <RefreshCcwIcon size={14} />
+                 <span class="ml-1">
+                     {language.retranslate}
+                 </span>
+             </button>
+-            <button class={"text-sm p-1 border-darkborderc float-end mr-2 my-1 hover:ring-darkbutton hover:ring-3 rounded-md hover:text-textcolor transition-all flex justify-center items-center " + (editTranslationMode ? 'text-blue-400' : 'text-textcolor2')}
++            <button class={"rs-meta-chip text-xs px-2 py-1 border border-darkborderc float-end mr-2 my-1 rounded-md hover:text-textcolor hover:border-borderc hover:bg-selected/30 transition-colors duration-150 ease-out flex justify-center items-center " + (editTranslationMode ? 'text-blue-400' : 'text-textcolor2')}
+                     onclick={() => {
+                         if(editTranslationMode){
+                             saveTranslationEdit()
+@@ -357,7 +348,7 @@
+                         }
+                     }}
+             >
+-                <PencilIcon size={20} />
++                <PencilIcon size={14} />
+                 <span class="ml-1">
+                     {editTranslationMode ? language.editTranslationSave : language.editTranslation}
+                 </span>
+@@ -546,7 +537,7 @@
+                 
+                 const imgs = doc.querySelectorAll('img')
+                 for(const img of imgs){
+-                    img.setAttribute('alt', 'from PocketRisu')
++                    img.setAttribute('alt', 'from PocketRisu-Alter')
+                     const url = img.getAttribute('src')
+                     
+                     img.setAttribute('style', `
+@@ -703,7 +694,7 @@
+     ${doc.body.innerHTML}
+ </div>
+ <div style="text-align: center; margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid ${root.style.getPropertyValue('--risu-theme-darkborderc')};">
+-    <span style="font-size: 0.75rem; color: ${root.style.getPropertyValue('--risu-theme-textcolor2')}; opacity: 0.7;">From PocketRisu</span>
++    <span style="font-size: 0.75rem; color: ${root.style.getPropertyValue('--risu-theme-textcolor2')}; opacity: 0.7;">From PocketRisu-Alter</span>
+ </div>
+ </div>
+ </div>`
+@@ -949,7 +940,7 @@
+ 
+ {#snippet renderGuiHtmlPart(dom:HTMLElement)}
+     {#if dom.tagName === 'IMG'}
+-        <img class={dom.getAttribute('class') ?? ''} alt="" style={dom.getAttribute('style') ?? ''} />
++        <img class={dom.getAttribute('class') ?? ''} alt="" loading="lazy" decoding="async" src={dom.getAttribute('src') ?? ''} style={dom.getAttribute('style') ?? ''} />
+     {:else if dom.tagName === 'A'}
+         <a target="_blank" rel="noreferrer" href={
+             (dom.getAttribute('href') && dom.getAttribute('href').startsWith('https')) ? dom.getAttribute('href') : ''
+@@ -1148,85 +1139,8 @@
+      style={isLastMemory ? `border-top:${DBState.db.memoryLimitThickness}px solid rgba(98, 114, 164, 0.7);` : ''}
+      onclickcapture={handleButtonTriggerWithin}>
+     <div class="text-textcolor mt-1 ml-4 mr-4 mb-1 p-2 bg-transparent grow border-t-gray-900 border-opacity/30 border-transparent flexium items-start max-w-full" >
+-        {#if DBState.db.theme === 'mobilechat' && !blankMessage}
+-            <div class={role === 'user' ? "flex items-start w-full justify-end" : "flex items-start"}>
+-                {#if role !== 'user'}
+-                    {@render senderIcon({rounded: true})}
+-                {/if}
+-                <div
+-                    class="bg-gray-100 rounded-lg p-3 max-w-[70%] mx-2"
+-                    class:rounded-tl-none={role !== 'user'}
+-                    class:rounded-tr-none={role === 'user'}
+-                >
+-                    <p class="text-gray-800">{@render textBox()}</p>
+-                    {#if DBState.db.characters?.[selIdState.selId]?.chats?.[DBState.db.characters?.[selIdState.selId]?.chatPage]?.message?.[idx]?.time}
+-                        <span class="text-xs text-textcolor2 mt-1 block">
+-                            {new Intl.DateTimeFormat(undefined, {
+-                                hour: '2-digit',
+-                                minute: '2-digit',
+-                                second: '2-digit',
+-                                month: '2-digit',
+-                                day: '2-digit',
+-                                hour12: false
+-                            }).format(DBState.db.characters[selIdState.selId].chats[DBState.db.characters[selIdState.selId].chatPage].message[idx].time)}
+-                        </span>
+-                    {/if}
+-                </div>
+-                {#if role === 'user'}
+-                    {@render senderIcon({rounded: true})}
+-                {/if}
+-            </div>
+-        {:else if DBState.db.theme === 'cardboard' && !blankMessage}
+-            <div class="w-full flex flex-col px-0 sm:px-4 py-4 relative">
+-                <div class="bg-linear-to-b from-gray-100 to-gray-200 rounded-lg shadow-lg border-gray-400 border p-4 flex flex-col">
+-                    <div class="flex gap-4 mt-2 flex-col sm:flex-row">
+-                        <div class="flex flex-col items-center">
+-                            <div class="sm:h-96 sm:w-72 sm:min-w-72 w-48 h-64">
+-                                {@render senderIcon({rounded: false, styleFix:'height:100%;width:100%;'})}
+-                            </div>
+-                            <h2 class="text-base font-bold text-gray-500 text-center mt-2 max-w-full text-ellipsis">{name}</h2>
+-
+-                        </div>
+-                        {#if editMode}
+-                            <textarea class="grow h-138 sm:h-96 overflow-y-auto bg-transparent text-black p-2 mb-2 resize-none message-edit-area" bind:value={message}></textarea>
+-                        {:else}
+-                            <div class="grow h-138 sm:h-96 overflow-y-auto p-2 mb-2 sm:mb-0">
+-                                {@render textBox()}
+-                            </div>
+-                        {/if}
+-                    </div>
+-                </div>
+-                <div class="absolute bottom-0 right-0 bg-linear-to-b from-gray-200 to-gray-300 p-2 rounded-md border border-gray-400 text-gray-400">
+-                    {@render iconButtons({applyTextColors: false})}
+-                </div>
+-            </div>
+-        {:else if DBState.db.theme === 'customHTML' && !blankMessage}
++        {#if DBState.db.theme === 'customHTML' && !blankMessage}
+             {@render renderGuiHtmlPart(RenderGUIHtml(DBState.db.guiHTML))}
+-        {:else if DBState.db.theme === 'standardRisu' && !blankMessage}
+-            {@render senderIcon({rounded: DBState.db.roundIcons})}
+-            <span class="flex flex-col ml-4 w-full max-w-full min-w-0 text-black">
+-                <div class="flexium items-center chat-width">
+-                    {#if DBState.db.characters[selIdState.selId]?.chaId === "§playground" && !blankMessage && DBState.db.characters[selIdState.selId]?.chats?.[DBState.db.characters[selIdState.selId]?.chatPage]?.message?.[idx]}
+-                        <span class="chat-width text-xl border-darkborderc flex items-center text-textcolor">
+-                            <span>{DBState.db.characters[selIdState.selId].chats[DBState.db.characters[selIdState.selId].chatPage].message[idx].role === 'char' ? 'Assistant' : 'User'}</span>
+-                            <button class="ml-2 text-textcolor2 hover:text-textcolor" onclick={() => {
+-                                DBState.db.characters[selIdState.selId].chats[DBState.db.characters[selIdState.selId].chatPage].message[idx].role = DBState.db.characters[selIdState.selId].chats[DBState.db.characters[selIdState.selId].chatPage].message[idx].role === 'char' ? 'user' : 'char'
+-                                ReloadChatPointer.update((v) => {
+-                                    v[idx] = (v[idx] ?? 0) + 1
+-                                    return v
+-                                })
+-                            }}><ArrowLeftRightIcon size="18" /></button>
+-                        </span>
+-                    {:else if !blankMessage && !$HideIconStore}
+-                        <div class="chat-width text-xl unmargin text-textcolor flex items-center">
+-                            <span>{name}</span>
+-                        </div>
+-                    {/if}
+-                    {@render iconButtons()}
+-                </div>
+-                {@render genInfo()}
+-                {@render textBox()}
+-            </span>
+         {:else}
+             {@render senderIcon({rounded: DBState.db.roundIcons})}
+             <span class="flex flex-col ml-4 w-full max-w-full min-w-0 text-black">
+diff --git a/src/lib/ChatScreens/ChatBody.svelte b/src/lib/ChatScreens/ChatBody.svelte
+index 6d8b8d204..56ae618f8 100644
+--- a/src/lib/ChatScreens/ChatBody.svelte
++++ b/src/lib/ChatScreens/ChatBody.svelte
+@@ -42,6 +42,92 @@
+     let lastCharArg:string|simpleCharacterArgument = null
+     let lastChatId = -10
+ 
++    let committedChunks = $state<string[]>([])
++    let liveHtml = $state('')
++    let committedPrefix = ''
++    let previousFullHtml = ''
++    let parseSequence = 0
++    let appliedSequence = 0
++    let streamIdentity = ''
++
++    const resolvedAssetSrc = new Map<string, string>()
++    const resolvingAssetSrc = new Map<string, Promise<string>>()
++    let viewerSrc = $state('')
++    const safeBlockEndPattern = /<\/(?:p|div|blockquote|pre|ul|ol|table|figure|h[1-6])>|<hr\b[^>]*\/?\s*>/gi
++
++    const getCachedFileSrc = async (cacheKey: string, path: string) => {
++        const cached = resolvedAssetSrc.get(cacheKey)
++        if(cached){
++            return cached
++        }
++
++        let resolving = resolvingAssetSrc.get(cacheKey)
++        if(!resolving){
++            resolving = getFileSrc(path).then((src) => {
++                resolvedAssetSrc.set(cacheKey, src)
++                resolvingAssetSrc.delete(cacheKey)
++                return src
++            }).catch((error) => {
++                resolvingAssetSrc.delete(cacheKey)
++                throw error
++            })
++            resolvingAssetSrc.set(cacheKey, resolving)
++        }
++
++        return resolving
++    }
++
++    const resetIncrementalRender = () => {
++        committedChunks = []
++        liveHtml = ''
++        committedPrefix = ''
++        previousFullHtml = ''
++    }
++
++    const getCommonPrefixLength = (left: string, right: string) => {
++        const max = Math.min(left.length, right.length)
++        let index = 0
++        while(index < max && left.charCodeAt(index) === right.charCodeAt(index)){
++            index++
++        }
++        return index
++    }
++
++    const findSafeBlockBoundary = (html: string, limit: number) => {
++        safeBlockEndPattern.lastIndex = 0
++        let boundary = 0
++        let match: RegExpExecArray|null
++        const stablePart = html.slice(0, limit)
++
++        while((match = safeBlockEndPattern.exec(stablePart)) !== null){
++            boundary = match.index + match[0].length
++        }
++
++        return boundary
++    }
++
++    const applyIncrementalHtml = (html: string) => {
++        if(committedPrefix && !html.startsWith(committedPrefix)){
++            resetIncrementalRender()
++        }
++
++        const commonLength = previousFullHtml
++            ? getCommonPrefixLength(previousFullHtml, html)
++            : 0
++        const stableBoundary = findSafeBlockBoundary(html, commonLength)
++
++        if(stableBoundary > committedPrefix.length){
++            const newChunk = html.slice(committedPrefix.length, stableBoundary)
++            if(newChunk){
++                committedChunks = [...committedChunks, newChunk]
++                committedPrefix += newChunk
++            }
++        }
++
++        liveHtml = html.slice(committedPrefix.length)
++        previousFullHtml = html
++    }
++
+     function getCbsCondition(){
+         try{
+             const cbsConditions:CbsConditions = {
+@@ -59,7 +145,6 @@
+     }
+ 
+     const markParsing = async (data: string, charArg: string | simpleCharacterArgument, chatID: number, tries?:number) => {
+-        // track 'translated' and 'retranslate' state
+         translated;
+         retranslate;
+         let lastParsedQueue = ''
+@@ -78,7 +163,7 @@
+                             : !DBState.db.legacyTranslation
+                             ? await getLLMCache(await ParseMarkdown(data, charArg, 'pretranslate', chatID, getCbsCondition()))
+                             : await getLLMCache(await ParseMarkdown(data, charArg, mode, chatID, getCbsCondition()))
+-                  
++
+                             translateText = cache !== null
+                         }
+                         else{
+@@ -89,11 +174,9 @@
+                     const lastTranslated = translated
+ 
+                     setTimeout(() => {
+-                            translated = translateText
++                        translated = translateText
+                     }, 10)
+ 
+-                    // State change of `translated` triggers markParsing again,
+-                    // causing redundant translation attempts
+                     if (lastTranslated !== translateText) {
+                         return;
+                     }
+@@ -107,7 +190,7 @@
+                 }
+ 
+                 let transResult
+-                
++
+                 if(DBState.db.translatorType === 'llm' && DBState.db.translateBeforeHTMLFormatting){
+                     await sleep(100)
+                     translating = true
+@@ -148,18 +231,15 @@
+                 lastParsedQueue = marked
+                 lastCharArg = charArg
+                 return marked
+-            }   
++            }
+         } catch (error) {
+-            //retry
+             if(tries > 2){
+-
+                 alertError(`Error while parsing chat message: ${translated}, ${error.message}, ${error.stack}`)
+                 return data
+             }
+             return await markParsing(data, charArg, chatID, (tries ?? 0) + 1)
+         }
+         finally{
+-            //since trimMarkdown is fast, we don't need to cache it
+             lastParsed = lastParsedQueue
+         }
+     }
+@@ -169,7 +249,7 @@
+             return
+         }
+         const imgs = bodyRoot.querySelectorAll('img:not([src^="data:"]):not([src^="http:"]):not([src^="https:"]):not([src^="blob:"]):not([src^="file:"]):not([src^="tauri:"]):not([src^="/"]):not([noimage])') as NodeListOf<HTMLImageElement>
+-        
++
+         if (imgs.length > 0) {
+             const currentCharacter = getCurrentCharacter()
+             const styl = currentCharacter.prebuiltAssetStyle
+@@ -184,22 +264,33 @@
+ 
+             imgs.forEach(async (img) => {
+                 const name = img.getAttribute('src')?.toLocaleLowerCase() || ''
+-                console.log(name)
+ 
+-                if(
+-                    name.length > 200 ||
+-                    name.includes(':')
+-                ){
++                if(name.length > 200 || name.includes(':')){
+                     img.setAttribute('noimage', 'true')
+                     return
+                 }
+-                
++
+                 const foundAsset = exactAssets.get(name)
+-                console.log('Checking image:', name, 'Assets:', assets)
+                 if(foundAsset){
++                    img.dataset.risuAssetName = name
+                     img.classList.add('root-loaded-image')
+                     img.classList.add('root-loaded-image-' + styl)
+-                    img.src = await getFileSrc(foundAsset)
++                    img.setAttribute('loading', 'eager')
++                    img.decoding = 'async'
++                    img.style.cursor = 'pointer'
++                    img.onclick = () => { viewerSrc = img.src }
++
++                    const cached = resolvedAssetSrc.get(name)
++                    if(cached){
++                        img.src = cached
++                        return
++                    }
++
++                    const originalName = name
++                    const resolved = await getCachedFileSrc(name, foundAsset)
++                    if(img.isConnected && img.getAttribute('src')?.toLocaleLowerCase() === originalName){
++                        img.src = resolved
++                    }
+                     return
+                 }
+ 
+@@ -222,17 +313,27 @@
+                     }
+                 }
+                 if(currentFound){
+-                    const got = await getFileSrc(currentFound)
+-                    const name2 = img.getAttribute('src')?.toLocaleLowerCase() || ''
+-                    if(name === name2){
+-                        img.setAttribute('src', got)
++                    img.dataset.risuAssetName = name
++                    img.classList.add('root-loaded-image')
++                    img.classList.add('root-loaded-image-' + styl)
++                    img.setAttribute('loading', 'eager')
++                    img.decoding = 'async'
++                    img.style.cursor = 'pointer'
++                    img.onclick = () => { viewerSrc = img.src }
++
++                    const cached = resolvedAssetSrc.get(name)
++                    if(cached){
++                        img.src = cached
++                        img.removeAttribute('noimage')
++                        return
+                     }
+ 
+-                    if(img.classList.length === 0){
+-                        img.classList.add('root-loaded-image')
+-                        img.classList.add('root-loaded-image-' + styl)
++                    const originalName = name
++                    const got = await getCachedFileSrc(name, currentFound)
++                    if(img.isConnected && img.getAttribute('src')?.toLocaleLowerCase() === originalName){
++                        img.setAttribute('src', got)
++                        img.removeAttribute('noimage')
+                     }
+-                    img.removeAttribute('noimage')
+                 }
+                 else{
+                     img.setAttribute('noimage', 'true')
+@@ -244,18 +345,40 @@
+     let markParsingResult = $derived.by(() => markParsing(msgDisplay, character, idx))
+ 
+     $effect(() => {
+-        markParsingResult
+-        checkImg()
+-        markParsingResult.then(async () => {
++        const identity = `${idx}:${typeof character === 'string' ? character : JSON.stringify(character ?? null)}`
++        if(identity !== streamIdentity){
++            streamIdentity = identity
++            resetIncrementalRender()
++        }
++
++        const currentResult = markParsingResult
++        const sequence = ++parseSequence
++
++        currentResult.then(async (md) => {
++            if(sequence < appliedSequence || typeof md !== 'string'){
++                return
++            }
++            appliedSequence = sequence
++
++            const html = addMetadataToElement(trimMarkdown(md), modelShortName)
++            applyIncrementalHtml(html)
++
++            await tick()
+             checkImg()
+-            await tick() // Wait for Svelte to re-render the {:then} block into DOM
+             if (bodyRoot) resolveInlayPlaceholders(bodyRoot)
+         })
+     })
+ </script>
+ 
+-{#await markParsingResult}
+-    {@html addMetadataToElement(trimMarkdown(lastParsed), modelShortName)}
+-{:then md}
+-    {@html addMetadataToElement(trimMarkdown(md), modelShortName)}
+-{/await}
++{#each committedChunks as chunk, chunkIndex (chunkIndex)}
++    {@html chunk}
++{/each}
++{@html liveHtml}
++
++{#if viewerSrc}
++<!-- svelte-ignore a11y_no_static_element_interactions -->
++<!-- svelte-ignore a11y_click_events_have_key_events -->
++<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80" onclick={() => { viewerSrc = '' }}>
++    <img src={viewerSrc} alt="" class="max-w-[90vw] max-h-[90vh] object-contain rounded-md shadow-2xl" onclick={(e) => e.stopPropagation()} />
++</div>
++{/if}
+\ No newline at end of file
+diff --git a/src/lib/ChatScreens/ChatScreen.svelte b/src/lib/ChatScreens/ChatScreen.svelte
+index 60b64610b..7a7dacb68 100644
+--- a/src/lib/ChatScreens/ChatScreen.svelte
++++ b/src/lib/ChatScreens/ChatScreen.svelte
+@@ -39,39 +39,8 @@
+     });
+ </script>
+ 
+-{#if DBState.db.theme === 'waifu'}
+-    <div class="grow h-full flex justify-center relative" style="{bgImg.length < 4 ? wallPaper : bgImg}">
+-        <SideBarArrow />
+-        <BackgroundDom />
+-        {#if $selectedCharID >= 0}
+-            {#if DBState.db.characters[$selectedCharID].viewScreen !== 'none'}
+-                <div class="h-full mr-10 flex justify-end halfw" style:width="{42 * (DBState.db.waifuWidth2 / 100)}rem">
+-                    <TransitionImage classType="waifu" src={getEmotion(DBState.db, $CharEmotion, 'plain')}/>
+-                </div>
+-            {/if}
+-        {/if}
+-        <div class="h-full w-2xl" style:width="{42 * (DBState.db.waifuWidth / 100)}rem" class:halfwp={$selectedCharID >= 0 && DBState.db.characters[$selectedCharID].viewScreen !== 'none'}>
+-            <DefaultChatScreen customStyle={`${externalStyles}backdrop-filter: blur(4px);`} bind:openChatList bind:openModuleList/>
+-        </div>
+-    </div>
+-{:else if DBState.db.theme === 'waifuMobile'}
+-    <div class="grow h-full relative" style={bgImg.length < 4 ? wallPaper : bgImg}>
+-        <SideBarArrow />
+-        <BackgroundDom />
+-        <div class="w-full absolute z-10 bottom-0 left-0"
+-            class:per33={$selectedCharID >= 0 && DBState.db.characters[$selectedCharID].viewScreen !== 'none'}
+-            class:h-full={!($selectedCharID >= 0 && DBState.db.characters[$selectedCharID].viewScreen !== 'none')}
+-        >
+-            <DefaultChatScreen customStyle={`${externalStyles}backdrop-filter: blur(4px);`} bind:openChatList bind:openModuleList/>
+-        </div>
+-        {#if $selectedCharID >= 0}
+-            {#if DBState.db.characters[$selectedCharID].viewScreen !== 'none'}
+-                <div class="h-full w-full absolute bottom-0 left-0 max-w-full">
+-                    <TransitionImage classType="mobile" src={getEmotion(DBState.db, $CharEmotion, 'plain')}/>
+-                </div>
+-            {/if}
+-        {/if}
+-    </div>
++{#if false}
++    <!-- removed waifu + waifuMobile themes -->
+ {:else}
+     <div class="grow h-full min-w-0 relative justify-center flex">
+         <SideBarArrow />
+@@ -93,13 +62,4 @@
+ {/if}
+ 
+ <style>
+-    .halfw{
+-        max-width: calc(50% - 5rem);
+-    }
+-    .halfwp{
+-        max-width: calc(50% - 5rem);
+-    }
+-    .per33{
+-        height: 33.333333%;
+-    }
+ </style>
+\ No newline at end of file
+diff --git a/src/lib/ChatScreens/Chats.svelte b/src/lib/ChatScreens/Chats.svelte
+index ba05f62e5..dbfa10d1f 100644
+--- a/src/lib/ChatScreens/Chats.svelte
++++ b/src/lib/ChatScreens/Chats.svelte
+@@ -44,7 +44,8 @@
+ 
+     let chatBody: HTMLDivElement;
+     let hashes: Set<number> = new Set();
+-    let mountInstances: Map<number, {}> = new Map();
++    let mountInstances: Map<number, any> = new Map();
++    let mountProps: Map<number, any> = new Map();
+ 
+     //Non-cryptographic hash function to generate a unique hash for each message
+     function hashCode(str:string):number {
+@@ -70,6 +71,7 @@
+         const charImage = getCharImage(currentCharacter.image, 'css')
+         const userImage = getCharImage(userIcon, 'css')
+         const simpleChar = createSimpleCharacter(currentCharacter);
++        const currentChatRoomId = getCurrentChatRoomId() ?? '';
+         let loadStart = messages.length - 1
+         let loadEnd = messages.length - loadPages
+ 
+@@ -100,43 +102,48 @@
+             const messageLargePortrait = message.role === 'user' ? (userIconPortrait ?? false) : ((currentCharacter as character).largePortrait ?? false);
+             const reloadPointer = reloadPointerMap[i] ?? 0;
+             const isRerollTarget = i === lastRealCharIdx;
+-            let hashd = message.data + (message.chatId ?? '') + i.toString() + messageLargePortrait.toString() + message.disabled?.toString() + reloadPointer.toString() + (message.swipeId ?? 0).toString() + (message.swipes?.length ?? 0).toString() + isRerollTarget.toString();
++            const stableMessageId = message.chatId ?? `${message.role ?? ''}:${message.time ?? ''}:${i}`;
++            const hashd = currentChatRoomId + stableMessageId + i.toString() + messageLargePortrait.toString() + message.disabled?.toString() + reloadPointer.toString() + (message.swipeId ?? 0).toString() + (message.swipes?.length ?? 0).toString() + isRerollTarget.toString();
+             const currentHash = hashCode(hashd);
+             currentHashes.add(currentHash);
++
++            const swipes = message.swipes;
++            const swipeId = message.swipeId ?? 0;
++            const nextProps: any = {
++                message: message.data ?? '',
++                isLastMemory: false,
++                idx: i,
++                totalLength: messages.length,
++                img: message.role === 'user' ? userImage : charImage,
++                onReroll: onReroll,
++                onNextSwipe: i === lastRealCharIdx ? onNextSwipe : () => {},
++                unReroll: unReroll,
++                onDeleteSwipe: i === lastRealCharIdx ? onDeleteSwipe : () => {},
++                rerollIcon: i === lastRealCharIdx ? 'force' : false,
++                character: simpleChar,
++                largePortrait: messageLargePortrait,
++                messageGenerationInfo: message.generationInfo,
++                role: message.role,
++                name: message.role === 'user' ? currentUsername : currentCharacter.name,
++                isComment: message.isComment ?? false,
++                disabled: message.disabled ?? false,
++                currentPage: i === lastRealCharIdx ? (swipeId ?? 0) + 1 : 1,
++                totalPages: i === lastRealCharIdx ? (swipes?.length ?? 1) : 1,
++            };
++
+             if(!hashes.has(currentHash)){
+                 const b = document.createElement('div');
+                 b.setAttribute('x-hashed', currentHash.toString());
++                b.setAttribute('data-role', message.role ?? 'char');
+                 b.classList.add('chat-message-container');
+-                const swipes = message.swipes;
+-                const swipeId = message.swipeId ?? 0;
++                b.classList.add('chat-message-appear');
++                const reactiveProps = $state(nextProps);
+                 const inst = mount(Chat, {
+                     target: b,
+-                    props: {
+-                        message: message.data,
+-                        isLastMemory: false,
+-                        idx: i,
+-                        totalLength: messages.length,
+-                        img: message.role === 'user' ? userImage : charImage,
+-                        onReroll: onReroll,
+-                        onNextSwipe: i === lastRealCharIdx ? onNextSwipe : () => {},
+-                        unReroll: unReroll,
+-                        onDeleteSwipe: i === lastRealCharIdx ? onDeleteSwipe : () => {},
+-                        rerollIcon: i === lastRealCharIdx ? 'force' : false,
+-                        character: simpleChar,
+-                        largePortrait: message.role === 'user' ? (userIconPortrait ?? false) : ((currentCharacter as character).largePortrait ?? false),
+-                        messageGenerationInfo: message.generationInfo,
+-                        role: message.role,
+-                        name: message.role === 'user' ? currentUsername : currentCharacter.name,
+-                        isComment: message.isComment ?? false,
+-                        disabled: message.disabled ?? false,
+-                        ...(i === lastRealCharIdx ? {
+-                            currentPage: (swipeId ?? 0) + 1,
+-                            totalPages: swipes?.length ?? 1,
+-                        } : {}),
+-                    },
+-
++                    props: reactiveProps,
+                 })
+                 mountInstances.set(currentHash, inst);
++                mountProps.set(currentHash, reactiveProps);
+                 const nextElement = nextHash === 0 ? null : chatBody.querySelector(`[x-hashed="${nextHash}"]`);
+                 if(nextElement){
+                     chatBody.insertBefore(b, nextElement?.nextSibling);
+@@ -145,6 +152,12 @@
+                     chatBody.prepend(b);
+                 }
+             }
++            else{
++                const reactiveProps = mountProps.get(currentHash);
++                if(reactiveProps){
++                    Object.assign(reactiveProps, nextProps);
++                }
++            }
+             nextHash = currentHash;
+ 
+         }
+@@ -156,6 +169,7 @@
+             if(inst){
+                 unmount(inst);
+                 mountInstances.delete(hash);
++                mountProps.delete(hash);
+             }
+             const element = chatBody.querySelector(`[x-hashed="${hash}"]`);
+             if(element){
+@@ -173,6 +187,7 @@
+             unmount(inst);
+         });
+         mountInstances.clear();
++        mountProps.clear();
+     })
+ 
+     function checkIfAtBottom() {
+@@ -185,17 +200,124 @@
+         return rect.top <= scRect.bottom + 100;
+     }
+ 
++    // How close (in px) the latest message's bottom may sit from the viewport
++    // bottom and still count as "stuck to the bottom".
++    const STICK_THRESHOLD = 80;
++
++    // The chat container is `flex-col-reverse`, so the latest message is the
++    // first DOM child and sits at the visual bottom. Streaming grows that
++    // message every tick; we only want to follow it down while the user is
++    // already pinned to the bottom — otherwise their scroll position must stay
++    // put. We can't rely on native `column-reverse` stickiness because the
++    // streamed markdown re-renders each tick, which discards the browser's
++    // scroll anchor and drags the viewport down regardless of position.
++    function measurePinnedToBottom() {
++        if (!chatBody || !chatBody.parentElement) return true;
++        const lastEl = chatBody.firstElementChild;
++        if (!lastEl) return true;
++        const rect = lastEl.getBoundingClientRect();
++        const scRect = chatBody.parentElement.getBoundingClientRect();
++        return rect.bottom <= scRect.bottom + STICK_THRESHOLD;
++    }
++
++    let pinnedToBottom = true;
++    // A non-growing message currently visible near the top of the viewport,
++    // used to restore the scroll position after the latest message grows while
++    // the user is scrolled up. Offsets are read from getBoundingClientRect so
++    // the math is independent of the browser-specific `scrollTop` sign that
++    // `column-reverse` introduces.
++    let anchorEl: Element | null = null;
++    let anchorOffset = 0;
++    let suppressScrollHandling = false;
++
++    function captureAnchor() {
++        anchorEl = null;
++        if (!chatBody || !chatBody.parentElement) return;
++        const scRect = chatBody.parentElement.getBoundingClientRect();
++        // Anchor on the element at the top of the viewport: it's the oldest
++        // message in view and won't change height while the latest message
++        // streams in at the bottom. Pick the visible child with the smallest
++        // top edge (DOM order is latest-first, so the streaming message sits at
++        // the bottom and is never chosen).
++        let best: Element | null = null;
++        let bestTop = Infinity;
++        for (const child of Array.from(chatBody.children)) {
++            const rect = child.getBoundingClientRect();
++            const visible = rect.bottom > scRect.top && rect.top < scRect.bottom;
++            if (visible && rect.top < bestTop) {
++                best = child;
++                bestTop = rect.top;
++            }
++        }
++        if (best) {
++            anchorEl = best;
++            anchorOffset = bestTop - scRect.top;
++        }
++    }
++
++    function handleContainerScroll() {
++        if (suppressScrollHandling) return;
++        pinnedToBottom = measurePinnedToBottom();
++        if (!pinnedToBottom) captureAnchor();
++    }
++
++    function withSuppressedScroll(fn: () => void) {
++        suppressScrollHandling = true;
++        fn();
++        // Release after the programmatic scroll event has been dispatched.
++        requestAnimationFrame(() => { suppressScrollHandling = false; });
++    }
++
++    $effect(() => {
++        const container = chatBody?.parentElement;
++        if (!container) return;
++
++        pinnedToBottom = measurePinnedToBottom();
++        container.addEventListener('scroll', handleContainerScroll, { passive: true });
++
++        const observer = new ResizeObserver(() => {
++            if (pinnedToBottom) {
++                // Follow the growing reply down so the newest text stays in view.
++                const lastEl = chatBody?.firstElementChild as HTMLElement | null;
++                if (lastEl) {
++                    withSuppressedScroll(() => {
++                        scrollWithinContainer(lastEl, container, { block: 'end', behavior: 'instant' });
++                    });
++                }
++            } else if (anchorEl && chatBody?.contains(anchorEl)) {
++                // Counteract the layout shift so the user stays where they were.
++                const scRect = container.getBoundingClientRect();
++                const current = anchorEl.getBoundingClientRect().top - scRect.top;
++                const drift = current - anchorOffset;
++                if (drift !== 0) {
++                    withSuppressedScroll(() => {
++                        container.scrollTop += drift;
++                    });
++                }
++            }
++        });
++        observer.observe(chatBody);
++
++        return () => {
++            container.removeEventListener('scroll', handleContainerScroll);
++            observer.disconnect();
++        };
++    });
++
+     function scrollLatestIntoChatScreen() {
+         if(!chatBody) return;
+         const element = chatBody.firstElementChild as HTMLElement | null;
+         const chatScreen = chatBody.parentElement;
+         if(!element || !chatScreen) return;
+-        scrollWithinContainer(element, chatScreen, { block: 'start', behavior: 'instant' });
++        scrollWithinContainer(element, chatScreen, { block: 'end', behavior: 'instant' });
+     }
+ 
+     export const scrollToLatestMessage = () => {
+         if(!chatBody) return;
+         hasNewUnreadMessage = false;
++        // The user explicitly asked to jump to the newest message, so re-pin to
++        // the bottom and let streaming follow along from here.
++        pinnedToBottom = true;
+         scrollLatestIntoChatScreen();
+     }
+ 
+@@ -210,17 +332,13 @@
+         const currentChatRoomId = getCurrentChatRoomId();
+         const isSameChat = currentChatRoomId === previousChatRoomId;
+ 
+-        // Only auto-scroll if it's the same chat and new messages were added
++        // Never force the viewport to the latest message during generation.
++        // Keep the user's current scroll position and expose the manual new-message
++        // button only when the reply arrived outside the visible bottom area.
+         if(isSameChat && messages.length > previousLength){
+             const lastMsg = messages[messages.length - 1];
+-            if(lastMsg && lastMsg.role === 'char' && DBState.db.autoScrollToNewMessage){
+-                if(wasAtBottom || DBState.db.alwaysScrollToNewMessage){
+-                    setTimeout(() => {
+-                        scrollLatestIntoChatScreen();
+-                    }, 700);
+-                } else {
+-                    hasNewUnreadMessage = true;
+-                }
++            if(lastMsg && lastMsg.role === 'char' && !wasAtBottom){
++                hasNewUnreadMessage = true;
+             }
+         }
+         previousLength = messages.length;
+diff --git a/src/lib/ChatScreens/DefaultChatScreen.svelte b/src/lib/ChatScreens/DefaultChatScreen.svelte
+index 4ead4a722..fbed15d40 100644
+--- a/src/lib/ChatScreens/DefaultChatScreen.svelte
++++ b/src/lib/ChatScreens/DefaultChatScreen.svelte
+@@ -6,14 +6,13 @@
+     import ShDropdownMenuTrigger from 'src/lib/UI/GUI/ShDropdownMenuTrigger.svelte';
+     import ShDropdownMenuContent from 'src/lib/UI/GUI/ShDropdownMenuContent.svelte';
+     import ShDropdownMenuItem from 'src/lib/UI/GUI/ShDropdownMenuItem.svelte';
+-    import { selectedCharID, PlaygroundStore, createSimpleCharacter, hypaV3ModalOpen, ScrollToMessageStore, additionalChatMenu, additionalFloatingActionButtons, chatDeselected, chatPanelStore } from "../../ts/stores.svelte";
+-    import { tick, untrack } from 'svelte';
++    import { selectedCharID, PlaygroundStore, createSimpleCharacter, hypaV3ModalOpen, ScrollToMessageStore, additionalChatMenu, additionalFloatingActionButtons, chatDeselected } from "../../ts/stores.svelte";
++    import { tick } from 'svelte';
+     import Chat from "./Chat.svelte";
+-    import { getAdditionalChatLoadPages, getInitialChatLoadPages } from 'src/ts/chatLoadPages';
+     import { type Chat as ChatData, type Message } from "../../ts/storage/database.svelte";
+     import { DBState } from 'src/ts/stores.svelte';
+     import { getCharImage } from "../../ts/characters";
+-    import { chatProcessStage, doingChat, sendChat } from "../../ts/process/index.svelte";
++    import { chatProcessStage, doingChat, sendChat, recoveryAbortController } from "../../ts/process/index.svelte";
+     import { ensureCurrentChatReady } from "../../ts/storage/chatStorage";
+     import { sleep } from "../../ts/util";
+     import { language } from "../../lang";
+@@ -34,7 +33,6 @@ import { isMobile } from 'src/ts/platform'
+     import { postChatFile } from 'src/ts/process/files/multisend';
+     import { getInlayAsset } from 'src/ts/process/files/inlays';
+     import { quickMenu } from 'src/ts/hotkey';
+-    import { loadChatDraft, scheduleSaveChatDraft, flushChatDraft, removeChatDraft } from 'src/ts/storage/chatDraft';
+ 
+     import Chats from './Chats.svelte';
+     import Button from '../UI/GUI/Button.svelte';
+@@ -65,7 +63,7 @@ import { isMobile } from 'src/ts/platform'
+     let messageInput:string = $state('')
+     let messageInputTranslate:string = $state('')
+     let openMenu = $state(false)
+-    let loadPages = $state(getInitialChatLoadPages(DBState.db))
++    let loadPages = $state(30)
+     let doingChatInputTranslate = false
+     let toggleStickers:boolean = $state(false)
+     let fileInput:string[] = $state([])
+@@ -74,6 +72,7 @@ import { isMobile } from 'src/ts/platform'
+     let scrollNavTimer: ReturnType<typeof setTimeout> | null = null
+     let chatsInstance: any = $state()
+     let isScrollingToMessage = $state(false)
++    let composerOverlayHeight = $state(0)
+     let { openModuleList = $bindable(false), openChatList = $bindable(false), customStyle = '' }: Props = $props();
+     let currentCharacter = $derived(DBState.db.characters[$selectedCharID])
+     let currentChatSlot = $derived(currentCharacter?.chats[currentCharacter.chatPage])
+@@ -81,75 +80,6 @@ import { isMobile } from 'src/ts/platform'
+     let currentChat = $derived(currentChatReady ? currentChatSlot.message : [])
+     let currentChatFmIndex = $derived(currentChatReady ? (currentChatSlot.fmIndex ?? -1) : -1)
+ 
+-    // ─── Per-chat composer draft ────────────────────────────────────────────
+-    // The message input is kept per chat, stored outside the chat body, so it
+-    // survives unmounting the chat view (e.g. accidentally opening Settings while
+-    // composing a long message). Keyed by character + chat id.
+-    let draftChaId = $derived(currentCharacter?.chaId ?? '')
+-    let draftChatId = $derived(currentChatSlot?.id ?? '')
+-    let draftLoading = $state(false)
+-
+-    function persistDraftNow() {
+-        flushChatDraft(draftChaId, draftChatId, { m: messageInput, t: messageInputTranslate })
+-    }
+-
+-    // Load on chat enter (keyed by id, so no wait for hydration); flush the
+-    // latest text for the chat being left on switch / unmount.
+-    $effect(() => {
+-        const chaId = draftChaId
+-        const chatId = draftChatId
+-        if (!chaId || !chatId) return
+-        untrack(() => { messageInput = ''; messageInputTranslate = ''; draftLoading = true })
+-        let active = true
+-        ;(async () => {
+-            const draft = await loadChatDraft(chaId, chatId)
+-            if (!active) return
+-            untrack(() => {
+-                // Don't clobber text the user began typing during the load.
+-                if (draft && messageInput === '' && messageInputTranslate === '') {
+-                    messageInput = draft.m
+-                    messageInputTranslate = draft.t
+-                }
+-                draftLoading = false
+-            })
+-            // Resize the textarea to fit the cleared/loaded text (height is
+-            // updated imperatively, not reactively to messageInput).
+-            await tick()
+-            if (active) updateInputSizeAll()
+-        })()
+-        return () => {
+-            active = false
+-            flushChatDraft(chaId, chatId, {
+-                m: untrack(() => messageInput),
+-                t: untrack(() => messageInputTranslate),
+-            })
+-        }
+-    })
+-
+-    // Debounced save while typing (each write is a network round-trip, so it is
+-    // coalesced). Suppressed during the initial load to avoid racing it.
+-    $effect(() => {
+-        const chaId = draftChaId
+-        const chatId = draftChatId
+-        const m = messageInput
+-        const t = messageInputTranslate
+-        if (!chaId || !chatId || draftLoading) return
+-        scheduleSaveChatDraft(chaId, chatId, { m, t })
+-    })
+-
+-    // Best-effort persist on tab hide / unload (refresh, app switch): the
+-    // unmount cleanup above does not fire on a hard page teardown.
+-    $effect(() => {
+-        const onHide = () => { if (document.visibilityState === 'hidden') persistDraftNow() }
+-        const onPageHide = () => persistDraftNow()
+-        document.addEventListener('visibilitychange', onHide)
+-        window.addEventListener('pagehide', onPageHide)
+-        return () => {
+-            document.removeEventListener('visibilitychange', onHide)
+-            window.removeEventListener('pagehide', onPageHide)
+-        }
+-    })
+-
+     /** Await hydration of active chat. Returns full Chat or null on failure. */
+     async function ensureActiveChatReady(selectedChar = $selectedCharID): Promise<ChatData | null> {
+         const char = DBState.db.characters[selectedChar]
+@@ -271,20 +201,18 @@ import { isMobile } from 'src/ts/platform'
+                 await sleep(100)
+             }
+ 
+-            const chatContainer = document.querySelector('.default-chat-screen') as HTMLElement | null;
+             const preIndex = Math.max(0, index - 3)
+             const preElement = document.querySelector(`[data-chat-index="${preIndex}"]`)
+-            // Scroll within the chat container only — raw scrollIntoView climbs to
+-            // documentElement and, if the root is inflated, shoves the whole page up.
+-            if(chatContainer && preElement){
+-                scrollWithinContainer(preElement as HTMLElement, chatContainer, { block: 'start', behavior: 'instant' })
+-            } else if(chatContainer && element){
+-                scrollWithinContainer(element as HTMLElement, chatContainer, { block: 'start', behavior: 'instant' })
++            if(preElement){
++                preElement.scrollIntoView({behavior: "instant", block: "start"})
++            } else {
++                element?.scrollIntoView({behavior: "instant", block: "start"})
+             }
+             await sleep(50)
+ 
+             if(element){
+                 // Wait for images to load to prevent layout shift
++                const chatContainer = document.querySelector('.default-chat-screen');
+                 if(chatContainer) {
+                     const images = Array.from(chatContainer.querySelectorAll('img'));
+                     const promises = images.map(img => {
+@@ -301,12 +229,11 @@ import { isMobile } from 'src/ts/platform'
+                     ]);
+                 }
+ 
+-                if(chatContainer){
+-                    scrollWithinContainer(element as HTMLElement, chatContainer, { block: 'start', behavior: 'instant' })
+-                    // Small delay and scroll again to ensure position is correct after any final layout adjustments
+-                    await sleep(50)
+-                    scrollWithinContainer(element as HTMLElement, chatContainer, { block: 'start', behavior: 'instant' })
+-                }
++                element.scrollIntoView({behavior: "instant", block: "start"})
++                
++                // Small delay and scroll again to ensure position is correct after any final layout adjustments
++                await sleep(50)
++                element.scrollIntoView({behavior: "instant", block: "start"})
+ 
+                 element.classList.add('ring-2', 'ring-blue-500')
+                 setTimeout(() => {
+@@ -340,8 +267,6 @@ import { isMobile } from 'src/ts/platform'
+             const commandProcessed = await processMultiCommand(messageInput)
+             if(commandProcessed !== false){
+                 messageInput = ''
+-                messageInputTranslate = ''
+-                removeChatDraft(draftChaId, draftChatId)
+                 return
+             }
+         }
+@@ -390,7 +315,6 @@ import { isMobile } from 'src/ts/platform'
+         }
+         messageInput = ''
+         messageInputTranslate = ''
+-        removeChatDraft(draftChaId, draftChatId)
+         DBState.db.characters[selectedChar].chats[DBState.db.characters[selectedChar].chatPage].message = cha
+ 
+         await sleep(10)
+@@ -414,7 +338,6 @@ import { isMobile } from 'src/ts/platform'
+     })
+     async function exitFullscreen(){
+         composerFullscreen = false
+-        persistDraftNow()   // checkpoint the draft on return from the expanded composer
+         await tick()   // let the inline composer re-measure with the latest text
+         updateInputSizeAll()
+         updateInputTransateMessage(false)
+@@ -566,6 +489,7 @@ import { isMobile } from 'src/ts/platform'
+         if(abortController){
+             abortController.abort()
+         }
++        $recoveryAbortController?.abort()
+     }
+ 
+     let { userIconPortrait, currentUsername, userIcon } = $derived.by(() => {
+@@ -597,22 +521,6 @@ import { isMobile } from 'src/ts/platform'
+     let inputTranslateHeight = $state("44px")
+     let inputTranslateEle:HTMLTextAreaElement = $state()
+ 
+-    // Standard theme: composer width follows the configured chat width (matches message cards).
+-    // Other themes: no width limit (original full-width behavior).
+-    let isStandardTheme = $derived(DBState.db.theme === '')
+-    let composerWidthClass = $derived(
+-        !isStandardTheme ? '' :
+-        DBState.db.nodeOnlyStandardChatWidth === 'full' ? 'max-w-full' :
+-        DBState.db.nodeOnlyStandardChatWidth === 'wide' ? 'max-w-6xl' :
+-        'max-w-3xl'
+-    )
+-    // Effective persona name for the input placeholder (chat-bound persona overrides the selected one).
+-    let activePersonaName = $derived.by(() => {
+-        const chat = DBState.db.characters[$selectedCharID]?.chats?.[DBState.db.characters[$selectedCharID]?.chatPage]
+-        const bound = chat?.bindedPersona ? DBState.db.personas.find(p => p.id === chat.bindedPersona) : null
+-        return (bound ?? DBState.db.personas[DBState.db.selectedPersona])?.name || 'User'
+-    })
+-
+     function updateInputSizeAll() {
+         updateInputSize()
+         updateInputTranslateSize()
+@@ -777,7 +685,7 @@ import { isMobile } from 'src/ts/platform'
+                 mergedCanvas.remove();
+             }
+             notifySuccess(language.screenshotSaved)
+-            loadPages = getInitialChatLoadPages(DBState.db)
++            loadPages = 10
+         } catch (error) {
+             console.error(error)
+             notifyError("Error while taking screenshot")
+@@ -789,7 +697,11 @@ import { isMobile } from 'src/ts/platform'
+ 
+ 
+ 
+-<div class="w-full h-full relative" style={customStyle}>
++<!-- svelte-ignore a11y_click_events_have_key_events -->
++<!-- svelte-ignore a11y_no_static_element_interactions -->
++<div class="w-full h-full relative" style={customStyle} onclick={() => {
++    openMenu = false
++}}>
+     
+     {#if DBState.db.nodeOnlyScrollButtonType !== 'off' && currentChat.length > 0}
+         <div
+@@ -833,21 +745,21 @@ import { isMobile } from 'src/ts/platform'
+ 
+     {#if showNewMessageButton}
+         {#if (DBState.db.newMessageButtonStyle === 'bottom-center' || !DBState.db.newMessageButtonStyle)}
+-            <button class="absolute bottom-16 left-1/2 -translate-x-1/2 bg-primary text-white px-4 py-2 rounded-full shadow-lg z-50 flex items-center gap-2 hover:bg-primary/90 transition-colors" onclick={scrollToBottom}>
++            <button class="absolute bottom-16 left-1/2 -translate-x-1/2 bg-bgcolor border border-borderc text-textcolor px-4 py-2 rounded-full z-50 flex items-center gap-2 hover:bg-selected/40 hover:border-textcolor2 transition-colors duration-150 ease-out" onclick={scrollToBottom}>
+                 <ArrowDown size={16} />
+                 <span>{language.newMessage}</span>
+             </button>
+         {/if}
+ 
+         {#if DBState.db.newMessageButtonStyle === 'bottom-right'}
+-            <button class="absolute bottom-20 right-4 bg-primary text-white px-4 py-2 rounded-full shadow-lg z-50 flex items-center gap-2 hover:bg-primary/90 transition-colors" onclick={scrollToBottom}>
++            <button class="absolute bottom-20 right-4 bg-bgcolor border border-borderc text-textcolor px-4 py-2 rounded-full z-50 flex items-center gap-2 hover:bg-selected/40 hover:border-textcolor2 transition-colors duration-150 ease-out" onclick={scrollToBottom}>
+                 <ArrowDown size={16} />
+                 <span>{language.newMessage}</span>
+             </button>
+         {/if}
+ 
+         {#if DBState.db.newMessageButtonStyle === 'bottom-left'}
+-            <button class="absolute bottom-20 left-4 bg-primary text-white px-4 py-2 rounded-full shadow-lg z-50 flex items-center gap-2 hover:bg-primary/90 transition-colors" onclick={scrollToBottom}>
++            <button class="absolute bottom-20 left-4 bg-bgcolor border border-borderc text-textcolor px-4 py-2 rounded-full z-50 flex items-center gap-2 hover:bg-selected/40 hover:border-textcolor2 transition-colors duration-150 ease-out" onclick={scrollToBottom}>
+                 <ArrowDown size={16} />
+                 <span>{language.newMessage}</span>
+             </button>
+@@ -867,7 +779,7 @@ import { isMobile } from 'src/ts/platform'
+         {/if}
+ 
+         {#if DBState.db.newMessageButtonStyle === 'top-bar'}
+-            <button class="absolute top-2 left-1/2 -translate-x-1/2 bg-primary text-white px-6 py-1.5 rounded-full shadow-lg z-50 flex items-center gap-2 hover:bg-primary/90 transition-colors text-sm" onclick={scrollToBottom}>
++            <button class="absolute top-2 left-1/2 -translate-x-1/2 bg-bgcolor border border-borderc text-textcolor px-6 py-1.5 rounded-full z-50 flex items-center gap-2 hover:bg-selected/40 hover:border-textcolor2 transition-colors duration-150 ease-out text-sm" onclick={scrollToBottom}>
+                 <ArrowDown size={14} />
+                 <span>{language.newMessage}</span>
+             </button>
+@@ -891,17 +803,36 @@ import { isMobile } from 'src/ts/platform'
+             <span>{language.selectChatToView}</span>
+         </div>
+     {:else}
+-        {#snippet composerCluster()}
++        <div class="h-full w-full flex flex-col-reverse overflow-y-auto relative default-chat-screen"
++            class:nodeonly-standard={DBState.db.theme === ''}
++            class:no-chat-width-wide={DBState.db.theme === '' && DBState.db.nodeOnlyStandardChatWidth === 'wide'}
++            class:no-chat-width-full={DBState.db.theme === '' && DBState.db.nodeOnlyStandardChatWidth === 'full'}
++            onscroll={(e) => {
++            if (DBState.db.nodeOnlyScrollButtonType !== 'off') {
++                bumpScrollNav()
++            }
++            //@ts-expect-error scrollHeight/clientHeight/scrollTop don't exist on EventTarget, but target is HTMLElement here
++            const scrolled = (e.target.scrollHeight - e.target.clientHeight + e.target.scrollTop)
++            if(scrolled < 100 && currentChat.length > loadPages){
++                loadPages += 15
++            }
++            const chatTarget = e.target as HTMLElement;
++            const chatsContainer = chatTarget.children[1] ?? chatTarget.children[0];
++            const lastEl = chatsContainer?.firstElementChild;
++            const isAtBottom = lastEl ? lastEl.getBoundingClientRect().top <= chatTarget.getBoundingClientRect().bottom + 100 : true;
++            if(isAtBottom){
++                showNewMessageButton = false;
++            }
++        }}>
+             <div
+-                    class="{DBState.db.fixedChatTextarea ? 'sticky pt-2 pb-2 right-0 bottom-0 bg-bgcolor' : 'mt-2 mb-2'} w-full"
+-                    style="{DBState.db.fixedChatTextarea ? 'z-index:29;' : ''}"
++                    class="sticky right-0 bottom-0 z-[29] h-0 w-full overflow-visible pointer-events-none"
+             >
+-              <div class="mx-auto w-full {composerWidthClass} px-2">
++              <div bind:clientHeight={composerOverlayHeight} class="pointer-events-auto mx-auto w-full max-w-3xl px-2 pb-4 -translate-y-full">
+                 <!-- "plugin-compat-items-stretch" is a compat hook (not a Tailwind class):
+                      plugins that locate the composer via div[class*="items-stretch"] (e.g. gemini-cache-keeper)
+                      relied on the pre-redesign container class. Keep it so they can still find/anchor their UI,
+                      and it scopes the timer re-flow rules in <style> below. -->
+-                <div class="flex flex-wrap items-center gap-1 rounded-3xl border border-darkborderc bg-bgcolor px-2 py-1.5 transition-colors focus-within:border-textcolor plugin-compat-items-stretch">
++                <div class="rs-composer flex flex-wrap items-center gap-1 rounded-xl border border-darkborderc bg-bgcolor/80 px-2 py-1.5 shadow-lg backdrop-blur-md plugin-compat-items-stretch">
+                 {#if DBState.db.characters[$selectedCharID]?.chaId !== '§playground'}
+                     <ShDropdownMenu bind:open={openMenu}>
+                         <ShDropdownMenuTrigger>
+@@ -1008,7 +939,7 @@ import { isMobile } from 'src/ts/platform'
+                           class:order-first={multiline}
+                           class:overflow-y-auto={inputOverflow}
+                           class:overflow-y-hidden={!inputOverflow}
+-                          placeholder={willResend ? language.resendLastMessage : language.enterMessageToPersona(activePersonaName)}
++                          placeholder={willResend ? language.resendLastMessage : language.enterMessagePlaceholder}
+                           bind:value={messageInput}
+                           bind:this={inputEle}
+                           onkeydown={(e) => {
+@@ -1063,7 +994,6 @@ import { isMobile } from 'src/ts/platform'
+                         }
+                     }}
+                           oninput={()=>{updateInputSizeAll();updateInputTransateMessage(false)}}
+-                          onblur={persistDraftNow}
+                           style:height={inputHeight}
+                 ></textarea>
+ 
+@@ -1087,7 +1017,7 @@ import { isMobile } from 'src/ts/platform'
+                     <button
+                             onclick={send}
+                             aria-label={willResend ? language.reroll : language.send}
+-                            class="order-2 shrink-0 flex justify-center items-center w-9 h-9 rounded-full bg-primary text-white hover:bg-primary/80 transition-colors button-icon-send"
++                            class="order-2 shrink-0 flex justify-center items-center w-9 h-9 rounded-lg bg-primary text-white hover:bg-primary/85 active:scale-[0.97] transition-[background-color,transform] duration-150 ease-out button-icon-send"
+                     >
+                         {#if willResend}
+                             <RefreshCcwIcon size={18} />
+@@ -1097,8 +1027,6 @@ import { isMobile } from 'src/ts/platform'
+                     </button>
+                 {/if}
+                 </div>
+-              </div>
+-            </div>
+             {#if DBState.db.useAutoTranslateInput && DBState.db.characters[$selectedCharID]?.chaId !== '§playground'}
+                 <div class="flex items-center mt-2 mb-2">
+                     <label for='messageInputTranslate' class="text-textcolor ml-4">
+@@ -1132,7 +1060,7 @@ import { isMobile } from 'src/ts/platform'
+                         {#await getInlayAsset(file) then inlayAsset}
+                             <div class="relative">
+                                 {#if inlayAsset.type === 'image'}
+-                                    <img src={inlayAsset.data} alt="Inlay" class="max-w-48 max-h-48 border border-darkborderc">
++                                    <img src={inlayAsset.data} alt="Inlay" loading="lazy" decoding="async" class="max-w-48 max-h-48 border border-darkborderc">
+                                 {:else if inlayAsset.type === 'video'}
+                                     <video controls class="max-w-48 max-h-48 border border-darkborderc">
+                                         <source src={inlayAsset.data} type="video/mp4" />
+@@ -1184,40 +1112,9 @@ import { isMobile } from 'src/ts/platform'
+                     : msg
+                 )} {send}/>
+             {/if}
+-        {/snippet}
+-
+-        <div class="h-full w-full flex flex-col-reverse overflow-y-auto relative default-chat-screen"
+-            class:nodeonly-standard={DBState.db.theme === ''}
+-            class:no-chat-width-wide={DBState.db.theme === '' && DBState.db.nodeOnlyStandardChatWidth === 'wide'}
+-            class:no-chat-width-full={DBState.db.theme === '' && DBState.db.nodeOnlyStandardChatWidth === 'full'}
+-            onscroll={(e) => {
+-            if (DBState.db.nodeOnlyScrollButtonType !== 'off') {
+-                bumpScrollNav()
+-            }
+-            //@ts-expect-error scrollHeight/clientHeight/scrollTop don't exist on EventTarget, but target is HTMLElement here
+-            const scrolled = (e.target.scrollHeight - e.target.clientHeight + e.target.scrollTop)
+-            if(scrolled < 100 && currentChat.length > loadPages){
+-                loadPages += getAdditionalChatLoadPages(DBState.db)
+-            }
+-            const chatTarget = e.target as HTMLElement;
+-            const chatsContainer = (DBState.db.fixedChatTextarea && chatTarget.children[1]) ? chatTarget.children[1] : chatTarget.children[0];
+-            const lastEl = chatsContainer?.firstElementChild;
+-            const isAtBottom = lastEl ? lastEl.getBoundingClientRect().top <= chatTarget.getBoundingClientRect().bottom + 100 : true;
+-            if(isAtBottom){
+-                showNewMessageButton = false;
+-            }
+-        }}>
+-            {@render composerCluster()}
+-
+-            {#if chatPanelStore.length > 0}
+-                <div class="mx-4 my-2 flex flex-col gap-2">
+-                    {#each chatPanelStore as panel (panel.id)}
+-                        <section class={`rounded-md border border-darkborderc bg-darkbg/80 p-3 text-textcolor ${panel.className ?? ''}`} data-plugin-chat-panel={panel.id}>
+-                            {@html panel.html}
+-                        </section>
+-                    {/each}
+-                </div>
+-            {/if}
++              </div>
++            </div>
++            <div class="w-full shrink-0 pointer-events-none" style:height={`calc(${composerOverlayHeight}px + 0.75rem)`}></div>
+ 
+             {#if !currentChatReady}
+                 <div class="w-full flex justify-center text-textcolor2 italic mb-12">
+@@ -1331,8 +1228,7 @@ import { isMobile } from 'src/ts/platform'
+             <textarea
+                     bind:value={messageInput}
+                     bind:this={fullscreenEle}
+-                    onblur={persistDraftNow}
+-                    placeholder={language.enterMessageToPersona(activePersonaName)}
++                    placeholder={language.enterMessagePlaceholder}
+                     class="flex-1 min-h-0 w-full resize-none rounded-md border border-darkborderc bg-transparent p-3 text-textcolor text-base outline-hidden overflow-y-auto focus:border-textcolor transition-colors"
+             ></textarea>
+             <div class="flex justify-end mt-3">
+@@ -1346,6 +1242,14 @@ import { isMobile } from 'src/ts/platform'
+     </div>
+ {/if}
+ <style>
++    .rs-composer {
++        transition: border-color var(--dur-base) var(--ease-out),
++                    box-shadow var(--dur-base) var(--ease-out);
++    }
++    .rs-composer:focus-within {
++        border-color: var(--accent);
++        box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 18%, transparent);
++    }
+ 
+     .chat-process-stage-1{
+         border-top: 0.4rem solid #60a5fa;
+diff --git a/src/lib/ChatScreens/TransitionImage.svelte b/src/lib/ChatScreens/TransitionImage.svelte
+index 6cd827cf5..b0c410580 100644
+--- a/src/lib/ChatScreens/TransitionImage.svelte
++++ b/src/lib/ChatScreens/TransitionImage.svelte
+@@ -121,6 +121,8 @@
+                     <img
+                         src={img}
+                         alt="img"
++                        draggable="false"
++                        decoding="async"
+                         style:width={`${100 / currentSrc.length}%`}
+                         style:left={`${100 / currentSrc.length * i}%`}
+                     />
+@@ -142,6 +144,8 @@
+                     <img
+                         src={oldSrc[i]}
+                         alt="img"
++                        draggable="false"
++                        decoding="async"
+                         class="old-image"
+                         onanimationend={handleTransitionEnd}
+                         style:width={`${100 / oldSrc.length}%`}
+@@ -169,6 +173,8 @@
+                     <img
+                         src={currentSrc[i]}
+                         alt="img"
++                        draggable="false"
++                        decoding="async"
+                         class="new-image"
+                         style:width={`${100 / currentSrc.length}%`}
+                         style:left={`${100 / currentSrc.length * i}%`}
+diff --git a/src/styles/chat-images.css b/src/styles/chat-images.css
+new file mode 100644
+index 000000000..e44365138
+--- /dev/null
++++ b/src/styles/chat-images.css
+@@ -0,0 +1,24 @@
++/* Responsive chat asset images.
++ *
++ * Chat assets keep their intrinsic ratio and stay within bounded width/height,
++ * preventing portrait assets from taking over the whole screen.
++ */
++.chat-message-container .chattext img:not([noimage]),
++.chat-message-container .chattext img.root-loaded-image:not([noimage]),
++.chat-message-container .chattext .x-risu-risu-inlay-image img:not([noimage]),
++.chat-message-container .chattext .x-risu-risu-inlay-image video {
++  display: block;
++  box-sizing: border-box;
++  width: 100% !important;
++  height: auto;
++  max-width: 100% !important;
++  max-height: min(88svh, 72rem) !important;
++  object-fit: contain;
++  object-position: center;
++  margin-inline: auto;
++}
++
++.chat-message-container .chattext .x-risu-risu-inlay-image {
++  width: 100%;
++  max-width: 100%;
++}

@@ -1,0 +1,3951 @@
+diff --git a/README.md b/README.md
+index 22e218589..c45cf5f24 100644
+--- a/README.md
++++ b/README.md
+@@ -1,83 +1,77 @@
+ <p align="center">
+-  <img src="assets/pocketrisu-banner-1024.png" alt="PocketRisu — Self-hosted AI Roleplay Chat Platform" width="900" />
++  <img src="assets/pocketrisu-banner-1024.png" alt="PocketRisu Alter — 셀프호스팅 AI 롤플레이 채팅" width="900" />
+ </p>
+ 
+-<h1 align="center">PocketRisu — Self-hosted AI Roleplay Chat</h1>
++<h1 align="center">PocketRisu Alter</h1>
+ 
+ <p align="center">
+-  <strong>English</strong> | <a href="i18n/README.ko.md">한국어</a> | <a href="i18n/README.de.md">Deutsch</a> | <a href="i18n/README.cn.md">简体中文</a> | <a href="i18n/README.es.md">Español</a> | <a href="i18n/README.vi.md">Tiếng Việt</a> | <a href="i18n/README.zh-Hant.md">繁體中文</a>
++  <strong>한국어</strong> | <a href="i18n/README.en.md">English</a>
+ </p>
+ 
+ <p align="center">
+-  <a href="https://github.com/PocketRisu/PocketRisu/releases">
+-    <img alt="Latest Release" src="https://img.shields.io/github/v/release/PocketRisu/PocketRisu?label=latest" />
+-  </a>
+   <a href="LICENSE">
+-    <img alt="License: GPL-3.0" src="https://img.shields.io/github/license/PocketRisu/PocketRisu" />
++    <img alt="License: GPL-3.0" src="https://img.shields.io/badge/license-GPL--3.0-blue" />
+   </a>
+   <a href="https://nodejs.org/">
+-    <img alt="Node" src="https://img.shields.io/badge/node-≥22.12-brightgreen" />
++    <img alt="Node" src="https://img.shields.io/badge/node-%E2%89%A522.12-brightgreen" />
+   </a>
+ </p>
+ 
+-PocketRisu is a self-hosted AI roleplay chat platform you run on your PC or personal server and access from PC, tablet, and smartphone through a web browser.
++PocketRisu Alter는 [PocketRisu](https://github.com/PocketRisu/PocketRisu)를 기반으로 개조한 셀프호스팅 AI 롤플레이 채팅 플랫폼입니다. PC나 개인 서버에 실행해두고, PC·태블릿·스마트폰에서 브라우저로 접속해 사용합니다.
++
++개조 기준은 2026년 6월 8일 PocketRisu v1.7.3 커밋(`9eeccfd2`)입니다. 그 뒤 Alter 쪽에서 실험 기능과 UI 변경을 더한 nightly 빌드입니다.
++
++> **주의:** 이 저장소는 불안정한 nightly 버전입니다. 기능이 바뀌거나 깨질 수 있으며, 안정성이 필요한 환경에서는 사용 전 백업을 권장합니다.
+ 
+ <p align="center">
+   <table>
+     <tr>
+-      <td align="center"><img src="assets/screenshots/screenshot-pc-chat.png" alt="PC chat" height="420" /></td>
+-      <td align="center"><img src="assets/screenshots/screenshot-mobile-chat.png" alt="Mobile chat" height="420" /></td>
++      <td align="center"><img src="assets/screenshots/screenshot-pc-chat.png" alt="PC 채팅" height="420" /></td>
++      <td align="center"><img src="assets/screenshots/screenshot-mobile-chat.png" alt="모바일 채팅" height="420" /></td>
+     </tr>
+     <tr>
+       <td align="center"><b>PC</b></td>
+-      <td align="center"><b>Mobile</b></td>
++      <td align="center"><b>모바일</b></td>
+     </tr>
+   </table>
+ </p>
+ 
++## 지원 실행 방식
+ 
+-## Documentation
+-
+-- [Installation guide](docs/en/install.md)
+-- [RisuAI migration guide](docs/en/migration.md)
+-- [Remote access guide](docs/en/remote.md)
+-- [Termux installation guide (Android)](docs/en/termux.md)
+-
++PocketRisu Alter는 Docker 실행과 소스 기반 서버 실행만 지원합니다.
+ 
+-## RisuAI Compatibility
++- [설치 가이드](docs/ko/install.md)
++- [RisuAI 데이터 이전 가이드](docs/ko/migration.md)
++- [원격 접속 가이드](docs/ko/remote.md)
+ 
+-PocketRisu is derived from [RisuAI](https://github.com/kwaroran/RisuAI) and refined for self-hosted environments. Existing RisuAI data can be migrated wholesale, and all RisuAI ecosystem assets remain usable as-is.
++그 외 실행 방식은 지원하지 않습니다.
+ 
+-- RisuRealm character downloads
+-- Character cards (`.charx`, `.risum`, `.risup`, etc.)
+-- Modules, lorebooks, presets
+-- Backup files (`.bin`) with two-way compatibility
++Docker로 실행하면 기본적으로 PocketRisu와 별도 저장소를 사용합니다. `docker-compose.yml`의 볼륨 이름은 `pocketrisu_alter_save`라 기존 PocketRisu/PocketRisu NodeOnly 데이터와 섞이지 않습니다. 같은 저장소를 공유하고 싶다면 `docker-compose.yml`의 `volumes` 설정을 직접 수정해야 합니다.
+ 
+-For migration from an existing RisuAI installation, see the [migration guide](docs/en/migration.md).
++## PocketRisu와 주요 차이
+ 
++- **텍스트 스트리밍 안정화**: 모델 프리셋 스트리밍 출력 갱신을 조정해 모바일 렌더링 지연과 끊김을 줄였습니다.
++- **서버 측 API 호출**: 지원되는 OpenAI 호환 요청은 서버 작업으로 실행됩니다. 생성 중 화면을 끄거나 브라우저 연결이 끊겨도 서버에서 계속 처리할 수 있습니다.
++- **테마와 색상 변경**: Alter 전용 디자인 토큰, 색상 체계, 채팅 말풍선/설정 화면 스타일을 추가했습니다.
++- **모델 프리셋 보강**: 백엔드 실행 지원 표시, 이미지/시스템·역할 능력 토글, 일부 프리셋 호환 처리를 보강했습니다.
++- **UI 조정**: 사이드바, 채팅 목록, 모델 프로필 브라우저, 모바일 헤더 등 일부 화면 레이아웃과 상호작용을 다듬었습니다.
++- **MARP 멀티에이전트 RP**: 백엔드 통합 다중 에이전트 롤플레이 파이프라인 — 여러 AI 에이전트가 병렬로 동작해 더 풍부한 캐릭터 상호작용을 제공합니다. [MARP](https://github.com/Sallos725/MARP) by Sallos 포팅.
+ 
+-## Features
++## 주요 기능
+ 
+-- **Multiple AI providers**: OpenAI, Claude, Gemini, DeepInfra, OpenRouter, Ollama, and more
+-- **Multi-device access**: Run one server, access from PC, tablet, and smartphone through a web browser
+-- **Unified data storage**: All data (characters, chats, settings, inlay images) stored in a single SQLite database on your server (no external cloud dependency)
+-- **Easy server-side backup**: The server handles backup and restore directly; local `.bin` backup export and import also supported
+-- **Powerful dashboard**: Disk usage (per character / per module), reclaimable snapshot space, SQLite optimization, and more — all in one screen
+-- **Lorebook & long-term memory**: World info / memory book, HypaMemoryV3, and other context retention features
+-- **Automatic translation**: Auto-translate input and output for cross-language roleplay
+-- **Regex scripts & plugins**: Modify model output and extend functionality
+-- **TTS & additional assets**: Voice synthesis, embedded images / audio / video in chat
+-- **Self-update**: Automatic version detection; portable distributions update from the web UI
+-- **Mobile remote access**: Quick Tunnel (URL + QR) or Tailscale
+-- **Multilingual UI**: Korean, English, Japanese, Chinese, and more
++기본 기능은 PocketRisu를 따릅니다. 지원 AI, 캐릭터/채팅, 로어북, 프리셋, 플러그인, 백업/복원 등 일반 기능은 [PocketRisu](https://github.com/PocketRisu/PocketRisu)를 참고하세요.
+ 
++## RisuAI 호환
+ 
+-## Community & Contact
++PocketRisu Alter는 RisuAI/PocketRisu 계열 데이터를 가져올 수 있습니다.
+ 
+-- Bug reports / feature requests: [GitHub Issues](https://github.com/PocketRisu/PocketRisu/issues)
+-- Email: contact@pocketrisu.com
++- RisuRealm 캐릭터 다운로드
++- 캐릭터 카드 (`.charx`, `.risum`, `.risup` 등)
++- 모듈, 로어북, 프리셋
++- 백업 파일 (`.bin`)
+ 
++기존 RisuAI에서 이전하는 방법은 [데이터 이전 가이드](docs/ko/migration.md)를 참고하세요.
+ 
+-## License
++## 라이선스
+ 
+ [GPL-3.0](LICENSE)
+diff --git a/docs/cn/install.md b/docs/cn/install.md
+deleted file mode 100644
+index 230e0dabf..000000000
+--- a/docs/cn/install.md
++++ /dev/null
+@@ -1,223 +0,0 @@
+-<p align="center">
+-  <a href="../en/install.md">English</a> | <a href="../ko/install.md">한국어</a> | <a href="../de/install.md">Deutsch</a> | <strong>简体中文</strong> | <a href="../es/install.md">Español</a> | <a href="../vi/install.md">Tiếng Việt</a> | <a href="../zh-Hant/install.md">繁體中文</a>
+-</p>
+-
+-# 安装指南
+-
+-> 🌐 此指南由机器翻译生成。如需获取最准确的信息,请参阅 [English](../en/install.md) 或 [한국어](../ko/install.md) 版本。
+-
+-PocketRisu 有四种安装方式。
+-
+-- [1. 便携版](#1-便携版) — 预编译的二进制文件。无需 Node.js。
+-- [2. Docker](#2-docker) — 容器环境。
+-- [3. 安装脚本](#3-安装脚本) — 从源码自动构建。适用于 Linux/macOS 服务器。
+-- [4. Git Clone](#4-git-clone) — 手动源码构建。适用于开发者/高级用户。
+-
+-
+-## 系统要求
+-
+-| 项目         | 最低                | 推荐                                |
+-| ------------ | ------------------- | ----------------------------------- |
+-| **CPU**      | 1 核                | 2 核及以上                          |
+-| **内存**     | 1 GB(仅运行)      | 4 GB 及以上(包含构建)             |
+-| **磁盘**     | 1 GB                | 2 GB 及以上                         |
+-| **Node.js**  | 22.12 及以上        | (便携版/Docker 不需要)             |
+-
+-便携版和 Docker 无需构建步骤,可在 1 GB 内存下运行。直接构建(Git Clone、安装脚本)在构建时消耗大量内存,建议 4 GB 或更多。
+-
+-
+----
+-
+-## 1. 便携版
+-
+-下载并运行预编译的二进制文件。无需 Node.js、Docker 或其他工具。支持 Windows、macOS(Apple Silicon)和 Linux(x64/ARM)。
+-
+-### 下载
+-
+-从 [Releases 页面](https://github.com/PocketRisu/PocketRisu/releases)获取对应您 OS 的文件。
+-
+-| OS                       | 文件                                      |
+-| ------------------------ | ----------------------------------------- |
+-| Windows (x64)            | `PocketRisu-vX.X.X-win-x64.zip`           |
+-| macOS (Apple Silicon)    | `PocketRisu-vX.X.X-macos-arm64.tar.gz`    |
+-| Linux (x64)              | `PocketRisu-vX.X.X-linux-x64.tar.gz`      |
+-| Linux (ARM)              | `PocketRisu-vX.X.X-linux-arm64.tar.gz`    |
+-
+-### 运行
+-
+-**Windows**
+-
+-解压 zip 文件,双击文件夹中的 `PocketRisu.exe`。浏览器自动打开 `http://localhost:6001`。
+-
+-**macOS**
+-
+-```bash
+-tar -xzf PocketRisu-vX.X.X-macos-arm64.tar.gz
+-xattr -cr PocketRisu-vX.X.X-macos-arm64
+-open PocketRisu-vX.X.X-macos-arm64/PocketRisu.app
+-```
+-
+-`xattr` 命令是绕过"无法验证 Apple"警告的一次性操作。
+-
+-**Linux**
+-
+-```bash
+-tar -xzf PocketRisu-vX.X.X-linux-*.tar.gz
+-cd PocketRisu-vX.X.X-linux-*
+-./start.sh
+-```
+-
+-在浏览器中打开 `http://localhost:6001`。
+-
+-### 无界面服务器(一行下载)
+-
+-对于无 GUI 的 Linux/macOS 服务器,用一行命令获取并运行最新版本。
+-
+-**Linux (x64):**
+-
+-```bash
+-VERSION=$(curl -s https://api.github.com/repos/PocketRisu/PocketRisu/releases/latest | grep -o '"tag_name":"[^"]*"' | cut -d'"' -f4)
+-curl -fsSL "https://github.com/PocketRisu/PocketRisu/releases/download/${VERSION}/PocketRisu-${VERSION}-linux-x64.tar.gz" -o pocketrisu.tar.gz
+-tar -xzf pocketrisu.tar.gz && rm pocketrisu.tar.gz
+-cd PocketRisu-${VERSION}-linux-x64
+-./start.sh
+-```
+-
+-**Linux (ARM):** 将上述命令中的 `linux-x64` 替换为 `linux-arm64`。
+-
+-**macOS (Apple Silicon):**
+-
+-```bash
+-VERSION=$(curl -s https://api.github.com/repos/PocketRisu/PocketRisu/releases/latest | grep -o '"tag_name":"[^"]*"' | cut -d'"' -f4)
+-curl -fsSL "https://github.com/PocketRisu/PocketRisu/releases/download/${VERSION}/PocketRisu-${VERSION}-macos-arm64.tar.gz" -o pocketrisu.tar.gz
+-tar -xzf pocketrisu.tar.gz && rm pocketrisu.tar.gz
+-xattr -cr PocketRisu-${VERSION}-macos-arm64
+-cd PocketRisu-${VERSION}-macos-arm64
+-./start.sh
+-```
+-
+-### 更新
+-
+-在 Web UI 主屏幕的更新弹窗中点击"立即更新",或在安装文件夹中运行更新脚本。
+-
+-- **Windows**: 双击 `update.bat`
+-- **macOS / Linux**: `./update.sh`
+-
+-`save/` 文件夹中的数据会保留。
+-
+-
+----
+-
+-## 2. Docker
+-
+-在已安装 Docker 或 Docker Desktop 的系统上运行。
+-
+-### 安装 Docker
+-
+-- **Windows / macOS**: 安装 [Docker Desktop](https://www.docker.com/products/docker-desktop/)。
+-- **Linux**:
+-  ```bash
+-  curl -fsSL https://get.docker.com | sh
+-  ```
+-
+-### 运行
+-
+-```bash
+-curl -L https://raw.githubusercontent.com/PocketRisu/PocketRisu/main/docker-compose.yml -o docker-compose.yml
+-docker compose up -d
+-```
+-
+-在浏览器中打开 `http://localhost:6001`。
+-
+-### 更新
+-
+-```bash
+-docker compose pull && docker compose up -d
+-```
+-
+-### 数据位置
+-
+-所有数据(聊天、角色等)存储在 Docker 卷 `risuai-save` 中。更新时数据保留。
+-
+-
+----
+-
+-## 3. 安装脚本
+-
+-获取源码并通过 Node.js 自动构建。适用于 Linux/macOS 服务器。如需通过 `git pull` 管理更新,使用此方法。
+-
+-### 前置条件
+-
+-需要 Node.js 22.12 或更高版本:
+-
+-```bash
+-node --version
+-# v22.12.0 或更高
+-```
+-
+-如未安装,请从 [Node.js 官方网站](https://nodejs.org/)安装。
+-
+-### 安装
+-
+-```bash
+-curl -fsSL https://raw.githubusercontent.com/PocketRisu/PocketRisu/main/install.sh | bash
+-```
+-
+-安装完成后会显示状态消息。
+-
+-### 启动服务器
+-
+-```bash
+-cd ~/pocketrisu
+-pnpm runserver
+-```
+-
+-在浏览器中打开 `http://localhost:6001`。
+-
+-### 更新
+-
+-```bash
+-cd ~/pocketrisu
+-./update.sh
+-```
+-
+-> **v1.5.x → v1.6.0 一次性提示**: 如果您在 Risuai-NodeOnly 时代(v1.5.x 或更早)通过 `install.sh` 安装,请在首次 v1.6.0 更新前一次性将 `update.sh` 替换为新版本。(仓库已重命名为 PocketRisu,旧 `update.sh` 无法找到新的源目录。)
+->
+-> ```bash
+-> curl -fsSL https://raw.githubusercontent.com/PocketRisu/PocketRisu/main/update.sh -o update.sh && chmod +x update.sh
+-> ./update.sh
+-> ```
+->
+-> 此后更新照常使用 `./update.sh`。
+-
+-
+----
+-
+-## 4. Git Clone
+-
+-手动克隆并构建源码。适用于需要修改或调试代码的开发者。
+-
+-```bash
+-git clone https://github.com/PocketRisu/PocketRisu.git
+-cd PocketRisu
+-pnpm install
+-pnpm build
+-pnpm runserver
+-```
+-
+-在浏览器中打开 `http://localhost:6001`。
+-
+-### 更新
+-
+-```bash
+-git pull
+-pnpm install
+-pnpm build
+-# 重启服务器
+-pnpm runserver
+-```
+-
+-
+----
+-
+-← [返回 README](../../i18n/README.cn.md)
+diff --git a/docs/cn/migration.md b/docs/cn/migration.md
+deleted file mode 100644
+index e41ee1ba8..000000000
+--- a/docs/cn/migration.md
++++ /dev/null
+@@ -1,71 +0,0 @@
+-<p align="center">
+-  <a href="../en/migration.md">English</a> | <a href="../ko/migration.md">한국어</a> | <a href="../de/migration.md">Deutsch</a> | <strong>简体中文</strong> | <a href="../es/migration.md">Español</a> | <a href="../vi/migration.md">Tiếng Việt</a> | <a href="../zh-Hant/migration.md">繁體中文</a>
+-</p>
+-
+-# RisuAI 迁移指南
+-
+-> 🌐 此指南由机器翻译生成。如需获取最准确的信息,请参阅 [English](../en/migration.md) 或 [한국어](../ko/migration.md) 版本。
+-
+-从现有 RisuAI 安装(Web RisuAI、本地 RisuAI)迁移数据到 PocketRisu 有三种方式。根据您的源环境和数据规模选择。
+-
+-- [1. 本地备份文件(.bin)](#1-本地备份文件bin) — 在所有环境中工作。最常用的方法。
+-- [2. Save 文件夹 zip 上传](#2-save-文件夹-zip-上传) — 本地 RisuAI,小规模数据。
+-- [3. Save 文件夹直接复制](#3-save-文件夹直接复制) — 本地 RisuAI,大规模数据。
+-
+-
+-## 开始之前
+-
+-> ⚠️ 迁移前**请备份现有数据**。可从 RisuAI 的 设置 > 备份 导出 `.bin` 文件。
+-
+-
+----
+-
+-## 1. 本地备份文件(.bin)
+-
+-从现有 RisuAI 导出 `.bin` 备份文件,然后导入 PocketRisu。无论源环境(web / Tauri / Capacitor / 本地)如何均可使用。
+-
+-1. **在现有 RisuAI 中**: 设置 > 备份 > "保存本地备份" 导出 `.bin` 文件。
+-2. **在 PocketRisu 中**: 设置 > 数据迁移 > "导入原版 Risu 本地备份" 导入 `.bin` 文件。
+-
+-
+----
+-
+-## 2. Save 文件夹 zip 上传
+-
+-如果您使用的是本地 RisuAI(Node 服务器版),可以将 `save` 文件夹压缩为 zip 并上传。
+-
+-1. 将现有 RisuAI 项目的 `save` 文件夹压缩为 zip 文件。
+-2. 在 PocketRisu 中打开 设置 > 数据迁移 > "从 NodeOnly Risu 导入 save 文件夹" 折叠面板。
+-3. 通过 "从 save 文件夹导入(Zip 上传)" 上传 zip 文件。
+-
+-> 如果 zip 文件过大,上传可能失败。这种情况请使用 [3. Save 文件夹直接复制](#3-save-文件夹直接复制)。
+-
+-
+----
+-
+-## 3. Save 文件夹直接复制
+-
+-适合大规模数据(数 GB 以上)。需要服务器文件系统的直接访问权限。
+-
+-1. 停止 PocketRisu 服务器。
+-2. 用现有 RisuAI 的 `save` 文件夹整体覆盖 PocketRisu 的 `save` 文件夹。
+-3. 重启 PocketRisu 服务器 — 自动迁移开始。
+-    - 可在终端或 PM2 日志中查看进度。
+-4. 迁移完成后,使用 设置 > 数据迁移 > "从 NodeOnly Risu 导入 save 文件夹" 折叠面板 > "清理已迁移的 save 文件" 移除原始文件并回收磁盘空间。
+-
+-
+----
+-
+-## 该选择哪种方式?
+-
+-| 情况                                              | 推荐方式                        |
+-| ------------------------------------------------- | ------------------------------- |
+-| 从 Web RisuAI 迁移                                | 1. `.bin` 备份                  |
+-| 从本地 RisuAI 迁移,数据小规模                     | 2. Zip 上传                     |
+-| 从本地 RisuAI 迁移,数据大规模(10GB+)            | 3. Save 文件夹直接复制          |
+-| 不确定                                            | 1. `.bin` 备份                  |
+-
+-
+----
+-
+-← [返回 README](../../i18n/README.cn.md)
+diff --git a/docs/cn/remote.md b/docs/cn/remote.md
+deleted file mode 100644
+index a898b8632..000000000
+--- a/docs/cn/remote.md
++++ /dev/null
+@@ -1,62 +0,0 @@
+-<p align="center">
+-  <a href="../en/remote.md">English</a> | <a href="../ko/remote.md">한국어</a> | <a href="../de/remote.md">Deutsch</a> | <strong>简体中文</strong> | <a href="../es/remote.md">Español</a> | <a href="../vi/remote.md">Tiếng Việt</a> | <a href="../zh-Hant/remote.md">繁體中文</a>
+-</p>
+-
+-# 远程访问指南
+-
+-> 🌐 此指南由机器翻译生成。如需获取最准确的信息,请参阅 [English](../en/remote.md) 或 [한국어](../ko/remote.md) 版本。
+-
+-从其他设备(智能手机、平板、其他 PC)访问运行在 PC 上的 PocketRisu 有两种方式。
+-
+-- [1. Quick Tunnel](#1-quick-tunnel) — PocketRisu 内置功能。无需额外应用。服务器重启时 URL 变更。
+-- [2. Tailscale](#2-tailscale) — 基于私有网络(VPN)。URL 固定。
+-
+-
+-## 1. Quick Tunnel
+-
+-PocketRisu 内置的临时远程访问 URL 发放功能。
+-
+-1. 在 PC 上 PocketRisu 中:设置 > 远程访问 > "打开远程访问"
+-2. 用智能手机相机扫描显示的二维码,或在其他设备的浏览器中直接输入 URL。
+-
+-> 服务器重启时 URL 会变更。如需固定 URL,请使用 [Tailscale](#2-tailscale)。
+-
+-
+----
+-
+-## 2. Tailscale
+-
+-构建只能从使用同一账号登录的设备访问的私有网络(VPN)。即使服务器重启,URL 也保持不变。
+-
+-### 步骤 1: 安装 Tailscale
+-
+-- PC: [tailscale.com](https://tailscale.com/)
+-- 智能手机: App Store / Google Play 中搜索 "Tailscale"
+-- 其他 PC: 同样 [tailscale.com](https://tailscale.com/)
+-
+-### 步骤 2: 使用同一账号登录
+-
+-在 PC 和所有要访问的设备的 Tailscale 应用中使用同一账号(Google、Microsoft 等)登录。
+-
+-### 步骤 3: 在 PC 上启用 HTTPS 共享
+-
+-在运行 PocketRisu 的 PC 终端中执行一次:
+-
+-```bash
+-tailscale serve --bg http://localhost:6001
+-```
+-
+-### 步骤 4: 从其他设备访问
+-
+-在浏览器中以以下格式的地址访问:
+-
+-```
+-https://我的PC名.tail某某.ts.net
+-```
+-
+-确切地址可在 Tailscale 应用的设备列表中通过 PC 名称查看。在浏览器中加入书签,以后只需在 PC 上启动服务器即可从任何设备访问。
+-
+-
+----
+-
+-← [返回 README](../../i18n/README.cn.md)
+diff --git a/docs/cn/termux.md b/docs/cn/termux.md
+deleted file mode 100644
+index a7a6921a8..000000000
+--- a/docs/cn/termux.md
++++ /dev/null
+@@ -1,144 +0,0 @@
+-<p align="center">
+-  <a href="../en/termux.md">English</a> | <a href="../ko/termux.md">한국어</a> | <a href="../de/termux.md">Deutsch</a> | <strong>简体中文</strong> | <a href="../es/termux.md">Español</a> | <a href="../vi/termux.md">Tiếng Việt</a> | <a href="../zh-Hant/termux.md">繁體中文</a>
+-</p>
+-
+-# Termux 安装指南
+-
+-> 🌐 此指南由机器翻译生成。如需获取最准确的信息,请参阅 [English](../en/termux.md) 或 [한국어](../ko/termux.md) 版本。
+-
+-本指南介绍如何通过 Termux 在 Android 手机上直接构建并运行 PocketRisu。预期使用方式是在同一台手机的浏览器中打开 `http://localhost:6001`。
+-
+-- [1. 准备工作](#1-准备工作) — F-Droid Termux 与系统要求
+-- [2. 安装与构建](#2-安装与构建) — 单条命令完成
+-- [3. 运行与连接](#3-运行与连接) — 从手机浏览器打开
+-- [4. 保持运行](#4-保持运行) — 屏幕关闭时也保持运行
+-- [5. 更新](#5-更新) — 获取最新版本
+-- [6. 限制](#6-限制) — 在 Termux 上无法使用的功能
+-
+-
+-## 系统要求
+-
+-| 项目         | 最低         | 推荐                    |
+-| ------------ | ------------ | ----------------------- |
+-| **Android**  | 7.0 (API 24) | 10 或更新版本           |
+-| **CPU**      | ARM64        | ARM64                   |
+-| **内存**     | 2 GB         | 4 GB 或以上             |
+-| **可用存储** | 2 GB         | 4 GB 或以上(含构建产物) |
+-
+-PocketRisu 不为 Termux 提供预编译的二进制文件,因此由手机自行构建。包括 `better-sqlite3` 等原生模块在内,构建大约需要 **10 至 40 分钟**,具体取决于手机性能。
+-
+-
+----
+-
+-## 1. 准备工作
+-
+-### 使用 F-Droid 或 GitHub Releases 版本的 Termux
+-
+-> ⚠️ **Play Store 版本的 Termux 无法使用。**
+-> Termux 维护者已于 2020 年停止更新 Play Store 版本,无法再安装 PocketRisu 所需的最新软件包(Node.js 22+)。
+-
+-请从以下任一来源安装 Termux:
+-
+-- **F-Droid(推荐)**: https://f-droid.org/packages/com.termux/
+-- **GitHub Releases**: https://github.com/termux/termux-app/releases
+-
+-如果已经安装了 Play Store 版本,请先卸载,然后从上述任一来源重新安装。
+-
+-
+----
+-
+-## 2. 安装与构建
+-
+-打开 Termux 并执行以下单条命令:
+-
+-```bash
+-pkg install -y git && \
+-  git clone https://github.com/PocketRisu/PocketRisu.git && \
+-  cd PocketRisu && \
+-  bash scripts/termux/build.sh
+-```
+-
+-该命令将自动完成:
+-
+-1. 安装 `git`
+-2. 克隆 PocketRisu 仓库
+-3. 安装构建依赖(`nodejs-lts`、`python`、`make`、`clang`、`pnpm` 等)
+-4. `pnpm install` — JavaScript 依赖及原生模块编译
+-5. `pnpm build` — 前端打包
+-
+-构建完成后会显示:
+-
+-```
+-Build OK. Start the server with:
+-  node server/node/server.cjs
+-
+-Then open this address in the phone's own browser:
+-  http://localhost:6001
+-```
+-
+-
+----
+-
+-## 3. 运行与连接
+-
+-从同一目录启动服务器:
+-
+-```bash
+-node server/node/server.cjs
+-```
+-
+-服务器启动日志出现后,在手机浏览器(Chrome、Firefox 等)中访问:
+-
+-```
+-http://localhost:6001
+-```
+-
+-PocketRisu UI 应当正常加载。浏览器自动将 `localhost` 视为安全上下文(secure context),因此剪贴板、`crypto.subtle` 等需要安全上下文的 API 均可正常工作。
+-
+-使用 `Ctrl + C` 停止服务器。
+-
+-
+----
+-
+-## 4. 保持运行
+-
+-为了在屏幕关闭或切换到其他应用时保持服务器运行,请启用 Termux 的唤醒锁:
+-
+-```bash
+-termux-wake-lock
+-```
+-
+-Termux 通知栏会显示唤醒锁指示,即使屏幕关闭服务器也会继续运行。
+-
+-释放命令: `termux-wake-unlock`
+-
+-> 内存压力下 Android 仍可能终止 Termux。为了长时间运行,请在手机的电池优化设置中将 Termux 排除在外。
+-
+-
+----
+-
+-## 5. 更新
+-
+-在 PocketRisu 目录下执行:
+-
+-```bash
+-cd ~/PocketRisu
+-git pull
+-NODE_OPTIONS="--max-old-space-size=2048" pnpm build
+-```
+-
+-如果依赖发生变更,`pnpm install` 会作为构建的一部分自动执行。构建完成后请重启服务器。
+-
+-
+----
+-
+-## 6. 限制
+-
+-**Quick Tunnel(Cloudflare 自动隧道)在 Termux 上无法使用。** `cloudflared` 二进制文件与 Termux 的 DNS 和 TLS 环境不兼容。
+-
+-PocketRisu 会自动检测 Termux 环境,在远程访问菜单中显示警告并隐藏启动按钮。
+-
+-
+----
+-
+-← [返回 README](../../i18n/README.cn.md)
+diff --git a/docs/de/install.md b/docs/de/install.md
+deleted file mode 100644
+index 16ec16b7b..000000000
+--- a/docs/de/install.md
++++ /dev/null
+@@ -1,223 +0,0 @@
+-<p align="center">
+-  <a href="../en/install.md">English</a> | <a href="../ko/install.md">한국어</a> | <strong>Deutsch</strong> | <a href="../cn/install.md">简体中文</a> | <a href="../es/install.md">Español</a> | <a href="../vi/install.md">Tiếng Việt</a> | <a href="../zh-Hant/install.md">繁體中文</a>
+-</p>
+-
+-# Installationsanleitung
+-
+-> 🌐 Diese Anleitung wurde maschinell übersetzt. Für die genauesten Informationen siehe die [englische](../en/install.md) oder [koreanische](../ko/install.md) Version.
+-
+-PocketRisu kann auf vier Arten installiert werden.
+-
+-- [1. Portable-Paket](#1-portable-paket) — Vorkompilierte Binärdatei. Kein Node.js erforderlich.
+-- [2. Docker](#2-docker) — Container-Umgebung.
+-- [3. Installationsskript](#3-installationsskript) — Automatischer Build aus dem Quellcode. Für Linux/macOS-Server.
+-- [4. Git Clone](#4-git-clone) — Manueller Quellbuild. Für Entwickler / fortgeschrittene Benutzer.
+-
+-
+-## Systemanforderungen
+-
+-| Element     | Minimum              | Empfohlen                                  |
+-| ----------- | -------------------- | ------------------------------------------ |
+-| **CPU**     | 1 Kern               | 2+ Kerne                                   |
+-| **RAM**     | 1 GB (nur Ausführen) | 4+ GB (inkl. Build)                        |
+-| **Disk**    | 1 GB                 | 2+ GB                                      |
+-| **Node.js** | 22.12+               | (nicht erforderlich für Portable/Docker)   |
+-
+-Das Portable-Paket und Docker benötigen keinen Build-Schritt und können mit 1 GB RAM laufen. Direkte Builds (Git Clone, Installationsskript) verbrauchen während des Builds viel Speicher; 4 GB oder mehr werden empfohlen.
+-
+-
+----
+-
+-## 1. Portable-Paket
+-
+-Laden Sie eine vorkompilierte Binärdatei herunter und führen Sie sie aus. Kein Node.js, Docker oder andere Tools erforderlich. Unterstützt Windows, macOS (Apple Silicon) und Linux (x64/ARM).
+-
+-### Download
+-
+-Holen Sie die Datei für Ihr OS von der [Releases-Seite](https://github.com/PocketRisu/PocketRisu/releases).
+-
+-| OS                      | Datei                                     |
+-| ----------------------- | ----------------------------------------- |
+-| Windows (x64)           | `PocketRisu-vX.X.X-win-x64.zip`           |
+-| macOS (Apple Silicon)   | `PocketRisu-vX.X.X-macos-arm64.tar.gz`    |
+-| Linux (x64)             | `PocketRisu-vX.X.X-linux-x64.tar.gz`      |
+-| Linux (ARM)             | `PocketRisu-vX.X.X-linux-arm64.tar.gz`    |
+-
+-### Ausführen
+-
+-**Windows**
+-
+-Entpacken Sie die zip und doppelklicken Sie auf `PocketRisu.exe`. Ein Browser öffnet sich automatisch unter `http://localhost:6001`.
+-
+-**macOS**
+-
+-```bash
+-tar -xzf PocketRisu-vX.X.X-macos-arm64.tar.gz
+-xattr -cr PocketRisu-vX.X.X-macos-arm64
+-open PocketRisu-vX.X.X-macos-arm64/PocketRisu.app
+-```
+-
+-Der `xattr`-Befehl ist ein einmaliger Schritt, um die "Apple kann nicht verifizieren"-Warnung zu umgehen.
+-
+-**Linux**
+-
+-```bash
+-tar -xzf PocketRisu-vX.X.X-linux-*.tar.gz
+-cd PocketRisu-vX.X.X-linux-*
+-./start.sh
+-```
+-
+-Öffnen Sie `http://localhost:6001` in Ihrem Browser.
+-
+-### Headless-Server (Ein-Zeilen-Download)
+-
+-Für Linux/macOS-Server ohne GUI: Neueste Version in einem Befehl herunterladen und ausführen.
+-
+-**Linux (x64):**
+-
+-```bash
+-VERSION=$(curl -s https://api.github.com/repos/PocketRisu/PocketRisu/releases/latest | grep -o '"tag_name":"[^"]*"' | cut -d'"' -f4)
+-curl -fsSL "https://github.com/PocketRisu/PocketRisu/releases/download/${VERSION}/PocketRisu-${VERSION}-linux-x64.tar.gz" -o pocketrisu.tar.gz
+-tar -xzf pocketrisu.tar.gz && rm pocketrisu.tar.gz
+-cd PocketRisu-${VERSION}-linux-x64
+-./start.sh
+-```
+-
+-**Linux (ARM):** Ersetzen Sie `linux-x64` durch `linux-arm64` im obigen Befehl.
+-
+-**macOS (Apple Silicon):**
+-
+-```bash
+-VERSION=$(curl -s https://api.github.com/repos/PocketRisu/PocketRisu/releases/latest | grep -o '"tag_name":"[^"]*"' | cut -d'"' -f4)
+-curl -fsSL "https://github.com/PocketRisu/PocketRisu/releases/download/${VERSION}/PocketRisu-${VERSION}-macos-arm64.tar.gz" -o pocketrisu.tar.gz
+-tar -xzf pocketrisu.tar.gz && rm pocketrisu.tar.gz
+-xattr -cr PocketRisu-${VERSION}-macos-arm64
+-cd PocketRisu-${VERSION}-macos-arm64
+-./start.sh
+-```
+-
+-### Aktualisieren
+-
+-Klicken Sie auf "Jetzt aktualisieren" im Update-Popup auf dem Startbildschirm der Web-UI, oder führen Sie das Update-Skript im Installationsordner aus.
+-
+-- **Windows**: Doppelklick auf `update.bat`
+-- **macOS / Linux**: `./update.sh`
+-
+-Daten im `save/`-Ordner bleiben erhalten.
+-
+-
+----
+-
+-## 2. Docker
+-
+-Läuft auf einem System mit installiertem Docker oder Docker Desktop.
+-
+-### Docker installieren
+-
+-- **Windows / macOS**: Installieren Sie [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+-- **Linux**:
+-  ```bash
+-  curl -fsSL https://get.docker.com | sh
+-  ```
+-
+-### Ausführen
+-
+-```bash
+-curl -L https://raw.githubusercontent.com/PocketRisu/PocketRisu/main/docker-compose.yml -o docker-compose.yml
+-docker compose up -d
+-```
+-
+-Öffnen Sie `http://localhost:6001` in Ihrem Browser.
+-
+-### Aktualisieren
+-
+-```bash
+-docker compose pull && docker compose up -d
+-```
+-
+-### Datenstandort
+-
+-Alle Daten (Chats, Charaktere usw.) werden im Docker-Volume `risuai-save` gespeichert. Daten bleiben bei Updates erhalten.
+-
+-
+----
+-
+-## 3. Installationsskript
+-
+-Holt den Quellcode und baut automatisch mit Node.js. Läuft auf Linux/macOS-Servern. Verwenden Sie dies, wenn Sie Updates über `git pull` verwalten möchten.
+-
+-### Voraussetzungen
+-
+-Node.js 22.12 oder höher ist erforderlich:
+-
+-```bash
+-node --version
+-# v22.12.0 oder höher
+-```
+-
+-Installieren Sie von der [offiziellen Node.js-Website](https://nodejs.org/), falls nicht vorhanden.
+-
+-### Installieren
+-
+-```bash
+-curl -fsSL https://raw.githubusercontent.com/PocketRisu/PocketRisu/main/install.sh | bash
+-```
+-
+-Eine Statusmeldung wird angezeigt, wenn die Installation abgeschlossen ist.
+-
+-### Server starten
+-
+-```bash
+-cd ~/pocketrisu
+-pnpm runserver
+-```
+-
+-Öffnen Sie `http://localhost:6001` in Ihrem Browser.
+-
+-### Aktualisieren
+-
+-```bash
+-cd ~/pocketrisu
+-./update.sh
+-```
+-
+-> **Einmaliger Hinweis für v1.5.x → v1.6.0**: Wenn Sie während der Risuai-NodeOnly-Ära (v1.5.x oder früher) über `install.sh` installiert haben, ersetzen Sie `update.sh` einmal mit der neuen Version vor Ihrem ersten v1.6.0-Update. (Das Repository wurde in PocketRisu umbenannt, und das alte `update.sh` kann das neue Quellverzeichnis nicht finden.)
+->
+-> ```bash
+-> curl -fsSL https://raw.githubusercontent.com/PocketRisu/PocketRisu/main/update.sh -o update.sh && chmod +x update.sh
+-> ./update.sh
+-> ```
+->
+-> Nachfolgende Updates laufen wie gewohnt mit `./update.sh`.
+-
+-
+----
+-
+-## 4. Git Clone
+-
+-Manuelles Klonen und Bauen des Quellcodes. Für Entwickler, die Code ändern oder debuggen müssen.
+-
+-```bash
+-git clone https://github.com/PocketRisu/PocketRisu.git
+-cd PocketRisu
+-pnpm install
+-pnpm build
+-pnpm runserver
+-```
+-
+-Öffnen Sie `http://localhost:6001` in Ihrem Browser.
+-
+-### Aktualisieren
+-
+-```bash
+-git pull
+-pnpm install
+-pnpm build
+-# Server neu starten
+-pnpm runserver
+-```
+-
+-
+----
+-
+-← [Zurück zur README](../../i18n/README.de.md)
+diff --git a/docs/de/migration.md b/docs/de/migration.md
+deleted file mode 100644
+index 0f6d1405e..000000000
+--- a/docs/de/migration.md
++++ /dev/null
+@@ -1,71 +0,0 @@
+-<p align="center">
+-  <a href="../en/migration.md">English</a> | <a href="../ko/migration.md">한국어</a> | <strong>Deutsch</strong> | <a href="../cn/migration.md">简体中文</a> | <a href="../es/migration.md">Español</a> | <a href="../vi/migration.md">Tiếng Việt</a> | <a href="../zh-Hant/migration.md">繁體中文</a>
+-</p>
+-
+-# RisuAI-Migrationsleitfaden
+-
+-> 🌐 Diese Anleitung wurde maschinell übersetzt. Für die genauesten Informationen siehe die [englische](../en/migration.md) oder [koreanische](../ko/migration.md) Version.
+-
+-Es gibt drei Möglichkeiten, Daten von einer bestehenden RisuAI-Installation (Web-RisuAI, Lokales RisuAI) zu PocketRisu zu migrieren. Wählen Sie je nach Quellumgebung und Datenmenge.
+-
+-- [1. Lokale Backup-Datei (.bin)](#1-lokale-backup-datei-bin) — Funktioniert in allen Umgebungen. Die häufigste Methode.
+-- [2. Save-Ordner Zip-Upload](#2-save-ordner-zip-upload) — Lokales RisuAI, kleine Datenmengen.
+-- [3. Save-Ordner direkt kopieren](#3-save-ordner-direkt-kopieren) — Lokales RisuAI, große Datenmengen.
+-
+-
+-## Bevor Sie beginnen
+-
+-> ⚠️ **Sichern Sie Ihre vorhandenen Daten** vor der Migration. Sie können eine `.bin`-Datei aus den Einstellungen > Backup von RisuAI exportieren.
+-
+-
+----
+-
+-## 1. Lokale Backup-Datei (.bin)
+-
+-Exportieren Sie eine `.bin`-Backup-Datei aus dem bestehenden RisuAI und importieren Sie sie dann in PocketRisu. Funktioniert unabhängig von der Quellumgebung (Web / Tauri / Capacitor / lokal).
+-
+-1. **Im bestehenden RisuAI**: Einstellungen > Backup > "Lokales Backup speichern", um eine `.bin`-Datei zu exportieren.
+-2. **In PocketRisu**: Einstellungen > Datenmigration > "Original Risu Local Backup importieren", um die `.bin`-Datei zu importieren.
+-
+-
+----
+-
+-## 2. Save-Ordner Zip-Upload
+-
+-Wenn Sie Lokales RisuAI (die Node-Server-Version) verwendet haben, können Sie Ihren `save`-Ordner zippen und hochladen.
+-
+-1. Komprimieren Sie den `save`-Ordner Ihres bestehenden RisuAI-Projekts als Zip-Datei.
+-2. Öffnen Sie in PocketRisu Einstellungen > Datenmigration > "Save-Ordner von NodeOnly Risu importieren"-Akkordeon.
+-3. Laden Sie die Zip über "Aus Save-Ordner importieren (Zip-Upload)" hoch.
+-
+-> Wenn die Zip-Datei zu groß ist, kann der Upload fehlschlagen. Verwenden Sie in diesem Fall [3. Save-Ordner direkt kopieren](#3-save-ordner-direkt-kopieren).
+-
+-
+----
+-
+-## 3. Save-Ordner direkt kopieren
+-
+-Geeignet für große Datenmengen (mehrere GB oder mehr). Erfordert direkten Dateisystemzugriff auf den Server.
+-
+-1. Stoppen Sie den PocketRisu-Server.
+-2. Überschreiben Sie den `save`-Ordner von PocketRisu mit dem `save`-Ordner des bestehenden RisuAI.
+-3. Starten Sie den PocketRisu-Server neu — die automatische Migration beginnt.
+-    - Überwachen Sie den Fortschritt im Terminal oder in den PM2-Logs.
+-4. Nach Abschluss der Migration verwenden Sie Einstellungen > Datenmigration > "Save-Ordner von NodeOnly Risu importieren"-Akkordeon > "Migrierte Save-Dateien aufräumen", um die Originaldateien zu entfernen und Speicherplatz freizugeben.
+-
+-
+----
+-
+-## Welche Methode soll ich wählen?
+-
+-| Situation                                                  | Empfohlene Methode                |
+-| ---------------------------------------------------------- | --------------------------------- |
+-| Migration von Web-RisuAI                                   | 1. `.bin`-Backup                  |
+-| Migration von Lokalem RisuAI, kleine Datenmenge            | 2. Zip-Upload                     |
+-| Migration von Lokalem RisuAI, große Datenmenge (10GB+)     | 3. Save-Ordner direkt kopieren    |
+-| Unsicher                                                   | 1. `.bin`-Backup                  |
+-
+-
+----
+-
+-← [Zurück zur README](../../i18n/README.de.md)
+diff --git a/docs/de/remote.md b/docs/de/remote.md
+deleted file mode 100644
+index 0310e13a1..000000000
+--- a/docs/de/remote.md
++++ /dev/null
+@@ -1,62 +0,0 @@
+-<p align="center">
+-  <a href="../en/remote.md">English</a> | <a href="../ko/remote.md">한국어</a> | <strong>Deutsch</strong> | <a href="../cn/remote.md">简体中文</a> | <a href="../es/remote.md">Español</a> | <a href="../vi/remote.md">Tiếng Việt</a> | <a href="../zh-Hant/remote.md">繁體中文</a>
+-</p>
+-
+-# Fernzugriff-Leitfaden
+-
+-> 🌐 Diese Anleitung wurde maschinell übersetzt. Für die genauesten Informationen siehe die [englische](../en/remote.md) oder [koreanische](../ko/remote.md) Version.
+-
+-Es gibt zwei Möglichkeiten, von einem anderen Gerät (Smartphone, Tablet, anderer PC) auf PocketRisu zuzugreifen, das auf Ihrem PC läuft.
+-
+-- [1. Quick Tunnel](#1-quick-tunnel) — In PocketRisu integriert. Keine zusätzliche App erforderlich. URL ändert sich beim Serverneustart.
+-- [2. Tailscale](#2-tailscale) — Basiert auf privatem Netzwerk (VPN). Persistente URL.
+-
+-
+-## 1. Quick Tunnel
+-
+-Eine in PocketRisu integrierte Funktion, die eine temporäre Fernzugriffs-URL ausgibt.
+-
+-1. Auf Ihrem PC in PocketRisu: Einstellungen > Fernzugriff > "Fernzugriff öffnen"
+-2. Scannen Sie den angezeigten QR-Code mit Ihrer Smartphone-Kamera oder geben Sie die URL direkt im Browser eines anderen Geräts ein.
+-
+-> Die URL ändert sich bei jedem Server-Neustart. Für eine persistente URL verwenden Sie [Tailscale](#2-tailscale).
+-
+-
+----
+-
+-## 2. Tailscale
+-
+-Erstellt ein privates Netzwerk (VPN), das nur von Geräten zugänglich ist, die mit demselben Konto angemeldet sind. Die URL bleibt über Server-Neustarts hinweg erhalten.
+-
+-### Schritt 1: Tailscale installieren
+-
+-- PC: [tailscale.com](https://tailscale.com/)
+-- Smartphone: Suchen Sie nach "Tailscale" im App Store / Google Play
+-- Anderer PC: Ebenso über [tailscale.com](https://tailscale.com/)
+-
+-### Schritt 2: Mit demselben Konto anmelden
+-
+-Melden Sie sich in der Tailscale-App auf dem PC und auf jedem Gerät, von dem Sie zugreifen möchten, mit demselben Konto (Google, Microsoft usw.) an.
+-
+-### Schritt 3: HTTPS-Sharing auf dem PC aktivieren
+-
+-Führen Sie im Terminal auf dem PC, auf dem PocketRisu läuft, einmal aus:
+-
+-```bash
+-tailscale serve --bg http://localhost:6001
+-```
+-
+-### Schritt 4: Von einem anderen Gerät zugreifen
+-
+-Öffnen Sie in einem Browser mit diesem URL-Format:
+-
+-```
+-https://ihr-pc-name.tail-irgendetwas.ts.net
+-```
+-
+-Finden Sie die genaue Adresse über den Eintrag Ihres PCs in der Geräteliste der Tailscale-App. Setzen Sie ein Lesezeichen im Browser, sodass Sie ab dann nur den Server auf dem PC starten müssen, um von jedem Gerät aus zuzugreifen.
+-
+-
+----
+-
+-← [Zurück zur README](../../i18n/README.de.md)
+diff --git a/docs/de/termux.md b/docs/de/termux.md
+deleted file mode 100644
+index fc19c6aa4..000000000
+--- a/docs/de/termux.md
++++ /dev/null
+@@ -1,144 +0,0 @@
+-<p align="center">
+-  <a href="../en/termux.md">English</a> | <a href="../ko/termux.md">한국어</a> | <strong>Deutsch</strong> | <a href="../cn/termux.md">简体中文</a> | <a href="../es/termux.md">Español</a> | <a href="../vi/termux.md">Tiếng Việt</a> | <a href="../zh-Hant/termux.md">繁體中文</a>
+-</p>
+-
+-# Termux-Installationsanleitung
+-
+-> 🌐 Diese Anleitung wurde maschinell übersetzt. Für die genauesten Informationen siehe die [englische](../en/termux.md) oder [koreanische](../ko/termux.md) Version.
+-
+-Diese Anleitung erklärt, wie PocketRisu direkt auf einem Android-Telefon über Termux gebaut und ausgeführt wird. Das vorgesehene Nutzungsmuster ist das Öffnen von `http://localhost:6001` im Browser desselben Telefons.
+-
+-- [1. Voraussetzungen](#1-voraussetzungen) — F-Droid Termux und Systemanforderungen
+-- [2. Installation und Build](#2-installation-und-build) — Einrichtung mit einem einzigen Befehl
+-- [3. Ausführen und Verbinden](#3-ausführen-und-verbinden) — vom Browser des Telefons öffnen
+-- [4. Laufen lassen](#4-laufen-lassen) — auch bei ausgeschaltetem Bildschirm
+-- [5. Aktualisieren](#5-aktualisieren) — neueste Version holen
+-- [6. Einschränkungen](#6-einschränkungen) — Funktionen, die auf Termux nicht funktionieren
+-
+-
+-## Systemanforderungen
+-
+-| Element            | Minimum         | Empfohlen                       |
+-| ------------------ | --------------- | ------------------------------- |
+-| **Android**        | 7.0 (API 24)    | 10 oder neuer                   |
+-| **CPU**            | ARM64           | ARM64                           |
+-| **RAM**            | 2 GB            | 4 GB oder mehr                  |
+-| **Freier Speicher** | 2 GB            | 4 GB oder mehr (mit Build)      |
+-
+-PocketRisu liefert keine vorkompilierten Binärdateien für Termux, daher baut das Telefon alles selbst. Einschließlich nativer Module wie `better-sqlite3` dauert der Build etwa **10 bis 40 Minuten**, je nach Telefonleistung.
+-
+-
+----
+-
+-## 1. Voraussetzungen
+-
+-### Verwenden Sie die F-Droid- oder GitHub-Releases-Version von Termux
+-
+-> ⚠️ **Die Play-Store-Version von Termux kann nicht verwendet werden.**
+-> Die Termux-Maintainer haben die Aktualisierung der Play-Store-Version 2020 eingestellt, und sie kann die aktuellen Pakete, die PocketRisu benötigt (Node.js 22+), nicht mehr installieren.
+-
+-Installieren Sie Termux von einer dieser Quellen:
+-
+-- **F-Droid (empfohlen)**: https://f-droid.org/packages/com.termux/
+-- **GitHub Releases**: https://github.com/termux/termux-app/releases
+-
+-Wenn Sie bereits die Play-Store-Version installiert haben, deinstallieren Sie sie zuerst und installieren Sie aus einer der obigen Quellen.
+-
+-
+----
+-
+-## 2. Installation und Build
+-
+-Öffnen Sie Termux und führen Sie diesen einzelnen Befehl aus:
+-
+-```bash
+-pkg install -y git && \
+-  git clone https://github.com/PocketRisu/PocketRisu.git && \
+-  cd PocketRisu && \
+-  bash scripts/termux/build.sh
+-```
+-
+-Der Befehl kümmert sich um:
+-
+-1. Installation von `git`
+-2. Klonen des PocketRisu-Repositorys
+-3. Installation der Build-Abhängigkeiten (`nodejs-lts`, `python`, `make`, `clang`, `pnpm` usw.)
+-4. `pnpm install` — JavaScript-Abhängigkeiten und Kompilierung nativer Module
+-5. `pnpm build` — Frontend-Bundling
+-
+-Wenn der Build abgeschlossen ist, sehen Sie:
+-
+-```
+-Build OK. Start the server with:
+-  node server/node/server.cjs
+-
+-Then open this address in the phone's own browser:
+-  http://localhost:6001
+-```
+-
+-
+----
+-
+-## 3. Ausführen und Verbinden
+-
+-Starten Sie den Server aus demselben Verzeichnis:
+-
+-```bash
+-node server/node/server.cjs
+-```
+-
+-Sobald das Server-Boot-Protokoll erscheint, öffnen Sie den Browser des Telefons (Chrome, Firefox usw.) und navigieren Sie zu:
+-
+-```
+-http://localhost:6001
+-```
+-
+-Die PocketRisu-Benutzeroberfläche sollte geladen werden. `localhost` wird vom Browser automatisch als sicherer Kontext behandelt, sodass Zwischenablage, `crypto.subtle` und andere APIs, die einen sicheren Kontext erfordern, normal funktionieren.
+-
+-Server stoppen mit `Strg + C`.
+-
+-
+----
+-
+-## 4. Laufen lassen
+-
+-Um den Server am Leben zu halten, wenn der Bildschirm ausgeschaltet wird oder Sie zu anderen Apps wechseln, aktivieren Sie den Wake-Lock von Termux:
+-
+-```bash
+-termux-wake-lock
+-```
+-
+-Die Termux-Benachrichtigung zeigt den Wake-Lock-Indikator, und der Server läuft auch bei ausgeschaltetem Bildschirm weiter.
+-
+-Freigeben mit: `termux-wake-unlock`
+-
+-> Android kann Termux unter Speicherdruck dennoch beenden. Für langfristige Nutzung schließen Sie Termux aus den Batterieoptimierungseinstellungen Ihres Telefons aus.
+-
+-
+----
+-
+-## 5. Aktualisieren
+-
+-Aus dem PocketRisu-Verzeichnis:
+-
+-```bash
+-cd ~/PocketRisu
+-git pull
+-NODE_OPTIONS="--max-old-space-size=2048" pnpm build
+-```
+-
+-Wenn sich Abhängigkeiten geändert haben, wird `pnpm install` automatisch als Teil des Builds ausgeführt. Starten Sie den Server neu, sobald der Build abgeschlossen ist.
+-
+-
+----
+-
+-## 6. Einschränkungen
+-
+-**Quick Tunnel (Cloudflare Auto-Tunnel) funktioniert nicht auf Termux.** Das `cloudflared`-Binary ist nicht mit der DNS- und TLS-Umgebung von Termux kompatibel.
+-
+-PocketRisu erkennt die Termux-Umgebung automatisch und zeigt eine Warnung im Menü Fernzugriff an, wobei die Start-Schaltfläche ausgeblendet wird.
+-
+-
+----
+-
+-← [Zurück zur README](../../i18n/README.de.md)
+diff --git a/docs/es/install.md b/docs/es/install.md
+deleted file mode 100644
+index 8a66d9c9e..000000000
+--- a/docs/es/install.md
++++ /dev/null
+@@ -1,223 +0,0 @@
+-<p align="center">
+-  <a href="../en/install.md">English</a> | <a href="../ko/install.md">한국어</a> | <a href="../de/install.md">Deutsch</a> | <a href="../cn/install.md">简体中文</a> | <strong>Español</strong> | <a href="../vi/install.md">Tiếng Việt</a> | <a href="../zh-Hant/install.md">繁體中文</a>
+-</p>
+-
+-# Guía de instalación
+-
+-> 🌐 Esta guía está traducida por máquina. Para obtener la información más precisa, consulte la versión en [inglés](../en/install.md) o [coreano](../ko/install.md).
+-
+-PocketRisu se puede instalar de cuatro formas.
+-
+-- [1. Paquete portable](#1-paquete-portable) — Binario precompilado. No requiere Node.js.
+-- [2. Docker](#2-docker) — Entorno de contenedores.
+-- [3. Script de instalación](#3-script-de-instalación) — Compilación automática desde fuente. Para servidores Linux/macOS.
+-- [4. Git Clone](#4-git-clone) — Compilación manual desde fuente. Para desarrolladores / usuarios avanzados.
+-
+-
+-## Requisitos del sistema
+-
+-| Elemento    | Mínimo                  | Recomendado                              |
+-| ----------- | ----------------------- | ---------------------------------------- |
+-| **CPU**     | 1 núcleo                | 2+ núcleos                               |
+-| **RAM**     | 1 GB (solo ejecución)   | 4+ GB (incluye compilación)              |
+-| **Disco**   | 1 GB                    | 2+ GB                                    |
+-| **Node.js** | 22.12+                  | (no requerido para portable/Docker)      |
+-
+-El paquete portable y Docker no requieren un paso de compilación y pueden ejecutarse con 1 GB de RAM. Las compilaciones directas (Git Clone, script de instalación) consumen memoria significativa durante la compilación, por lo que se recomiendan 4 GB o más.
+-
+-
+----
+-
+-## 1. Paquete portable
+-
+-Descarga y ejecuta un binario precompilado. No requiere Node.js, Docker u otras herramientas. Compatible con Windows, macOS (Apple Silicon) y Linux (x64/ARM).
+-
+-### Descarga
+-
+-Obtén el archivo para tu OS desde la [página de Releases](https://github.com/PocketRisu/PocketRisu/releases).
+-
+-| OS                       | Archivo                                   |
+-| ------------------------ | ----------------------------------------- |
+-| Windows (x64)            | `PocketRisu-vX.X.X-win-x64.zip`           |
+-| macOS (Apple Silicon)    | `PocketRisu-vX.X.X-macos-arm64.tar.gz`    |
+-| Linux (x64)              | `PocketRisu-vX.X.X-linux-x64.tar.gz`      |
+-| Linux (ARM)              | `PocketRisu-vX.X.X-linux-arm64.tar.gz`    |
+-
+-### Ejecutar
+-
+-**Windows**
+-
+-Extrae el zip y haz doble clic en `PocketRisu.exe`. Un navegador se abre automáticamente en `http://localhost:6001`.
+-
+-**macOS**
+-
+-```bash
+-tar -xzf PocketRisu-vX.X.X-macos-arm64.tar.gz
+-xattr -cr PocketRisu-vX.X.X-macos-arm64
+-open PocketRisu-vX.X.X-macos-arm64/PocketRisu.app
+-```
+-
+-El comando `xattr` es un paso único para evitar la advertencia "Apple no puede verificar".
+-
+-**Linux**
+-
+-```bash
+-tar -xzf PocketRisu-vX.X.X-linux-*.tar.gz
+-cd PocketRisu-vX.X.X-linux-*
+-./start.sh
+-```
+-
+-Abre `http://localhost:6001` en tu navegador.
+-
+-### Servidor sin GUI (descarga en una línea)
+-
+-Para servidores Linux/macOS sin interfaz gráfica, descarga y ejecuta la última versión con un solo comando.
+-
+-**Linux (x64):**
+-
+-```bash
+-VERSION=$(curl -s https://api.github.com/repos/PocketRisu/PocketRisu/releases/latest | grep -o '"tag_name":"[^"]*"' | cut -d'"' -f4)
+-curl -fsSL "https://github.com/PocketRisu/PocketRisu/releases/download/${VERSION}/PocketRisu-${VERSION}-linux-x64.tar.gz" -o pocketrisu.tar.gz
+-tar -xzf pocketrisu.tar.gz && rm pocketrisu.tar.gz
+-cd PocketRisu-${VERSION}-linux-x64
+-./start.sh
+-```
+-
+-**Linux (ARM):** Reemplaza `linux-x64` por `linux-arm64` en el comando anterior.
+-
+-**macOS (Apple Silicon):**
+-
+-```bash
+-VERSION=$(curl -s https://api.github.com/repos/PocketRisu/PocketRisu/releases/latest | grep -o '"tag_name":"[^"]*"' | cut -d'"' -f4)
+-curl -fsSL "https://github.com/PocketRisu/PocketRisu/releases/download/${VERSION}/PocketRisu-${VERSION}-macos-arm64.tar.gz" -o pocketrisu.tar.gz
+-tar -xzf pocketrisu.tar.gz && rm pocketrisu.tar.gz
+-xattr -cr PocketRisu-${VERSION}-macos-arm64
+-cd PocketRisu-${VERSION}-macos-arm64
+-./start.sh
+-```
+-
+-### Actualizar
+-
+-Haz clic en "Actualizar ahora" en el popup de actualización en la pantalla principal de la UI web, o ejecuta el script de actualización en la carpeta de instalación.
+-
+-- **Windows**: Doble clic en `update.bat`
+-- **macOS / Linux**: `./update.sh`
+-
+-Los datos en la carpeta `save/` se conservan.
+-
+-
+----
+-
+-## 2. Docker
+-
+-Se ejecuta en un sistema con Docker o Docker Desktop instalado.
+-
+-### Instalar Docker
+-
+-- **Windows / macOS**: Instala [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+-- **Linux**:
+-  ```bash
+-  curl -fsSL https://get.docker.com | sh
+-  ```
+-
+-### Ejecutar
+-
+-```bash
+-curl -L https://raw.githubusercontent.com/PocketRisu/PocketRisu/main/docker-compose.yml -o docker-compose.yml
+-docker compose up -d
+-```
+-
+-Abre `http://localhost:6001` en tu navegador.
+-
+-### Actualizar
+-
+-```bash
+-docker compose pull && docker compose up -d
+-```
+-
+-### Ubicación de los datos
+-
+-Todos los datos (chats, personajes, etc.) se almacenan en el volumen de Docker `risuai-save`. Los datos se conservan al actualizar.
+-
+-
+----
+-
+-## 3. Script de instalación
+-
+-Descarga el código fuente y compila automáticamente con Node.js. Se ejecuta en servidores Linux/macOS. Úsalo si quieres gestionar las actualizaciones mediante `git pull`.
+-
+-### Prerrequisitos
+-
+-Se requiere Node.js 22.12 o superior:
+-
+-```bash
+-node --version
+-# v22.12.0 o superior
+-```
+-
+-Instala desde el [sitio oficial de Node.js](https://nodejs.org/) si no está presente.
+-
+-### Instalar
+-
+-```bash
+-curl -fsSL https://raw.githubusercontent.com/PocketRisu/PocketRisu/main/install.sh | bash
+-```
+-
+-Se muestra un mensaje de estado cuando finaliza la instalación.
+-
+-### Iniciar el servidor
+-
+-```bash
+-cd ~/pocketrisu
+-pnpm runserver
+-```
+-
+-Abre `http://localhost:6001` en tu navegador.
+-
+-### Actualizar
+-
+-```bash
+-cd ~/pocketrisu
+-./update.sh
+-```
+-
+-> **Nota única para v1.5.x → v1.6.0**: Si instalaste mediante `install.sh` durante la era Risuai-NodeOnly (v1.5.x o anterior), reemplaza `update.sh` con la nueva versión una vez antes de tu primera actualización a v1.6.0. (El repositorio se renombró a PocketRisu y el `update.sh` antiguo no puede encontrar el nuevo directorio fuente.)
+->
+-> ```bash
+-> curl -fsSL https://raw.githubusercontent.com/PocketRisu/PocketRisu/main/update.sh -o update.sh && chmod +x update.sh
+-> ./update.sh
+-> ```
+->
+-> Las actualizaciones posteriores se ejecutan con `./update.sh` como de costumbre.
+-
+-
+----
+-
+-## 4. Git Clone
+-
+-Clona y compila manualmente el código fuente. Para desarrolladores que necesitan modificar o depurar código.
+-
+-```bash
+-git clone https://github.com/PocketRisu/PocketRisu.git
+-cd PocketRisu
+-pnpm install
+-pnpm build
+-pnpm runserver
+-```
+-
+-Abre `http://localhost:6001` en tu navegador.
+-
+-### Actualizar
+-
+-```bash
+-git pull
+-pnpm install
+-pnpm build
+-# Reiniciar servidor
+-pnpm runserver
+-```
+-
+-
+----
+-
+-← [Volver al README](../../i18n/README.es.md)
+diff --git a/docs/es/migration.md b/docs/es/migration.md
+deleted file mode 100644
+index 75bcb5d61..000000000
+--- a/docs/es/migration.md
++++ /dev/null
+@@ -1,71 +0,0 @@
+-<p align="center">
+-  <a href="../en/migration.md">English</a> | <a href="../ko/migration.md">한국어</a> | <a href="../de/migration.md">Deutsch</a> | <a href="../cn/migration.md">简体中文</a> | <strong>Español</strong> | <a href="../vi/migration.md">Tiếng Việt</a> | <a href="../zh-Hant/migration.md">繁體中文</a>
+-</p>
+-
+-# Guía de migración desde RisuAI
+-
+-> 🌐 Esta guía está traducida por máquina. Para obtener la información más precisa, consulte la versión en [inglés](../en/migration.md) o [coreano](../ko/migration.md).
+-
+-Hay tres formas de migrar datos desde una instalación existente de RisuAI (RisuAI Web, RisuAI Local) a PocketRisu. Elija según su entorno de origen y el tamaño de los datos.
+-
+-- [1. Archivo de copia de seguridad local (.bin)](#1-archivo-de-copia-de-seguridad-local-bin) — Funciona en todos los entornos. El método más común.
+-- [2. Subida zip de la carpeta save](#2-subida-zip-de-la-carpeta-save) — RisuAI Local, datos pequeños.
+-- [3. Copia directa de la carpeta save](#3-copia-directa-de-la-carpeta-save) — RisuAI Local, datos grandes.
+-
+-
+-## Antes de comenzar
+-
+-> ⚠️ **Haga una copia de seguridad de sus datos existentes** antes de migrar. Puede exportar un archivo `.bin` desde Configuración > Copia de seguridad en RisuAI.
+-
+-
+----
+-
+-## 1. Archivo de copia de seguridad local (.bin)
+-
+-Exporte un archivo de copia de seguridad `.bin` desde RisuAI existente y luego impórtelo en PocketRisu. Funciona independientemente del entorno de origen (web / Tauri / Capacitor / local).
+-
+-1. **En RisuAI existente**: Configuración > Copia de seguridad > "Guardar copia local" para exportar un archivo `.bin`.
+-2. **En PocketRisu**: Configuración > Migración de datos > "Importar copia local de Risu original" para importar el archivo `.bin`.
+-
+-
+----
+-
+-## 2. Subida zip de la carpeta save
+-
+-Si estaba usando RisuAI Local (la versión de servidor Node), puede comprimir su carpeta `save` y subirla.
+-
+-1. Comprima la carpeta `save` de su proyecto RisuAI existente como un archivo zip.
+-2. En PocketRisu, vaya a Configuración > Migración de datos > acordeón "Importar carpeta save de NodeOnly Risu".
+-3. Suba el zip a través de "Importar desde carpeta save (Subir Zip)".
+-
+-> Si el archivo zip es demasiado grande, la subida puede fallar. En ese caso, use [3. Copia directa de la carpeta save](#3-copia-directa-de-la-carpeta-save).
+-
+-
+----
+-
+-## 3. Copia directa de la carpeta save
+-
+-Apropiado para grandes conjuntos de datos (varios GB o más). Requiere acceso directo al sistema de archivos del servidor.
+-
+-1. Detenga el servidor PocketRisu.
+-2. Sobrescriba la carpeta `save` de PocketRisu con la carpeta `save` del RisuAI existente.
+-3. Reinicie el servidor PocketRisu — la migración automática comienza.
+-    - Monitoree el progreso en el terminal o en los logs de PM2.
+-4. Después de que se complete la migración, use Configuración > Migración de datos > acordeón "Importar carpeta save de NodeOnly Risu" > "Limpiar archivos save migrados" para eliminar los archivos originales y recuperar espacio en disco.
+-
+-
+----
+-
+-## ¿Qué método debo elegir?
+-
+-| Situación                                                       | Método recomendado                       |
+-| --------------------------------------------------------------- | ---------------------------------------- |
+-| Migrar desde RisuAI Web                                         | 1. Copia `.bin`                          |
+-| Migrar desde RisuAI Local, datos pequeños                       | 2. Subida zip                            |
+-| Migrar desde RisuAI Local, datos grandes (10GB+)                | 3. Copia directa de la carpeta save      |
+-| No estoy seguro                                                 | 1. Copia `.bin`                          |
+-
+-
+----
+-
+-← [Volver al README](../../i18n/README.es.md)
+diff --git a/docs/es/remote.md b/docs/es/remote.md
+deleted file mode 100644
+index c79c302a9..000000000
+--- a/docs/es/remote.md
++++ /dev/null
+@@ -1,62 +0,0 @@
+-<p align="center">
+-  <a href="../en/remote.md">English</a> | <a href="../ko/remote.md">한국어</a> | <a href="../de/remote.md">Deutsch</a> | <a href="../cn/remote.md">简体中文</a> | <strong>Español</strong> | <a href="../vi/remote.md">Tiếng Việt</a> | <a href="../zh-Hant/remote.md">繁體中文</a>
+-</p>
+-
+-# Guía de acceso remoto
+-
+-> 🌐 Esta guía está traducida por máquina. Para obtener la información más precisa, consulte la versión en [inglés](../en/remote.md) o [coreano](../ko/remote.md).
+-
+-Hay dos formas de acceder a PocketRisu que se ejecuta en tu PC desde otro dispositivo (smartphone, tablet, otro PC).
+-
+-- [1. Quick Tunnel](#1-quick-tunnel) — Integrado en PocketRisu. No requiere app adicional. La URL cambia al reiniciar el servidor.
+-- [2. Tailscale](#2-tailscale) — Basado en red privada (VPN). URL persistente.
+-
+-
+-## 1. Quick Tunnel
+-
+-Una función integrada en PocketRisu que emite una URL temporal de acceso remoto.
+-
+-1. En tu PC, en PocketRisu: Configuración > Acceso Remoto > "Abrir Acceso Remoto"
+-2. Escanea el código QR mostrado con la cámara de tu smartphone o introduce la URL directamente en el navegador de otro dispositivo.
+-
+-> La URL cambia cada vez que se reinicia el servidor. Para una URL persistente, usa [Tailscale](#2-tailscale).
+-
+-
+----
+-
+-## 2. Tailscale
+-
+-Construye una red privada (VPN) accesible solo desde dispositivos conectados con la misma cuenta. La URL persiste a través de reinicios del servidor.
+-
+-### Paso 1: Instalar Tailscale
+-
+-- PC: [tailscale.com](https://tailscale.com/)
+-- Smartphone: Busca "Tailscale" en App Store / Google Play
+-- Otro PC: Igualmente desde [tailscale.com](https://tailscale.com/)
+-
+-### Paso 2: Iniciar sesión con la misma cuenta
+-
+-Inicia sesión en la app de Tailscale en el PC y en cada dispositivo desde el que quieras acceder, usando la misma cuenta (Google, Microsoft, etc.).
+-
+-### Paso 3: Habilitar compartir HTTPS en el PC
+-
+-En el terminal del PC que ejecuta PocketRisu, ejecuta una vez:
+-
+-```bash
+-tailscale serve --bg http://localhost:6001
+-```
+-
+-### Paso 4: Acceder desde otro dispositivo
+-
+-Abre en un navegador con este formato de URL:
+-
+-```
+-https://nombre-de-mi-pc.tail-algo.ts.net
+-```
+-
+-Encuentra la dirección exacta a través de la entrada de tu PC en la lista de dispositivos de la app de Tailscale. Agrega a marcadores del navegador, y a partir de entonces solo necesitas iniciar el servidor en el PC para acceder desde cualquier dispositivo.
+-
+-
+----
+-
+-← [Volver al README](../../i18n/README.es.md)
+diff --git a/docs/es/termux.md b/docs/es/termux.md
+deleted file mode 100644
+index 8d842dd46..000000000
+--- a/docs/es/termux.md
++++ /dev/null
+@@ -1,144 +0,0 @@
+-<p align="center">
+-  <a href="../en/termux.md">English</a> | <a href="../ko/termux.md">한국어</a> | <a href="../de/termux.md">Deutsch</a> | <a href="../cn/termux.md">简体中文</a> | <strong>Español</strong> | <a href="../vi/termux.md">Tiếng Việt</a> | <a href="../zh-Hant/termux.md">繁體中文</a>
+-</p>
+-
+-# Guía de instalación de Termux
+-
+-> 🌐 Esta guía está traducida por máquina. Para obtener la información más precisa, consulte la versión en [inglés](../en/termux.md) o [coreano](../ko/termux.md).
+-
+-Esta guía explica cómo compilar y ejecutar PocketRisu directamente en un teléfono Android usando Termux. El patrón de uso previsto es abrir `http://localhost:6001` en el navegador del propio teléfono.
+-
+-- [1. Requisitos previos](#1-requisitos-previos) — Termux de F-Droid y requisitos del sistema
+-- [2. Instalación y compilación](#2-instalación-y-compilación) — configuración con un solo comando
+-- [3. Ejecución y conexión](#3-ejecución-y-conexión) — abrir desde el navegador del teléfono
+-- [4. Mantener en ejecución](#4-mantener-en-ejecución) — sobrevivir con la pantalla apagada
+-- [5. Actualización](#5-actualización) — obtener la última versión
+-- [6. Limitaciones](#6-limitaciones) — funciones que no funcionan en Termux
+-
+-
+-## Requisitos del sistema
+-
+-| Elemento              | Mínimo        | Recomendado                            |
+-| --------------------- | ------------- | -------------------------------------- |
+-| **Android**           | 7.0 (API 24)  | 10 o más reciente                      |
+-| **CPU**               | ARM64         | ARM64                                  |
+-| **RAM**               | 2 GB          | 4 GB o más                             |
+-| **Espacio libre**     | 2 GB          | 4 GB o más (incluida la compilación)   |
+-
+-PocketRisu no proporciona binarios precompilados para Termux, por lo que el teléfono compila todo por sí mismo. Incluyendo módulos nativos como `better-sqlite3`, la compilación tarda aproximadamente **de 10 a 40 minutos**, dependiendo del rendimiento del teléfono.
+-
+-
+----
+-
+-## 1. Requisitos previos
+-
+-### Utilice la versión de Termux de F-Droid o GitHub Releases
+-
+-> ⚠️ **La versión de Termux de Play Store no se puede utilizar.**
+-> Los mantenedores de Termux dejaron de actualizar la versión de Play Store en 2020, y ya no puede instalar los paquetes recientes que PocketRisu necesita (Node.js 22+).
+-
+-Instale Termux desde una de las siguientes fuentes:
+-
+-- **F-Droid (recomendado)**: https://f-droid.org/packages/com.termux/
+-- **GitHub Releases**: https://github.com/termux/termux-app/releases
+-
+-Si ya tiene la versión de Play Store instalada, desinstálela primero e instálela desde una de las fuentes anteriores.
+-
+-
+----
+-
+-## 2. Instalación y compilación
+-
+-Abra Termux y ejecute este único comando:
+-
+-```bash
+-pkg install -y git && \
+-  git clone https://github.com/PocketRisu/PocketRisu.git && \
+-  cd PocketRisu && \
+-  bash scripts/termux/build.sh
+-```
+-
+-El comando se encarga de:
+-
+-1. Instalar `git`
+-2. Clonar el repositorio de PocketRisu
+-3. Instalar las dependencias de compilación (`nodejs-lts`, `python`, `make`, `clang`, `pnpm`, etc.)
+-4. `pnpm install` — dependencias de JavaScript y compilación de módulos nativos
+-5. `pnpm build` — empaquetado del frontend
+-
+-Cuando termine la compilación, verá:
+-
+-```
+-Build OK. Start the server with:
+-  node server/node/server.cjs
+-
+-Then open this address in the phone's own browser:
+-  http://localhost:6001
+-```
+-
+-
+----
+-
+-## 3. Ejecución y conexión
+-
+-Desde el mismo directorio, inicie el servidor:
+-
+-```bash
+-node server/node/server.cjs
+-```
+-
+-Una vez que aparezca el registro de arranque del servidor, abra el navegador del teléfono (Chrome, Firefox, etc.) y navegue a:
+-
+-```
+-http://localhost:6001
+-```
+-
+-La interfaz de PocketRisu debería cargarse. El navegador trata automáticamente a `localhost` como contexto seguro, por lo que el portapapeles, `crypto.subtle` y otras API que requieren contexto seguro funcionan con normalidad.
+-
+-Detenga el servidor con `Ctrl + C`.
+-
+-
+----
+-
+-## 4. Mantener en ejecución
+-
+-Para mantener el servidor activo cuando la pantalla se apaga o cambia a otras aplicaciones, active el bloqueo de activación (wake lock) de Termux:
+-
+-```bash
+-termux-wake-lock
+-```
+-
+-La notificación de Termux mostrará el indicador de wake lock, y el servidor continuará ejecutándose incluso con la pantalla apagada.
+-
+-Libere con: `termux-wake-unlock`
+-
+-> Android aún puede terminar Termux bajo presión de memoria. Para uso prolongado, excluya Termux de la configuración de optimización de batería de su teléfono.
+-
+-
+----
+-
+-## 5. Actualización
+-
+-Desde el directorio de PocketRisu:
+-
+-```bash
+-cd ~/PocketRisu
+-git pull
+-NODE_OPTIONS="--max-old-space-size=2048" pnpm build
+-```
+-
+-Si las dependencias cambiaron, `pnpm install` se ejecuta automáticamente como parte de la compilación. Reinicie el servidor cuando se complete la compilación.
+-
+-
+----
+-
+-## 6. Limitaciones
+-
+-**Quick Tunnel (túnel automático de Cloudflare) no funciona en Termux.** El binario `cloudflared` no es compatible con el entorno DNS y TLS de Termux.
+-
+-PocketRisu detecta automáticamente el entorno Termux y muestra una advertencia en el menú de Acceso Remoto, ocultando el botón de inicio.
+-
+-
+----
+-
+-← [Volver al README](../../i18n/README.es.md)
+diff --git a/docs/ko/install.md b/docs/ko/install.md
+index 583abe4af..932744799 100644
+--- a/docs/ko/install.md
++++ b/docs/ko/install.md
+@@ -1,221 +1,79 @@
+-<p align="center">
+-  <a href="../en/install.md">English</a> | <strong>한국어</strong> | <a href="../de/install.md">Deutsch</a> | <a href="../cn/install.md">简体中文</a> | <a href="../es/install.md">Español</a> | <a href="../vi/install.md">Tiếng Việt</a> | <a href="../zh-Hant/install.md">繁體中文</a>
+-</p>
+-
+ # 설치 가이드
+ 
+-PocketRisu를 설치하는 방법은 네 가지가 있습니다.
+-
+-- [1. 포터블 패키지](#1-포터블-패키지) — 미리 컴파일된 바이너리. Node.js 불필요.
+-- [2. Docker](#2-docker) — 컨테이너 환경.
+-- [3. 설치 스크립트](#3-설치-스크립트) — 소스에서 자동 빌드. Linux/macOS 서버용.
+-- [4. Git Clone](#4-git-clone) — 소스 직접 빌드. 개발자/고급 사용자용.
+-
+-
+-## 시스템 요구사항
+-
+-| 항목        | 최소         | 권장                  |
+-| ----------- | ------------ | --------------------- |
+-| **CPU**     | 1코어        | 2코어 이상            |
+-| **RAM**     | 1GB (실행만) | 4GB 이상 (빌드 포함)  |
+-| **디스크**  | 1GB          | 2GB 이상              |
+-| **Node.js** | 22.12 이상   | (포터블/Docker는 불필요) |
+-
+-포터블 패키지와 Docker는 빌드 과정이 없어 RAM 1GB로 동작합니다. 직접 빌드(Git Clone, 설치 스크립트)할 경우 빌드 중 메모리 사용량이 높아 4GB 이상을 권장합니다.
+-
+-
+----
+-
+-## 1. 포터블 패키지
+-
+-미리 컴파일된 바이너리를 다운로드해 실행합니다. Node.js, Docker 등 추가 도구가 필요 없습니다. Windows, macOS(Apple Silicon), Linux(x64/ARM)를 지원합니다.
+-
+-### 다운로드
+-
+-[Releases 페이지](https://github.com/PocketRisu/PocketRisu/releases)에서 OS에 맞는 파일을 받습니다.
+-
+-| OS                      | 파일명                                    |
+-| ----------------------- | ----------------------------------------- |
+-| Windows (x64)           | `PocketRisu-vX.X.X-win-x64.zip`           |
+-| macOS (Apple Silicon)   | `PocketRisu-vX.X.X-macos-arm64.tar.gz`    |
+-| Linux (x64)             | `PocketRisu-vX.X.X-linux-x64.tar.gz`      |
+-| Linux (ARM)             | `PocketRisu-vX.X.X-linux-arm64.tar.gz`    |
+-
+-### 실행
+-
+-**Windows**
+-
+-zip 파일의 압축을 풀고 폴더 안의 `PocketRisu.exe`를 더블클릭합니다. 브라우저가 자동으로 열리며 `http://localhost:6001`로 접속됩니다.
+-
+-**macOS**
+-
+-```bash
+-tar -xzf PocketRisu-vX.X.X-macos-arm64.tar.gz
+-xattr -cr PocketRisu-vX.X.X-macos-arm64
+-open PocketRisu-vX.X.X-macos-arm64/PocketRisu.app
+-```
+-
+-`xattr` 명령은 "Apple에서 확인할 수 없습니다" 경고를 우회하기 위한 1회성 작업입니다.
+-
+-**Linux**
+-
+-```bash
+-tar -xzf PocketRisu-vX.X.X-linux-*.tar.gz
+-cd PocketRisu-vX.X.X-linux-*
+-./start.sh
+-```
+-
+-브라우저에서 `http://localhost:6001`로 접속됩니다.
+-
+-### 헤드리스 서버 (한 줄 다운로드)
+-
+-GUI 없는 Linux/macOS 서버에서 최신 버전을 한 번에 받아 실행합니다.
+-
+-**Linux (x64):**
+-
+-```bash
+-VERSION=$(curl -s https://api.github.com/repos/PocketRisu/PocketRisu/releases/latest | grep -o '"tag_name":"[^"]*"' | cut -d'"' -f4)
+-curl -fsSL "https://github.com/PocketRisu/PocketRisu/releases/download/${VERSION}/PocketRisu-${VERSION}-linux-x64.tar.gz" -o pocketrisu.tar.gz
+-tar -xzf pocketrisu.tar.gz && rm pocketrisu.tar.gz
+-cd PocketRisu-${VERSION}-linux-x64
+-./start.sh
+-```
+-
+-**Linux (ARM):** 위 명령에서 `linux-x64`를 `linux-arm64`로 교체.
+-
+-**macOS (Apple Silicon):**
+-
+-```bash
+-VERSION=$(curl -s https://api.github.com/repos/PocketRisu/PocketRisu/releases/latest | grep -o '"tag_name":"[^"]*"' | cut -d'"' -f4)
+-curl -fsSL "https://github.com/PocketRisu/PocketRisu/releases/download/${VERSION}/PocketRisu-${VERSION}-macos-arm64.tar.gz" -o pocketrisu.tar.gz
+-tar -xzf pocketrisu.tar.gz && rm pocketrisu.tar.gz
+-xattr -cr PocketRisu-${VERSION}-macos-arm64
+-cd PocketRisu-${VERSION}-macos-arm64
+-./start.sh
+-```
++PocketRisu Alter는 불안정한 nightly 버전입니다. 실행 전 `save/` 데이터나 Docker 볼륨을 백업하세요.
+ 
+-### 업데이트
++지원 실행 방식은 두 가지뿐입니다.
+ 
+-웹 UI 홈 화면의 업데이트 팝업에서 "지금 업데이트"를 클릭하거나, 설치 폴더에서 아래 스크립트를 실행합니다.
++- [1. Docker](#1-docker)
++- [2. 소스 기반 서버 실행](#2-소스-기반-서버-실행)
+ 
+-- **Windows**: `update.bat` 더블클릭
+-- **macOS / Linux**: `./update.sh`
++그 외 실행 방식과 설치 스크립트는 지원하지 않습니다.
+ 
+-`save/` 폴더의 데이터는 그대로 보존됩니다.
++## 시스템 요구사항
+ 
++| 항목 | 최소 | 권장 |
++| --- | --- | --- |
++| CPU | 1코어 | 2코어 이상 |
++| RAM | 1GB | 4GB 이상 |
++| 디스크 | 1GB | 2GB 이상 |
++| Node.js | 22.12 이상 | 소스 기반 서버 실행 시 필요 |
+ 
+----
++Docker 실행에는 Docker 또는 Docker Desktop이 필요합니다. 소스 기반 서버 실행에는 Node.js 22.12 이상과 pnpm이 필요합니다.
+ 
+-## 2. Docker
++## 1. Docker
+ 
+ Docker / Docker Desktop이 설치된 환경에서 동작합니다.
+ 
+-### Docker 설치
+-
+-- **Windows / macOS**: [Docker Desktop](https://www.docker.com/products/docker-desktop/) 다운로드 후 설치
+-- **Linux**:
+-  ```bash
+-  curl -fsSL https://get.docker.com | sh
+-  ```
+-
+ ### 실행
+ 
+ ```bash
+-curl -L https://raw.githubusercontent.com/PocketRisu/PocketRisu/main/docker-compose.yml -o docker-compose.yml
++git clone https://github.com/PocketRisu-Alter/PocketRisu-Alter.git
++cd PocketRisu-Alter
+ docker compose up -d
+ ```
+ 
+-브라우저에서 `http://localhost:6001`로 접속됩니다.
++기본 `docker-compose.yml` 기준 브라우저에서 `http://localhost:7860`으로 접속합니다. `6001` 포트도 함께 쓰려면 `docker-compose.yml`의 주석 처리된 포트 매핑을 활성화하세요.
+ 
+ ### 업데이트
+ 
+ ```bash
+-docker compose pull && docker compose up -d
++cd PocketRisu-Alter
++git pull
++docker compose up -d --build
+ ```
+ 
+ ### 데이터 위치
+ 
+-채팅·캐릭터 등 모든 데이터는 Docker 볼륨(`risuai-save`)에 저장됩니다. 업데이트해도 데이터는 유지됩니다.
+-
+-
+----
+-
+-## 3. 설치 스크립트
+-
+-소스 코드를 받아 Node.js로 자동 빌드하는 스크립트 방식입니다. Linux/macOS 서버에서 동작합니다. `git pull` 흐름으로 직접 관리하고 싶을 때 사용합니다.
+-
+-### 사전 준비
+-
+-Node.js 22.12 이상이 필요합니다:
+-
+-```bash
+-node --version
+-# v22.12.0 이상
+-```
+-
+-Node.js가 없다면 [Node.js 공식 사이트](https://nodejs.org/)에서 설치합니다.
++채팅·캐릭터 등 데이터는 Docker 볼륨 `pocketrisu_alter_save`에 저장됩니다. 컨테이너를 다시 빌드해도 볼륨을 지우지 않으면 데이터는 유지됩니다.
+ 
+-### 설치
+-
+-```bash
+-curl -fsSL https://raw.githubusercontent.com/PocketRisu/PocketRisu/main/install.sh | bash
+-```
+-
+-설치가 완료되면 안내 메시지가 표시됩니다.
+-
+-### 서버 시작
+-
+-```bash
+-cd ~/pocketrisu
+-pnpm runserver
+-```
+-
+-브라우저에서 `http://localhost:6001`로 접속.
+-
+-### 업데이트
+-
+-```bash
+-cd ~/pocketrisu
+-./update.sh
+-```
+-
+-> **v1.5.x → v1.6.0 1회성 안내**: Risuai-NodeOnly 시절(v1.5.x 이하)에 `install.sh`로 설치하셨다면, v1.6.0으로 첫 업데이트 전에 `update.sh`를 새 버전으로 한 번만 교체해주세요. (repo 이름이 PocketRisu로 바뀌어 옛 `update.sh`가 새 소스 디렉토리를 찾지 못합니다.)
+->
+-> ```bash
+-> curl -fsSL https://raw.githubusercontent.com/PocketRisu/PocketRisu/main/update.sh -o update.sh && chmod +x update.sh
+-> ./update.sh
+-> ```
+->
+-> 이후 업데이트부터는 평소대로 `./update.sh`만 실행하면 됩니다.
+-
+-
+----
++이 볼륨은 PocketRisu의 Docker 저장소와 별도입니다. 기존 PocketRisu 데이터와 섞이지 않도록 분리된 이름을 사용합니다. 같은 저장소를 공유하고 싶다면 `docker-compose.yml`의 `volumes` 설정을 직접 수정하세요.
+ 
+-## 4. Git Clone
++## 2. 소스 기반 서버 실행
+ 
+-소스 코드를 직접 받아 단계별로 빌드합니다. 코드 수정·디버깅이 필요한 개발자용입니다.
++소스 코드를 직접 받아 빌드한 뒤 Node 서버를 실행합니다. 코드 수정·디버깅 또는 직접 운영이 필요한 경우 사용합니다.
+ 
+ ```bash
+-git clone https://github.com/PocketRisu/PocketRisu.git
+-cd PocketRisu
++git clone https://github.com/PocketRisu-Alter/PocketRisu-Alter.git
++cd PocketRisu-Alter
+ pnpm install
+ pnpm build
+ pnpm runserver
+ ```
+ 
+-브라우저에서 `http://localhost:6001`로 접속.
++브라우저에서 `http://localhost:6001`로 접속합니다.
+ 
+ ### 업데이트
+ 
+ ```bash
++cd PocketRisu-Alter
+ git pull
+ pnpm install
+ pnpm build
+-# 서버 재시작
+ pnpm runserver
+ ```
+ 
++이미 서버가 실행 중이면 중지한 뒤 다시 시작하세요.
+ 
+ ---
+ 
+-← [README로 돌아가기](../../i18n/README.ko.md)
++← [README로 돌아가기](../../README.md)
+diff --git a/docs/ko/migration.md b/docs/ko/migration.md
+index cf702a257..9272bb8da 100644
+--- a/docs/ko/migration.md
++++ b/docs/ko/migration.md
+@@ -1,10 +1,6 @@
+-<p align="center">
+-  <a href="../en/migration.md">English</a> | <strong>한국어</strong> | <a href="../de/migration.md">Deutsch</a> | <a href="../cn/migration.md">简体中文</a> | <a href="../es/migration.md">Español</a> | <a href="../vi/migration.md">Tiếng Việt</a> | <a href="../zh-Hant/migration.md">繁體中文</a>
+-</p>
+-
+ # RisuAI 데이터 이전 가이드
+ 
+-기존 RisuAI(웹 리스, 로컬 리스)에서 PocketRisu로 데이터를 이전하는 방법은 세 가지입니다. 출발 환경과 데이터 규모에 따라 선택합니다.
++기존 RisuAI(웹 리스, 로컬 리스)에서 PocketRisu Alter로 데이터를 이전하는 방법은 세 가지입니다. 출발 환경과 데이터 규모에 따라 선택합니다.
+ 
+ - [1. 로컬 백업 파일(.bin) 이전](#1-로컬-백업-파일bin-이전) — 모든 환경에서 동작. 가장 일반적인 방법.
+ - [2. Save 폴더 zip 업로드](#2-save-폴더-zip-업로드) — 로컬 리스, 소규모 데이터.
+@@ -20,10 +16,10 @@
+ 
+ ## 1. 로컬 백업 파일(.bin) 이전
+ 
+-기존 RisuAI에서 내보낸 `.bin` 백업 파일을 PocketRisu에서 불러오는 방식입니다. 출발 환경(웹/Tauri/Capacitor/로컬)에 무관하게 동작합니다.
++기존 RisuAI에서 내보낸 `.bin` 백업 파일을 PocketRisu Alter에서 불러오는 방식입니다. 출발 환경(웹/Tauri/Capacitor/로컬)에 무관하게 동작합니다.
+ 
+ 1. **기존 RisuAI**: 설정 > 백업 > "로컬 백업 저장"으로 `.bin` 파일 내보내기
+-2. **PocketRisu**: 설정 > 데이터 이전 > "원본 리스 로컬 백업 불러오기"로 `.bin` 파일 가져오기
++2. **PocketRisu Alter**: 설정 > 데이터 이전 > "원본 리스 로컬 백업 불러오기"로 `.bin` 파일 가져오기
+ 
+ 
+ ---
+@@ -33,7 +29,7 @@
+ 기존에 로컬 리스(Node 서버 버전)를 사용 중이었다면, `save` 폴더를 zip으로 압축해 업로드할 수 있습니다.
+ 
+ 1. 기존 RisuAI 프로젝트의 `save` 폴더를 zip으로 압축
+-2. PocketRisu의 설정 > 데이터 이전 > "노드리스에서 save 폴더 가져오기" 아코디언 열기
++2. PocketRisu Alter의 설정 > 데이터 이전 > "노드리스에서 save 폴더 가져오기" 아코디언 열기
+ 3. "Save 폴더에서 불러오기 (Zip 업로드)"로 zip 파일 업로드
+ 
+ > 압축 파일 용량이 클 경우 업로드가 실패할 수 있습니다. 이 경우 [3. Save 폴더 직접 복사](#3-save-폴더-직접-복사)를 사용하세요.
+@@ -45,9 +41,9 @@
+ 
+ 대용량 데이터(수 GB 이상)에 적합한 방식입니다. 서버 파일 시스템에 직접 접근할 수 있어야 합니다.
+ 
+-1. PocketRisu 서버 정지
+-2. 기존 RisuAI의 `save` 폴더를 PocketRisu의 `save` 폴더에 통째로 덮어쓰기
+-3. PocketRisu 서버 재시작 — 자동 마이그레이션이 진행됩니다
++1. PocketRisu Alter 서버 정지
++2. 기존 RisuAI의 `save` 폴더를 PocketRisu Alter의 `save` 폴더에 통째로 덮어쓰기
++3. PocketRisu Alter 서버 재시작 — 자동 마이그레이션이 진행됩니다
+     - 터미널 또는 PM2 로그에서 진행률을 확인할 수 있습니다
+ 4. 마이그레이션 완료 후, 설정 > 데이터 이전 > "노드리스에서 save 폴더 가져오기" 아코디언의 "마이그레이션된 Save 파일 정리"로 원본 파일을 제거해 디스크 공간을 회수
+ 
+@@ -66,4 +62,4 @@
+ 
+ ---
+ 
+-← [README로 돌아가기](../../i18n/README.ko.md)
++← [README로 돌아가기](../../README.md)
+diff --git a/docs/ko/remote.md b/docs/ko/remote.md
+index 5c7a62f55..90c2c020d 100644
+--- a/docs/ko/remote.md
++++ b/docs/ko/remote.md
+@@ -1,20 +1,16 @@
+-<p align="center">
+-  <a href="../en/remote.md">English</a> | <strong>한국어</strong> | <a href="../de/remote.md">Deutsch</a> | <a href="../cn/remote.md">简体中文</a> | <a href="../es/remote.md">Español</a> | <a href="../vi/remote.md">Tiếng Việt</a> | <a href="../zh-Hant/remote.md">繁體中文</a>
+-</p>
+-
+ # 원격 접속 가이드
+ 
+-PocketRisu를 PC에 실행해두고 다른 기기(스마트폰, 태블릿, 다른 PC 등)에서 접속하는 방법은 두 가지입니다.
++PocketRisu Alter를 PC나 서버에 실행해두고 다른 기기(스마트폰, 태블릿, 다른 PC 등)에서 접속하는 방법은 두 가지입니다.
+ 
+-- [1. Quick Tunnel](#1-quick-tunnel) — PocketRisu 내장 기능. 별도 앱 불필요. 서버 재시작 시 URL 변경.
++- [1. Quick Tunnel](#1-quick-tunnel) — PocketRisu Alter 내장 기능. 별도 앱 불필요. 서버 재시작 시 URL 변경.
+ - [2. Tailscale](#2-tailscale) — 사설 네트워크(VPN) 기반. URL 고정.
+ 
+ 
+ ## 1. Quick Tunnel
+ 
+-PocketRisu가 임시 원격 접속 URL을 발급하는 내장 기능입니다.
++PocketRisu Alter가 임시 원격 접속 URL을 발급하는 내장 기능입니다.
+ 
+-1. PC에서 PocketRisu 설정 > 원격 접속 > "원격 접속 열기" 클릭
++1. PC에서 PocketRisu Alter 설정 > 원격 접속 > "원격 접속 열기" 클릭
+ 2. 표시되는 QR 코드를 스마트폰 카메라로 스캔하거나, URL을 다른 기기 브라우저에 직접 입력
+ 
+ > 서버를 재시작하면 URL이 바뀝니다. 고정 URL이 필요하면 [Tailscale](#2-tailscale)을 사용하세요.
+@@ -38,7 +34,7 @@ PC와 접속할 모든 기기에서 동일한 계정(Google, Microsoft 등)으
+ 
+ ### 3단계: PC에서 HTTPS 공유 활성화
+ 
+-PocketRisu가 실행 중인 PC의 터미널에서 한 번만 실행:
++PocketRisu Alter가 실행 중인 PC의 터미널에서 한 번만 실행:
+ 
+ ```bash
+ tailscale serve --bg http://localhost:6001
+@@ -57,4 +53,4 @@ https://내PC이름.tail어쩌구.ts.net
+ 
+ ---
+ 
+-← [README로 돌아가기](../../i18n/README.ko.md)
++← [README로 돌아가기](../../README.md)
+diff --git a/docs/ko/termux.md b/docs/ko/termux.md
+deleted file mode 100644
+index d9f8dab14..000000000
+--- a/docs/ko/termux.md
++++ /dev/null
+@@ -1,142 +0,0 @@
+-<p align="center">
+-  <a href="../en/termux.md">English</a> | <strong>한국어</strong> | <a href="../de/termux.md">Deutsch</a> | <a href="../cn/termux.md">简体中文</a> | <a href="../es/termux.md">Español</a> | <a href="../vi/termux.md">Tiếng Việt</a> | <a href="../zh-Hant/termux.md">繁體中文</a>
+-</p>
+-
+-# Termux 설치 가이드
+-
+-안드로이드 폰에서 Termux를 통해 PocketRisu를 직접 빌드해 사용하는 방법을 안내합니다. 같은 폰의 브라우저에서 `http://localhost:6001`로 접속하는 사용 패턴이 기본입니다.
+-
+-- [1. 사전 준비](#1-사전-준비) — F-Droid Termux + 시스템 요구사항
+-- [2. 설치 및 빌드](#2-설치-및-빌드) — 한 줄 명령으로 자동 진행
+-- [3. 실행 및 접속](#3-실행-및-접속) — 폰 브라우저로 사용
+-- [4. 백그라운드 유지](#4-백그라운드-유지) — 화면 꺼진 상태에서도 서버 유지
+-- [5. 업데이트](#5-업데이트) — 최신 버전 받기
+-- [6. 제한사항](#6-제한사항) — Termux 환경에서 동작하지 않는 기능
+-
+-
+-## 시스템 요구사항
+-
+-| 항목         | 최소           | 권장                          |
+-| ------------ | -------------- | ----------------------------- |
+-| **Android**  | 7.0 (API 24)   | 10 이상                       |
+-| **CPU 아키텍처** | ARM64          | ARM64                         |
+-| **RAM**      | 2GB            | 4GB 이상                      |
+-| **여유 공간**  | 2GB            | 4GB 이상 (빌드 결과물 포함)   |
+-
+-PocketRisu는 Termux에서 미리 컴파일된 바이너리를 제공하지 않으며, 폰에서 직접 빌드합니다. `better-sqlite3` 같은 네이티브 모듈을 포함해 빌드 시간은 폰 성능에 따라 **약 10~40분** 소요됩니다.
+-
+-
+----
+-
+-## 1. 사전 준비
+-
+-### Termux는 F-Droid 또는 GitHub Releases 버전을 사용
+-
+-> ⚠️ **Play Store의 Termux는 사용할 수 없습니다.**
+-> Termux 개발진이 2020년 이후 Play Store 버전 업데이트를 중단했으며, PocketRisu 빌드에 필요한 최신 패키지(Node.js 22 이상 등)가 설치되지 않습니다.
+-
+-다음 두 곳 중 하나에서 Termux를 받습니다.
+-
+-- **F-Droid (권장)**: https://f-droid.org/packages/com.termux/
+-- **GitHub Releases**: https://github.com/termux/termux-app/releases
+-
+-이미 Play Store 버전이 설치돼 있다면 삭제 후 위 두 곳 중 한 곳에서 새로 설치합니다.
+-
+-
+----
+-
+-## 2. 설치 및 빌드
+-
+-Termux 앱을 연 후 다음 한 줄을 실행합니다.
+-
+-```bash
+-pkg install -y git && \
+-  git clone https://github.com/PocketRisu/PocketRisu.git && \
+-  cd PocketRisu && \
+-  bash scripts/termux/build.sh
+-```
+-
+-이 명령이 자동으로 처리합니다.
+-
+-1. `git` 설치
+-2. PocketRisu 소스 다운로드
+-3. 빌드 의존성 설치 (`nodejs-lts`, `python`, `make`, `clang`, `pnpm` 등)
+-4. `pnpm install` — JavaScript 의존성 다운로드 및 네이티브 모듈 컴파일
+-5. `pnpm build` — 프론트엔드 번들링
+-
+-빌드가 완료되면 다음 메시지가 표시됩니다.
+-
+-```
+-Build OK. Start the server with:
+-  node server/node/server.cjs
+-
+-Then open this address in the phone's own browser:
+-  http://localhost:6001
+-```
+-
+-
+----
+-
+-## 3. 실행 및 접속
+-
+-빌드가 끝난 디렉터리에서 서버를 실행합니다.
+-
+-```bash
+-node server/node/server.cjs
+-```
+-
+-서버 부팅 로그가 표시되면 폰의 브라우저(Chrome, Firefox 등)에서 다음 주소를 엽니다.
+-
+-```
+-http://localhost:6001
+-```
+-
+-PocketRisu UI가 표시되면 정상입니다. `localhost`는 브라우저가 자동으로 secure context로 인정하므로 클립보드, crypto.subtle 등 모든 기능이 동작합니다.
+-
+-서버 종료: 터미널에서 `Ctrl + C`
+-
+-
+----
+-
+-## 4. 백그라운드 유지
+-
+-화면이 꺼지거나 다른 앱을 사용하는 동안에도 서버를 유지하려면 슬립 방지를 활성화합니다.
+-
+-```bash
+-termux-wake-lock
+-```
+-
+-Termux 알림 영역에 wake lock 상태가 표시되며, 폰 화면이 꺼져도 서버 프로세스가 종료되지 않습니다.
+-
+-해제: `termux-wake-unlock`
+-
+-> Android가 메모리 부족 상황에서 Termux를 강제 종료할 수 있습니다. 안정적으로 항상 켜두려면 폰의 배터리 최적화 설정에서 Termux를 제외해 두는 것을 권장합니다.
+-
+-
+----
+-
+-## 5. 업데이트
+-
+-PocketRisu 디렉터리에서 다음을 실행합니다.
+-
+-```bash
+-cd ~/PocketRisu
+-git pull
+-NODE_OPTIONS="--max-old-space-size=2048" pnpm build
+-```
+-
+-코드 변경에 따라 새 의존성이 필요한 경우 `pnpm install`이 자동 실행됩니다. 빌드가 끝나면 서버를 재시작합니다.
+-
+-
+----
+-
+-## 6. 제한사항
+-
+-설정 → 원격 접속 메뉴의 **Quick Tunnel은 Termux에서 사용할 수 없습니다**. cloudflared 바이너리가 Termux의 DNS·TLS 환경과 호환되지 않습니다.
+-
+-PocketRisu UI는 Termux 환경을 자동 감지하여 해당 메뉴에 경고를 표시하고 버튼을 숨깁니다.
+-
+-
+----
+-
+-← [PocketRisu README로 돌아가기](../../i18n/README.ko.md)
+diff --git a/docs/telegram-bot-plan.md b/docs/telegram-bot-plan.md
+new file mode 100644
+index 000000000..8fcf7bf63
+--- /dev/null
++++ b/docs/telegram-bot-plan.md
+@@ -0,0 +1,58 @@
++# Telegram Bot Integration Plan
++
++## Overview
++Connect PocketRisu characters and chat sessions to Telegram via a bot.
++
++## Steps
++
++### 1. Bot Creation Guide
++- Add `docs/telegram-bot-setup.md` with step-by-step guide:
++  1. Open @BotFather on Telegram
++  2. `/newbot` → name → username → copy token
++  3. Token format: `123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11`
++
++### 2. Database Schema
++- Add to `Database` interface in `src/ts/storage/database.svelte.ts`:
++  - `telegramToken?: string` — Bot token
++  - `telegramEnabled?: boolean` — Master toggle
++  - `telegramCharMapping?: TelegramCharMapping[]` — Character↔Telegram chat mapping
++- Define `TelegramCharMapping`:
++  ```ts
++  interface TelegramCharMapping {
++    telegramChatId: string    // Telegram chat/group ID
++    chaId: string             // Character UUID
++    enabled: boolean
++  }
++  ```
++
++### 3. Backend: Telegram Bot Module
++- Create `server/node/telegramBot.cjs`:
++  - Polling-based (no webhook needed for self-hosted)
++  - On incoming message: find matching character by `telegramChatId`, call `startChatJob` or direct API
++  - Send responses back to Telegram
++- API routes (`/api/telegram/*`):
++  - `GET /api/telegram/status` — Bot running status
++  - `POST /api/telegram/start` — Start bot with token
++  - `POST /api/telegram/stop` — Stop bot
++  - `GET /api/telegram/chats` — List linked chats
++
++### 4. Frontend: Settings UI
++- New settings page: `TelegramSettings.svelte` (SettingsMenuIndex 24)
++  - Token input field (masked)
++  - Enable/disable toggle
++  - Character select + Telegram chat ID mapping section
++  - Connection status indicator
++- Register in `Settings.svelte` with Telegram icon
++
++### 5. i18n
++- Add keys to `en.ts` and `ko.ts`:
++  - `telegram`
++  - `telegramDesc`
++  - `telegramToken`
++  - `telegramEnable`
++  - `telegramCharMapping`
++  - `telegramStatus`
++  - etc.
++
++### 6. Verify
++- Start server → connect bot → send message on Telegram → character responds
+diff --git a/docs/vi/install.md b/docs/vi/install.md
+deleted file mode 100644
+index 944550740..000000000
+--- a/docs/vi/install.md
++++ /dev/null
+@@ -1,223 +0,0 @@
+-<p align="center">
+-  <a href="../en/install.md">English</a> | <a href="../ko/install.md">한국어</a> | <a href="../de/install.md">Deutsch</a> | <a href="../cn/install.md">简体中文</a> | <a href="../es/install.md">Español</a> | <strong>Tiếng Việt</strong> | <a href="../zh-Hant/install.md">繁體中文</a>
+-</p>
+-
+-# Hướng dẫn cài đặt
+-
+-> 🌐 Hướng dẫn này được dịch bằng máy. Để có thông tin chính xác nhất, vui lòng tham khảo phiên bản [tiếng Anh](../en/install.md) hoặc [tiếng Hàn](../ko/install.md).
+-
+-PocketRisu có thể được cài đặt theo bốn cách.
+-
+-- [1. Gói portable](#1-gói-portable) — Tệp nhị phân được biên dịch sẵn. Không cần Node.js.
+-- [2. Docker](#2-docker) — Môi trường container.
+-- [3. Script cài đặt](#3-script-cài-đặt) — Build tự động từ mã nguồn. Dành cho máy chủ Linux/macOS.
+-- [4. Git Clone](#4-git-clone) — Build mã nguồn thủ công. Dành cho nhà phát triển / người dùng nâng cao.
+-
+-
+-## Yêu cầu hệ thống
+-
+-| Mục          | Tối thiểu                | Khuyến nghị                              |
+-| ------------ | ------------------------ | ---------------------------------------- |
+-| **CPU**      | 1 nhân                   | 2+ nhân                                  |
+-| **RAM**      | 1 GB (chỉ chạy)          | 4+ GB (bao gồm build)                    |
+-| **Đĩa**      | 1 GB                     | 2+ GB                                    |
+-| **Node.js**  | 22.12+                   | (không cần cho portable/Docker)          |
+-
+-Gói portable và Docker không cần bước build và có thể chạy với 1 GB RAM. Build trực tiếp (Git Clone, script cài đặt) tiêu tốn nhiều bộ nhớ khi build, vì vậy khuyến nghị 4 GB trở lên.
+-
+-
+----
+-
+-## 1. Gói portable
+-
+-Tải xuống và chạy tệp nhị phân được biên dịch sẵn. Không cần Node.js, Docker hay công cụ khác. Hỗ trợ Windows, macOS (Apple Silicon) và Linux (x64/ARM).
+-
+-### Tải xuống
+-
+-Lấy tệp cho OS của bạn từ [trang Releases](https://github.com/PocketRisu/PocketRisu/releases).
+-
+-| OS                       | Tệp                                       |
+-| ------------------------ | ----------------------------------------- |
+-| Windows (x64)            | `PocketRisu-vX.X.X-win-x64.zip`           |
+-| macOS (Apple Silicon)    | `PocketRisu-vX.X.X-macos-arm64.tar.gz`    |
+-| Linux (x64)              | `PocketRisu-vX.X.X-linux-x64.tar.gz`      |
+-| Linux (ARM)              | `PocketRisu-vX.X.X-linux-arm64.tar.gz`    |
+-
+-### Chạy
+-
+-**Windows**
+-
+-Giải nén tệp zip và nhấp đúp vào `PocketRisu.exe`. Trình duyệt tự động mở tại `http://localhost:6001`.
+-
+-**macOS**
+-
+-```bash
+-tar -xzf PocketRisu-vX.X.X-macos-arm64.tar.gz
+-xattr -cr PocketRisu-vX.X.X-macos-arm64
+-open PocketRisu-vX.X.X-macos-arm64/PocketRisu.app
+-```
+-
+-Lệnh `xattr` là thao tác một lần để bỏ qua cảnh báo "Apple không thể xác minh".
+-
+-**Linux**
+-
+-```bash
+-tar -xzf PocketRisu-vX.X.X-linux-*.tar.gz
+-cd PocketRisu-vX.X.X-linux-*
+-./start.sh
+-```
+-
+-Mở `http://localhost:6001` trong trình duyệt.
+-
+-### Máy chủ không GUI (tải xuống một dòng)
+-
+-Đối với máy chủ Linux/macOS không có GUI, tải xuống và chạy phiên bản mới nhất bằng một lệnh.
+-
+-**Linux (x64):**
+-
+-```bash
+-VERSION=$(curl -s https://api.github.com/repos/PocketRisu/PocketRisu/releases/latest | grep -o '"tag_name":"[^"]*"' | cut -d'"' -f4)
+-curl -fsSL "https://github.com/PocketRisu/PocketRisu/releases/download/${VERSION}/PocketRisu-${VERSION}-linux-x64.tar.gz" -o pocketrisu.tar.gz
+-tar -xzf pocketrisu.tar.gz && rm pocketrisu.tar.gz
+-cd PocketRisu-${VERSION}-linux-x64
+-./start.sh
+-```
+-
+-**Linux (ARM):** Thay `linux-x64` bằng `linux-arm64` trong lệnh trên.
+-
+-**macOS (Apple Silicon):**
+-
+-```bash
+-VERSION=$(curl -s https://api.github.com/repos/PocketRisu/PocketRisu/releases/latest | grep -o '"tag_name":"[^"]*"' | cut -d'"' -f4)
+-curl -fsSL "https://github.com/PocketRisu/PocketRisu/releases/download/${VERSION}/PocketRisu-${VERSION}-macos-arm64.tar.gz" -o pocketrisu.tar.gz
+-tar -xzf pocketrisu.tar.gz && rm pocketrisu.tar.gz
+-xattr -cr PocketRisu-${VERSION}-macos-arm64
+-cd PocketRisu-${VERSION}-macos-arm64
+-./start.sh
+-```
+-
+-### Cập nhật
+-
+-Nhấp "Cập nhật ngay" trong popup cập nhật trên màn hình chính của giao diện web, hoặc chạy script cập nhật trong thư mục cài đặt.
+-
+-- **Windows**: Nhấp đúp `update.bat`
+-- **macOS / Linux**: `./update.sh`
+-
+-Dữ liệu trong thư mục `save/` được bảo toàn.
+-
+-
+----
+-
+-## 2. Docker
+-
+-Chạy trên hệ thống có Docker hoặc Docker Desktop được cài đặt.
+-
+-### Cài đặt Docker
+-
+-- **Windows / macOS**: Cài đặt [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+-- **Linux**:
+-  ```bash
+-  curl -fsSL https://get.docker.com | sh
+-  ```
+-
+-### Chạy
+-
+-```bash
+-curl -L https://raw.githubusercontent.com/PocketRisu/PocketRisu/main/docker-compose.yml -o docker-compose.yml
+-docker compose up -d
+-```
+-
+-Mở `http://localhost:6001` trong trình duyệt.
+-
+-### Cập nhật
+-
+-```bash
+-docker compose pull && docker compose up -d
+-```
+-
+-### Vị trí dữ liệu
+-
+-Tất cả dữ liệu (cuộc trò chuyện, nhân vật, v.v.) được lưu trong Docker volume `risuai-save`. Dữ liệu được bảo toàn khi cập nhật.
+-
+-
+----
+-
+-## 3. Script cài đặt
+-
+-Lấy mã nguồn và build tự động với Node.js. Chạy trên máy chủ Linux/macOS. Sử dụng nếu bạn muốn quản lý cập nhật qua `git pull`.
+-
+-### Điều kiện tiên quyết
+-
+-Cần Node.js 22.12 trở lên:
+-
+-```bash
+-node --version
+-# v22.12.0 trở lên
+-```
+-
+-Cài đặt từ [trang chính thức của Node.js](https://nodejs.org/) nếu chưa có.
+-
+-### Cài đặt
+-
+-```bash
+-curl -fsSL https://raw.githubusercontent.com/PocketRisu/PocketRisu/main/install.sh | bash
+-```
+-
+-Thông báo trạng thái hiển thị khi cài đặt hoàn tất.
+-
+-### Khởi động máy chủ
+-
+-```bash
+-cd ~/pocketrisu
+-pnpm runserver
+-```
+-
+-Mở `http://localhost:6001` trong trình duyệt.
+-
+-### Cập nhật
+-
+-```bash
+-cd ~/pocketrisu
+-./update.sh
+-```
+-
+-> **Lưu ý một lần cho v1.5.x → v1.6.0**: Nếu bạn đã cài đặt qua `install.sh` trong thời kỳ Risuai-NodeOnly (v1.5.x trở về trước), hãy thay `update.sh` bằng phiên bản mới một lần trước lần cập nhật v1.6.0 đầu tiên. (Repository đã được đổi tên thành PocketRisu và `update.sh` cũ không thể tìm thấy thư mục mã nguồn mới.)
+->
+-> ```bash
+-> curl -fsSL https://raw.githubusercontent.com/PocketRisu/PocketRisu/main/update.sh -o update.sh && chmod +x update.sh
+-> ./update.sh
+-> ```
+->
+-> Các cập nhật tiếp theo chạy bằng `./update.sh` như thường lệ.
+-
+-
+----
+-
+-## 4. Git Clone
+-
+-Clone và build mã nguồn thủ công. Dành cho nhà phát triển cần sửa đổi hoặc gỡ lỗi mã.
+-
+-```bash
+-git clone https://github.com/PocketRisu/PocketRisu.git
+-cd PocketRisu
+-pnpm install
+-pnpm build
+-pnpm runserver
+-```
+-
+-Mở `http://localhost:6001` trong trình duyệt.
+-
+-### Cập nhật
+-
+-```bash
+-git pull
+-pnpm install
+-pnpm build
+-# Khởi động lại máy chủ
+-pnpm runserver
+-```
+-
+-
+----
+-
+-← [Quay lại README](../../i18n/README.vi.md)
+diff --git a/docs/vi/migration.md b/docs/vi/migration.md
+deleted file mode 100644
+index 790daf470..000000000
+--- a/docs/vi/migration.md
++++ /dev/null
+@@ -1,71 +0,0 @@
+-<p align="center">
+-  <a href="../en/migration.md">English</a> | <a href="../ko/migration.md">한국어</a> | <a href="../de/migration.md">Deutsch</a> | <a href="../cn/migration.md">简体中文</a> | <a href="../es/migration.md">Español</a> | <strong>Tiếng Việt</strong> | <a href="../zh-Hant/migration.md">繁體中文</a>
+-</p>
+-
+-# Hướng dẫn di chuyển từ RisuAI
+-
+-> 🌐 Hướng dẫn này được dịch bằng máy. Để có thông tin chính xác nhất, vui lòng tham khảo phiên bản [tiếng Anh](../en/migration.md) hoặc [tiếng Hàn](../ko/migration.md).
+-
+-Có ba cách để di chuyển dữ liệu từ cài đặt RisuAI hiện có (RisuAI Web, RisuAI Cục bộ) sang PocketRisu. Chọn dựa trên môi trường nguồn và kích thước dữ liệu của bạn.
+-
+-- [1. Tệp sao lưu cục bộ (.bin)](#1-tệp-sao-lưu-cục-bộ-bin) — Hoạt động trong mọi môi trường. Phương pháp phổ biến nhất.
+-- [2. Tải lên zip thư mục save](#2-tải-lên-zip-thư-mục-save) — RisuAI Cục bộ, dữ liệu nhỏ.
+-- [3. Sao chép trực tiếp thư mục save](#3-sao-chép-trực-tiếp-thư-mục-save) — RisuAI Cục bộ, dữ liệu lớn.
+-
+-
+-## Trước khi bắt đầu
+-
+-> ⚠️ **Sao lưu dữ liệu hiện có** trước khi di chuyển. Bạn có thể xuất tệp `.bin` từ Cài đặt > Sao lưu của RisuAI.
+-
+-
+----
+-
+-## 1. Tệp sao lưu cục bộ (.bin)
+-
+-Xuất tệp sao lưu `.bin` từ RisuAI hiện có, sau đó nhập vào PocketRisu. Hoạt động bất kể môi trường nguồn (web / Tauri / Capacitor / cục bộ).
+-
+-1. **Trong RisuAI hiện có**: Cài đặt > Sao lưu > "Lưu bản sao lưu cục bộ" để xuất tệp `.bin`.
+-2. **Trong PocketRisu**: Cài đặt > Di chuyển dữ liệu > "Nhập bản sao lưu cục bộ Risu gốc" để nhập tệp `.bin`.
+-
+-
+----
+-
+-## 2. Tải lên zip thư mục save
+-
+-Nếu bạn đang sử dụng RisuAI Cục bộ (phiên bản máy chủ Node), bạn có thể nén thư mục `save` và tải lên.
+-
+-1. Nén thư mục `save` của dự án RisuAI hiện có thành tệp zip.
+-2. Trong PocketRisu, vào Cài đặt > Di chuyển dữ liệu > accordion "Nhập thư mục save từ NodeOnly Risu".
+-3. Tải lên zip qua "Nhập từ thư mục save (Tải lên Zip)".
+-
+-> Nếu tệp zip quá lớn, việc tải lên có thể thất bại. Trong trường hợp đó, hãy sử dụng [3. Sao chép trực tiếp thư mục save](#3-sao-chép-trực-tiếp-thư-mục-save).
+-
+-
+----
+-
+-## 3. Sao chép trực tiếp thư mục save
+-
+-Phù hợp cho dữ liệu lớn (vài GB trở lên). Yêu cầu quyền truy cập trực tiếp hệ thống tệp của máy chủ.
+-
+-1. Dừng máy chủ PocketRisu.
+-2. Ghi đè thư mục `save` của PocketRisu bằng thư mục `save` của RisuAI hiện có.
+-3. Khởi động lại máy chủ PocketRisu — quá trình di chuyển tự động bắt đầu.
+-    - Theo dõi tiến trình trong terminal hoặc nhật ký PM2.
+-4. Sau khi hoàn tất di chuyển, sử dụng Cài đặt > Di chuyển dữ liệu > accordion "Nhập thư mục save từ NodeOnly Risu" > "Dọn dẹp tệp save đã di chuyển" để xóa các tệp gốc và thu hồi dung lượng đĩa.
+-
+-
+----
+-
+-## Tôi nên chọn phương pháp nào?
+-
+-| Tình huống                                                | Phương pháp được đề xuất             |
+-| --------------------------------------------------------- | ------------------------------------ |
+-| Di chuyển từ RisuAI Web                                   | 1. Sao lưu `.bin`                    |
+-| Di chuyển từ RisuAI Cục bộ, dữ liệu nhỏ                   | 2. Tải lên Zip                       |
+-| Di chuyển từ RisuAI Cục bộ, dữ liệu lớn (10GB+)           | 3. Sao chép trực tiếp thư mục save   |
+-| Không chắc                                                | 1. Sao lưu `.bin`                    |
+-
+-
+----
+-
+-← [Quay lại README](../../i18n/README.vi.md)
+diff --git a/docs/vi/remote.md b/docs/vi/remote.md
+deleted file mode 100644
+index 34e598ef7..000000000
+--- a/docs/vi/remote.md
++++ /dev/null
+@@ -1,62 +0,0 @@
+-<p align="center">
+-  <a href="../en/remote.md">English</a> | <a href="../ko/remote.md">한국어</a> | <a href="../de/remote.md">Deutsch</a> | <a href="../cn/remote.md">简体中文</a> | <a href="../es/remote.md">Español</a> | <strong>Tiếng Việt</strong> | <a href="../zh-Hant/remote.md">繁體中文</a>
+-</p>
+-
+-# Hướng dẫn truy cập từ xa
+-
+-> 🌐 Hướng dẫn này được dịch bằng máy. Để có thông tin chính xác nhất, vui lòng tham khảo phiên bản [tiếng Anh](../en/remote.md) hoặc [tiếng Hàn](../ko/remote.md).
+-
+-Có hai cách để truy cập PocketRisu đang chạy trên PC của bạn từ thiết bị khác (điện thoại thông minh, máy tính bảng, PC khác).
+-
+-- [1. Quick Tunnel](#1-quick-tunnel) — Tính năng tích hợp trong PocketRisu. Không cần ứng dụng bổ sung. URL thay đổi khi khởi động lại máy chủ.
+-- [2. Tailscale](#2-tailscale) — Dựa trên mạng riêng (VPN). URL cố định.
+-
+-
+-## 1. Quick Tunnel
+-
+-Tính năng tích hợp của PocketRisu để cấp URL truy cập từ xa tạm thời.
+-
+-1. Trên PC, trong PocketRisu: Cài đặt > Truy cập từ xa > "Mở truy cập từ xa"
+-2. Quét mã QR hiển thị bằng camera điện thoại thông minh hoặc nhập URL trực tiếp vào trình duyệt của thiết bị khác.
+-
+-> URL thay đổi mỗi khi máy chủ khởi động lại. Để có URL cố định, hãy sử dụng [Tailscale](#2-tailscale).
+-
+-
+----
+-
+-## 2. Tailscale
+-
+-Xây dựng một mạng riêng (VPN) chỉ có thể truy cập từ các thiết bị đăng nhập cùng tài khoản. URL được duy trì sau khi máy chủ khởi động lại.
+-
+-### Bước 1: Cài đặt Tailscale
+-
+-- PC: [tailscale.com](https://tailscale.com/)
+-- Điện thoại thông minh: Tìm "Tailscale" trong App Store / Google Play
+-- PC khác: Tương tự [tailscale.com](https://tailscale.com/)
+-
+-### Bước 2: Đăng nhập bằng cùng tài khoản
+-
+-Đăng nhập vào ứng dụng Tailscale trên PC và trên mọi thiết bị bạn muốn truy cập, sử dụng cùng tài khoản (Google, Microsoft, v.v.).
+-
+-### Bước 3: Bật chia sẻ HTTPS trên PC
+-
+-Trong terminal trên PC đang chạy PocketRisu, chạy một lần:
+-
+-```bash
+-tailscale serve --bg http://localhost:6001
+-```
+-
+-### Bước 4: Truy cập từ thiết bị khác
+-
+-Mở trong trình duyệt với định dạng URL:
+-
+-```
+-https://tên-pc-của-tôi.tail-gì-đó.ts.net
+-```
+-
+-Tìm địa chỉ chính xác qua mục PC của bạn trong danh sách thiết bị của ứng dụng Tailscale. Đánh dấu trong trình duyệt, và từ đó chỉ cần khởi động máy chủ trên PC là có thể truy cập từ bất kỳ thiết bị nào.
+-
+-
+----
+-
+-← [Quay lại README](../../i18n/README.vi.md)
+diff --git a/docs/vi/termux.md b/docs/vi/termux.md
+deleted file mode 100644
+index 69c05c68a..000000000
+--- a/docs/vi/termux.md
++++ /dev/null
+@@ -1,144 +0,0 @@
+-<p align="center">
+-  <a href="../en/termux.md">English</a> | <a href="../ko/termux.md">한국어</a> | <a href="../de/termux.md">Deutsch</a> | <a href="../cn/termux.md">简体中文</a> | <a href="../es/termux.md">Español</a> | <strong>Tiếng Việt</strong> | <a href="../zh-Hant/termux.md">繁體中文</a>
+-</p>
+-
+-# Hướng dẫn cài đặt Termux
+-
+-> 🌐 Hướng dẫn này được dịch bằng máy. Để có thông tin chính xác nhất, vui lòng tham khảo phiên bản [tiếng Anh](../en/termux.md) hoặc [tiếng Hàn](../ko/termux.md).
+-
+-Hướng dẫn này giải thích cách xây dựng và chạy PocketRisu trực tiếp trên điện thoại Android sử dụng Termux. Mẫu sử dụng dự kiến là mở `http://localhost:6001` trong trình duyệt của chính điện thoại.
+-
+-- [1. Điều kiện tiên quyết](#1-điều-kiện-tiên-quyết) — Termux từ F-Droid và yêu cầu hệ thống
+-- [2. Cài đặt và xây dựng](#2-cài-đặt-và-xây-dựng) — thiết lập bằng một lệnh duy nhất
+-- [3. Chạy và kết nối](#3-chạy-và-kết-nối) — mở từ trình duyệt điện thoại
+-- [4. Duy trì hoạt động](#4-duy-trì-hoạt-động) — tiếp tục chạy khi tắt màn hình
+-- [5. Cập nhật](#5-cập-nhật) — lấy phiên bản mới nhất
+-- [6. Hạn chế](#6-hạn-chế) — tính năng không hoạt động trên Termux
+-
+-
+-## Yêu cầu hệ thống
+-
+-| Hạng mục            | Tối thiểu       | Đề xuất                                |
+-| ------------------- | --------------- | -------------------------------------- |
+-| **Android**         | 7.0 (API 24)    | 10 trở lên                             |
+-| **CPU**             | ARM64           | ARM64                                  |
+-| **RAM**             | 2 GB            | 4 GB trở lên                           |
+-| **Dung lượng trống** | 2 GB            | 4 GB trở lên (bao gồm bản build)       |
+-
+-PocketRisu không cung cấp tệp nhị phân biên dịch sẵn cho Termux, vì vậy điện thoại tự xây dựng mọi thứ. Bao gồm các module gốc như `better-sqlite3`, quá trình xây dựng mất khoảng **10 đến 40 phút**, tùy theo hiệu năng điện thoại.
+-
+-
+----
+-
+-## 1. Điều kiện tiên quyết
+-
+-### Sử dụng phiên bản Termux từ F-Droid hoặc GitHub Releases
+-
+-> ⚠️ **Không thể sử dụng phiên bản Termux trên Play Store.**
+-> Các bảo trì viên Termux đã ngừng cập nhật bản Play Store vào năm 2020, và bản này không còn cài đặt được các gói mới mà PocketRisu cần (Node.js 22+).
+-
+-Cài đặt Termux từ một trong các nguồn sau:
+-
+-- **F-Droid (khuyến nghị)**: https://f-droid.org/packages/com.termux/
+-- **GitHub Releases**: https://github.com/termux/termux-app/releases
+-
+-Nếu bạn đã cài bản từ Play Store, hãy gỡ cài đặt trước rồi cài lại từ một trong các nguồn trên.
+-
+-
+----
+-
+-## 2. Cài đặt và xây dựng
+-
+-Mở Termux và chạy lệnh duy nhất này:
+-
+-```bash
+-pkg install -y git && \
+-  git clone https://github.com/PocketRisu/PocketRisu.git && \
+-  cd PocketRisu && \
+-  bash scripts/termux/build.sh
+-```
+-
+-Lệnh này tự động xử lý:
+-
+-1. Cài đặt `git`
+-2. Sao chép kho lưu trữ PocketRisu
+-3. Cài đặt các phụ thuộc xây dựng (`nodejs-lts`, `python`, `make`, `clang`, `pnpm`, v.v.)
+-4. `pnpm install` — phụ thuộc JavaScript và biên dịch module gốc
+-5. `pnpm build` — đóng gói giao diện người dùng
+-
+-Khi quá trình xây dựng hoàn tất, bạn sẽ thấy:
+-
+-```
+-Build OK. Start the server with:
+-  node server/node/server.cjs
+-
+-Then open this address in the phone's own browser:
+-  http://localhost:6001
+-```
+-
+-
+----
+-
+-## 3. Chạy và kết nối
+-
+-Từ cùng thư mục, khởi động máy chủ:
+-
+-```bash
+-node server/node/server.cjs
+-```
+-
+-Sau khi nhật ký khởi động máy chủ xuất hiện, mở trình duyệt điện thoại (Chrome, Firefox, v.v.) và truy cập:
+-
+-```
+-http://localhost:6001
+-```
+-
+-Giao diện PocketRisu sẽ tải lên. `localhost` được trình duyệt tự động xem là ngữ cảnh bảo mật (secure context), vì vậy clipboard, `crypto.subtle` và các API yêu cầu ngữ cảnh bảo mật khác đều hoạt động bình thường.
+-
+-Dừng máy chủ bằng `Ctrl + C`.
+-
+-
+----
+-
+-## 4. Duy trì hoạt động
+-
+-Để máy chủ tiếp tục chạy khi màn hình tắt hoặc bạn chuyển sang ứng dụng khác, hãy bật wake lock của Termux:
+-
+-```bash
+-termux-wake-lock
+-```
+-
+-Thông báo Termux sẽ hiển thị chỉ báo wake lock, và máy chủ tiếp tục chạy ngay cả khi màn hình tắt.
+-
+-Giải phóng bằng: `termux-wake-unlock`
+-
+-> Android vẫn có thể đóng Termux khi thiếu bộ nhớ. Để chạy lâu dài, hãy loại trừ Termux khỏi cài đặt tối ưu hóa pin của điện thoại.
+-
+-
+----
+-
+-## 5. Cập nhật
+-
+-Từ thư mục PocketRisu:
+-
+-```bash
+-cd ~/PocketRisu
+-git pull
+-NODE_OPTIONS="--max-old-space-size=2048" pnpm build
+-```
+-
+-Nếu các phụ thuộc thay đổi, `pnpm install` sẽ tự động chạy như một phần của quá trình xây dựng. Khởi động lại máy chủ khi quá trình xây dựng hoàn tất.
+-
+-
+----
+-
+-## 6. Hạn chế
+-
+-**Quick Tunnel (đường hầm tự động của Cloudflare) không hoạt động trên Termux.** Tệp nhị phân `cloudflared` không tương thích với môi trường DNS và TLS của Termux.
+-
+-PocketRisu tự động phát hiện môi trường Termux và hiển thị cảnh báo trong menu Truy cập từ xa, ẩn nút khởi động.
+-
+-
+----
+-
+-← [Quay lại README](../../i18n/README.vi.md)
+diff --git a/docs/zh-Hant/install.md b/docs/zh-Hant/install.md
+deleted file mode 100644
+index c1816819c..000000000
+--- a/docs/zh-Hant/install.md
++++ /dev/null
+@@ -1,223 +0,0 @@
+-<p align="center">
+-  <a href="../en/install.md">English</a> | <a href="../ko/install.md">한국어</a> | <a href="../de/install.md">Deutsch</a> | <a href="../cn/install.md">简体中文</a> | <a href="../es/install.md">Español</a> | <a href="../vi/install.md">Tiếng Việt</a> | <strong>繁體中文</strong>
+-</p>
+-
+-# 安裝指南
+-
+-> 🌐 此指南由機器翻譯生成。如需獲取最準確的資訊,請參閱 [English](../en/install.md) 或 [한국어](../ko/install.md) 版本。
+-
+-PocketRisu 有四種安裝方式。
+-
+-- [1. 可攜版](#1-可攜版) — 預先編譯的二進位檔案。無需 Node.js。
+-- [2. Docker](#2-docker) — 容器環境。
+-- [3. 安裝指令碼](#3-安裝指令碼) — 從原始碼自動建構。適用於 Linux/macOS 伺服器。
+-- [4. Git Clone](#4-git-clone) — 手動原始碼建構。適用於開發者/進階使用者。
+-
+-
+-## 系統需求
+-
+-| 項目         | 最低                   | 建議                              |
+-| ------------ | ---------------------- | --------------------------------- |
+-| **CPU**      | 1 核                   | 2 核以上                          |
+-| **記憶體**   | 1 GB(僅執行)         | 4 GB 以上(含建構)               |
+-| **磁碟**     | 1 GB                   | 2 GB 以上                         |
+-| **Node.js**  | 22.12 以上             | (可攜版/Docker 不需要)            |
+-
+-可攜版和 Docker 不需建構步驟,可在 1 GB 記憶體下執行。直接建構(Git Clone、安裝指令碼)建構時記憶體用量高,建議 4 GB 或以上。
+-
+-
+----
+-
+-## 1. 可攜版
+-
+-下載並執行預先編譯的二進位檔案。無需 Node.js、Docker 或其他工具。支援 Windows、macOS(Apple Silicon)和 Linux(x64/ARM)。
+-
+-### 下載
+-
+-從 [Releases 頁面](https://github.com/PocketRisu/PocketRisu/releases)取得對應您 OS 的檔案。
+-
+-| OS                       | 檔案                                      |
+-| ------------------------ | ----------------------------------------- |
+-| Windows (x64)            | `PocketRisu-vX.X.X-win-x64.zip`           |
+-| macOS (Apple Silicon)    | `PocketRisu-vX.X.X-macos-arm64.tar.gz`    |
+-| Linux (x64)              | `PocketRisu-vX.X.X-linux-x64.tar.gz`      |
+-| Linux (ARM)              | `PocketRisu-vX.X.X-linux-arm64.tar.gz`    |
+-
+-### 執行
+-
+-**Windows**
+-
+-解壓縮 zip,雙擊資料夾中的 `PocketRisu.exe`。瀏覽器自動開啟 `http://localhost:6001`。
+-
+-**macOS**
+-
+-```bash
+-tar -xzf PocketRisu-vX.X.X-macos-arm64.tar.gz
+-xattr -cr PocketRisu-vX.X.X-macos-arm64
+-open PocketRisu-vX.X.X-macos-arm64/PocketRisu.app
+-```
+-
+-`xattr` 命令是繞過「Apple 無法驗證」警告的一次性操作。
+-
+-**Linux**
+-
+-```bash
+-tar -xzf PocketRisu-vX.X.X-linux-*.tar.gz
+-cd PocketRisu-vX.X.X-linux-*
+-./start.sh
+-```
+-
+-在瀏覽器中開啟 `http://localhost:6001`。
+-
+-### 無介面伺服器(一行下載)
+-
+-對於無 GUI 的 Linux/macOS 伺服器,用一行命令取得並執行最新版本。
+-
+-**Linux (x64):**
+-
+-```bash
+-VERSION=$(curl -s https://api.github.com/repos/PocketRisu/PocketRisu/releases/latest | grep -o '"tag_name":"[^"]*"' | cut -d'"' -f4)
+-curl -fsSL "https://github.com/PocketRisu/PocketRisu/releases/download/${VERSION}/PocketRisu-${VERSION}-linux-x64.tar.gz" -o pocketrisu.tar.gz
+-tar -xzf pocketrisu.tar.gz && rm pocketrisu.tar.gz
+-cd PocketRisu-${VERSION}-linux-x64
+-./start.sh
+-```
+-
+-**Linux (ARM):** 將上述命令中的 `linux-x64` 替換為 `linux-arm64`。
+-
+-**macOS (Apple Silicon):**
+-
+-```bash
+-VERSION=$(curl -s https://api.github.com/repos/PocketRisu/PocketRisu/releases/latest | grep -o '"tag_name":"[^"]*"' | cut -d'"' -f4)
+-curl -fsSL "https://github.com/PocketRisu/PocketRisu/releases/download/${VERSION}/PocketRisu-${VERSION}-macos-arm64.tar.gz" -o pocketrisu.tar.gz
+-tar -xzf pocketrisu.tar.gz && rm pocketrisu.tar.gz
+-xattr -cr PocketRisu-${VERSION}-macos-arm64
+-cd PocketRisu-${VERSION}-macos-arm64
+-./start.sh
+-```
+-
+-### 更新
+-
+-在 Web UI 主畫面的更新彈窗點選「立即更新」,或在安裝資料夾執行更新指令碼。
+-
+-- **Windows**: 雙擊 `update.bat`
+-- **macOS / Linux**: `./update.sh`
+-
+-`save/` 資料夾中的資料會保留。
+-
+-
+----
+-
+-## 2. Docker
+-
+-在已安裝 Docker 或 Docker Desktop 的系統上執行。
+-
+-### 安裝 Docker
+-
+-- **Windows / macOS**: 安裝 [Docker Desktop](https://www.docker.com/products/docker-desktop/)。
+-- **Linux**:
+-  ```bash
+-  curl -fsSL https://get.docker.com | sh
+-  ```
+-
+-### 執行
+-
+-```bash
+-curl -L https://raw.githubusercontent.com/PocketRisu/PocketRisu/main/docker-compose.yml -o docker-compose.yml
+-docker compose up -d
+-```
+-
+-在瀏覽器中開啟 `http://localhost:6001`。
+-
+-### 更新
+-
+-```bash
+-docker compose pull && docker compose up -d
+-```
+-
+-### 資料位置
+-
+-所有資料(對話、角色等)儲存在 Docker 卷 `risuai-save`。更新時資料保留。
+-
+-
+----
+-
+-## 3. 安裝指令碼
+-
+-取得原始碼並透過 Node.js 自動建構。執行於 Linux/macOS 伺服器。若要透過 `git pull` 管理更新時使用。
+-
+-### 前置需求
+-
+-需要 Node.js 22.12 或以上:
+-
+-```bash
+-node --version
+-# v22.12.0 或以上
+-```
+-
+-若未安裝,請從 [Node.js 官方網站](https://nodejs.org/)安裝。
+-
+-### 安裝
+-
+-```bash
+-curl -fsSL https://raw.githubusercontent.com/PocketRisu/PocketRisu/main/install.sh | bash
+-```
+-
+-安裝完成後會顯示狀態訊息。
+-
+-### 啟動伺服器
+-
+-```bash
+-cd ~/pocketrisu
+-pnpm runserver
+-```
+-
+-在瀏覽器中開啟 `http://localhost:6001`。
+-
+-### 更新
+-
+-```bash
+-cd ~/pocketrisu
+-./update.sh
+-```
+-
+-> **v1.5.x → v1.6.0 一次性提示**: 若您在 Risuai-NodeOnly 時代(v1.5.x 或更早)透過 `install.sh` 安裝,請在首次 v1.6.0 更新前一次性將 `update.sh` 替換為新版本。(儲存庫已重新命名為 PocketRisu,舊 `update.sh` 無法找到新的原始目錄。)
+->
+-> ```bash
+-> curl -fsSL https://raw.githubusercontent.com/PocketRisu/PocketRisu/main/update.sh -o update.sh && chmod +x update.sh
+-> ./update.sh
+-> ```
+->
+-> 此後更新照常使用 `./update.sh`。
+-
+-
+----
+-
+-## 4. Git Clone
+-
+-手動 clone 並建構原始碼。適用於需要修改或除錯程式碼的開發者。
+-
+-```bash
+-git clone https://github.com/PocketRisu/PocketRisu.git
+-cd PocketRisu
+-pnpm install
+-pnpm build
+-pnpm runserver
+-```
+-
+-在瀏覽器中開啟 `http://localhost:6001`。
+-
+-### 更新
+-
+-```bash
+-git pull
+-pnpm install
+-pnpm build
+-# 重啟伺服器
+-pnpm runserver
+-```
+-
+-
+----
+-
+-← [返回 README](../../i18n/README.zh-Hant.md)
+diff --git a/docs/zh-Hant/migration.md b/docs/zh-Hant/migration.md
+deleted file mode 100644
+index 17a66c17b..000000000
+--- a/docs/zh-Hant/migration.md
++++ /dev/null
+@@ -1,71 +0,0 @@
+-<p align="center">
+-  <a href="../en/migration.md">English</a> | <a href="../ko/migration.md">한국어</a> | <a href="../de/migration.md">Deutsch</a> | <a href="../cn/migration.md">简体中文</a> | <a href="../es/migration.md">Español</a> | <a href="../vi/migration.md">Tiếng Việt</a> | <strong>繁體中文</strong>
+-</p>
+-
+-# RisuAI 遷移指南
+-
+-> 🌐 此指南由機器翻譯生成。如需獲取最準確的資訊,請參閱 [English](../en/migration.md) 或 [한국어](../ko/migration.md) 版本。
+-
+-從現有 RisuAI 安裝(Web RisuAI、本地 RisuAI)遷移資料到 PocketRisu 有三種方式。根據您的來源環境和資料規模選擇。
+-
+-- [1. 本地備份檔案(.bin)](#1-本地備份檔案bin) — 在所有環境中可用。最常見的方法。
+-- [2. Save 資料夾 zip 上傳](#2-save-資料夾-zip-上傳) — 本地 RisuAI,小規模資料。
+-- [3. Save 資料夾直接複製](#3-save-資料夾直接複製) — 本地 RisuAI,大規模資料。
+-
+-
+-## 開始之前
+-
+-> ⚠️ 遷移前**請備份現有資料**。可從 RisuAI 的 設定 > 備份 匯出 `.bin` 檔案。
+-
+-
+----
+-
+-## 1. 本地備份檔案(.bin)
+-
+-從現有 RisuAI 匯出 `.bin` 備份檔案,然後匯入 PocketRisu。無論來源環境(web / Tauri / Capacitor / 本地)如何均可使用。
+-
+-1. **在現有 RisuAI 中**: 設定 > 備份 > "儲存本地備份" 匯出 `.bin` 檔案。
+-2. **在 PocketRisu 中**: 設定 > 資料遷移 > "匯入原版 Risu 本地備份" 匯入 `.bin` 檔案。
+-
+-
+----
+-
+-## 2. Save 資料夾 zip 上傳
+-
+-若您使用的是本地 RisuAI(Node 伺服器版),可將 `save` 資料夾壓縮為 zip 並上傳。
+-
+-1. 將現有 RisuAI 專案的 `save` 資料夾壓縮為 zip 檔案。
+-2. 在 PocketRisu 中開啟 設定 > 資料遷移 > "從 NodeOnly Risu 匯入 save 資料夾" 摺疊面板。
+-3. 透過 "從 save 資料夾匯入(Zip 上傳)" 上傳 zip 檔案。
+-
+-> 若 zip 檔案過大,上傳可能失敗。此時請使用 [3. Save 資料夾直接複製](#3-save-資料夾直接複製)。
+-
+-
+----
+-
+-## 3. Save 資料夾直接複製
+-
+-適合大規模資料(數 GB 以上)。需要伺服器檔案系統的直接存取權限。
+-
+-1. 停止 PocketRisu 伺服器。
+-2. 用現有 RisuAI 的 `save` 資料夾整體覆蓋 PocketRisu 的 `save` 資料夾。
+-3. 重啟 PocketRisu 伺服器 — 自動遷移開始。
+-    - 可在終端機或 PM2 日誌中檢視進度。
+-4. 遷移完成後,使用 設定 > 資料遷移 > "從 NodeOnly Risu 匯入 save 資料夾" 摺疊面板 > "清理已遷移的 save 檔案" 移除原始檔案並回收磁碟空間。
+-
+-
+----
+-
+-## 我該選擇哪種方式?
+-
+-| 情況                                              | 推薦方式                          |
+-| ------------------------------------------------- | --------------------------------- |
+-| 從 Web RisuAI 遷移                                | 1. `.bin` 備份                    |
+-| 從本地 RisuAI 遷移,資料小規模                    | 2. Zip 上傳                       |
+-| 從本地 RisuAI 遷移,資料大規模(10GB+)            | 3. Save 資料夾直接複製            |
+-| 不確定                                            | 1. `.bin` 備份                    |
+-
+-
+----
+-
+-← [返回 README](../../i18n/README.zh-Hant.md)
+diff --git a/docs/zh-Hant/remote.md b/docs/zh-Hant/remote.md
+deleted file mode 100644
+index efd26a71a..000000000
+--- a/docs/zh-Hant/remote.md
++++ /dev/null
+@@ -1,62 +0,0 @@
+-<p align="center">
+-  <a href="../en/remote.md">English</a> | <a href="../ko/remote.md">한국어</a> | <a href="../de/remote.md">Deutsch</a> | <a href="../cn/remote.md">简体中文</a> | <a href="../es/remote.md">Español</a> | <a href="../vi/remote.md">Tiếng Việt</a> | <strong>繁體中文</strong>
+-</p>
+-
+-# 遠端存取指南
+-
+-> 🌐 此指南由機器翻譯生成。如需獲取最準確的資訊,請參閱 [English](../en/remote.md) 或 [한국어](../ko/remote.md) 版本。
+-
+-從其他裝置(智慧型手機、平板、其他 PC)存取執行於 PC 上的 PocketRisu 有兩種方式。
+-
+-- [1. Quick Tunnel](#1-quick-tunnel) — PocketRisu 內建功能。無需額外應用程式。伺服器重啟時 URL 會變更。
+-- [2. Tailscale](#2-tailscale) — 基於私人網路(VPN)。URL 固定。
+-
+-
+-## 1. Quick Tunnel
+-
+-PocketRisu 內建的臨時遠端存取 URL 發放功能。
+-
+-1. 在 PC 上 PocketRisu 中:設定 > 遠端存取 > "開啟遠端存取"
+-2. 用智慧型手機相機掃描顯示的 QR Code,或在其他裝置的瀏覽器中直接輸入 URL。
+-
+-> 伺服器重啟時 URL 會變更。如需固定 URL,請使用 [Tailscale](#2-tailscale)。
+-
+-
+----
+-
+-## 2. Tailscale
+-
+-建構僅能從使用同一帳號登入的裝置存取的私人網路(VPN)。即使伺服器重啟,URL 仍保持不變。
+-
+-### 步驟 1: 安裝 Tailscale
+-
+-- PC: [tailscale.com](https://tailscale.com/)
+-- 智慧型手機: App Store / Google Play 中搜尋 "Tailscale"
+-- 其他 PC: 同樣 [tailscale.com](https://tailscale.com/)
+-
+-### 步驟 2: 使用同一帳號登入
+-
+-在 PC 和所有要存取的裝置的 Tailscale 應用程式中使用同一帳號(Google、Microsoft 等)登入。
+-
+-### 步驟 3: 在 PC 上啟用 HTTPS 共享
+-
+-在執行 PocketRisu 的 PC 終端機中執行一次:
+-
+-```bash
+-tailscale serve --bg http://localhost:6001
+-```
+-
+-### 步驟 4: 從其他裝置存取
+-
+-在瀏覽器中以以下格式的位址存取:
+-
+-```
+-https://我的PC名稱.tail某某.ts.net
+-```
+-
+-確切位址可在 Tailscale 應用程式的裝置清單中透過 PC 名稱檢視。在瀏覽器中加入書籤,以後只需在 PC 上啟動伺服器即可從任何裝置存取。
+-
+-
+----
+-
+-← [返回 README](../../i18n/README.zh-Hant.md)
+diff --git a/docs/zh-Hant/termux.md b/docs/zh-Hant/termux.md
+deleted file mode 100644
+index 4ee48e8b7..000000000
+--- a/docs/zh-Hant/termux.md
++++ /dev/null
+@@ -1,144 +0,0 @@
+-<p align="center">
+-  <a href="../en/termux.md">English</a> | <a href="../ko/termux.md">한국어</a> | <a href="../de/termux.md">Deutsch</a> | <a href="../cn/termux.md">简体中文</a> | <a href="../es/termux.md">Español</a> | <a href="../vi/termux.md">Tiếng Việt</a> | <strong>繁體中文</strong>
+-</p>
+-
+-# Termux 安裝指南
+-
+-> 🌐 此指南由機器翻譯生成。如需獲取最準確的資訊,請參閱 [English](../en/termux.md) 或 [한국어](../ko/termux.md) 版本。
+-
+-本指南介紹如何透過 Termux 在 Android 手機上直接建置並執行 PocketRisu。預期使用方式是在同一支手機的瀏覽器中開啟 `http://localhost:6001`。
+-
+-- [1. 準備工作](#1-準備工作) — F-Droid Termux 與系統需求
+-- [2. 安裝與建置](#2-安裝與建置) — 一條命令完成
+-- [3. 執行與連線](#3-執行與連線) — 從手機瀏覽器開啟
+-- [4. 保持執行](#4-保持執行) — 螢幕關閉時也保持執行
+-- [5. 更新](#5-更新) — 取得最新版本
+-- [6. 限制](#6-限制) — 在 Termux 上無法使用的功能
+-
+-
+-## 系統需求
+-
+-| 項目         | 最低         | 建議                      |
+-| ------------ | ------------ | ------------------------- |
+-| **Android**  | 7.0 (API 24) | 10 或更新版本             |
+-| **CPU**      | ARM64        | ARM64                     |
+-| **記憶體**   | 2 GB         | 4 GB 或以上               |
+-| **可用空間** | 2 GB         | 4 GB 或以上(含建置產物)   |
+-
+-PocketRisu 不為 Termux 提供預先編譯的二進位檔,因此由手機自行建置。包括 `better-sqlite3` 等原生模組在內,建置大約需要 **10 至 40 分鐘**,具體取決於手機效能。
+-
+-
+----
+-
+-## 1. 準備工作
+-
+-### 使用 F-Droid 或 GitHub Releases 版本的 Termux
+-
+-> ⚠️ **Play Store 版本的 Termux 無法使用。**
+-> Termux 維護者已於 2020 年停止更新 Play Store 版本,無法再安裝 PocketRisu 所需的最新套件(Node.js 22+)。
+-
+-請從以下任一來源安裝 Termux:
+-
+-- **F-Droid(建議)**: https://f-droid.org/packages/com.termux/
+-- **GitHub Releases**: https://github.com/termux/termux-app/releases
+-
+-如果已經安裝了 Play Store 版本,請先解除安裝,然後從上述任一來源重新安裝。
+-
+-
+----
+-
+-## 2. 安裝與建置
+-
+-開啟 Termux 並執行以下單一命令:
+-
+-```bash
+-pkg install -y git && \
+-  git clone https://github.com/PocketRisu/PocketRisu.git && \
+-  cd PocketRisu && \
+-  bash scripts/termux/build.sh
+-```
+-
+-該命令會自動完成:
+-
+-1. 安裝 `git`
+-2. 複製 PocketRisu 儲存庫
+-3. 安裝建置相依套件(`nodejs-lts`、`python`、`make`、`clang`、`pnpm` 等)
+-4. `pnpm install` — JavaScript 相依套件與原生模組編譯
+-5. `pnpm build` — 前端打包
+-
+-建置完成後會顯示:
+-
+-```
+-Build OK. Start the server with:
+-  node server/node/server.cjs
+-
+-Then open this address in the phone's own browser:
+-  http://localhost:6001
+-```
+-
+-
+----
+-
+-## 3. 執行與連線
+-
+-從相同目錄啟動伺服器:
+-
+-```bash
+-node server/node/server.cjs
+-```
+-
+-伺服器啟動日誌出現後,在手機瀏覽器(Chrome、Firefox 等)中開啟:
+-
+-```
+-http://localhost:6001
+-```
+-
+-PocketRisu UI 應當正常載入。瀏覽器自動將 `localhost` 視為安全內容(secure context),因此剪貼簿、`crypto.subtle` 等需要安全內容的 API 均可正常運作。
+-
+-使用 `Ctrl + C` 停止伺服器。
+-
+-
+----
+-
+-## 4. 保持執行
+-
+-為了在螢幕關閉或切換到其他應用程式時保持伺服器執行,請啟用 Termux 的喚醒鎖:
+-
+-```bash
+-termux-wake-lock
+-```
+-
+-Termux 通知列會顯示喚醒鎖指示器,即使螢幕關閉伺服器也會繼續執行。
+-
+-釋放命令: `termux-wake-unlock`
+-
+-> 在記憶體壓力下 Android 仍可能終止 Termux。為了長時間執行,請在手機的電池最佳化設定中將 Termux 排除。
+-
+-
+----
+-
+-## 5. 更新
+-
+-在 PocketRisu 目錄下執行:
+-
+-```bash
+-cd ~/PocketRisu
+-git pull
+-NODE_OPTIONS="--max-old-space-size=2048" pnpm build
+-```
+-
+-如果相依套件發生變更,`pnpm install` 會作為建置的一部分自動執行。建置完成後請重新啟動伺服器。
+-
+-
+----
+-
+-## 6. 限制
+-
+-**Quick Tunnel(Cloudflare 自動隧道)在 Termux 上無法使用。** `cloudflared` 二進位檔與 Termux 的 DNS 和 TLS 環境不相容。
+-
+-PocketRisu 會自動偵測 Termux 環境,在遠端存取選單中顯示警告並隱藏啟動按鈕。
+-
+-
+----
+-
+-← [返回 README](../../i18n/README.zh-Hant.md)
+diff --git a/i18n/README.cn.md b/i18n/README.cn.md
+deleted file mode 100644
+index fd650cf1e..000000000
+--- a/i18n/README.cn.md
++++ /dev/null
+@@ -1,85 +0,0 @@
+-<p align="center">
+-  <img src="../assets/pocketrisu-banner-1024.png" alt="PocketRisu — 自托管 AI 角色扮演聊天平台" width="900" />
+-</p>
+-
+-<h1 align="center">PocketRisu — 自托管 AI 角色扮演聊天</h1>
+-
+-<p align="center">
+-  <a href="../README.md">English</a> | <a href="README.ko.md">한국어</a> | <a href="README.de.md">Deutsch</a> | <strong>简体中文</strong> | <a href="README.es.md">Español</a> | <a href="README.vi.md">Tiếng Việt</a> | <a href="README.zh-Hant.md">繁體中文</a>
+-</p>
+-
+-<p align="center">
+-  <a href="https://github.com/PocketRisu/PocketRisu/releases">
+-    <img alt="Latest Release" src="https://img.shields.io/github/v/release/PocketRisu/PocketRisu?label=latest" />
+-  </a>
+-  <a href="../LICENSE">
+-    <img alt="License: GPL-3.0" src="https://img.shields.io/github/license/PocketRisu/PocketRisu" />
+-  </a>
+-  <a href="https://nodejs.org/">
+-    <img alt="Node" src="https://img.shields.io/badge/node-≥22.12-brightgreen" />
+-  </a>
+-</p>
+-
+-> 🌐 此 README 由机器翻译生成。如需获取最准确的信息,请参阅 [English](../README.md) 或 [한국어](README.ko.md) 版本。欢迎贡献翻译。
+-
+-PocketRisu 是一个自托管的 AI 角色扮演聊天平台,您可以在自己的 PC 或个人服务器上运行,并通过网页浏览器从 PC、平板和智能手机访问。
+-
+-<p align="center">
+-  <table>
+-    <tr>
+-      <td align="center"><img src="../assets/screenshots/screenshot-pc-chat.png" alt="PC 聊天" height="420" /></td>
+-      <td align="center"><img src="../assets/screenshots/screenshot-mobile-chat.png" alt="移动端聊天" height="420" /></td>
+-    </tr>
+-    <tr>
+-      <td align="center"><b>PC</b></td>
+-      <td align="center"><b>移动端</b></td>
+-    </tr>
+-  </table>
+-</p>
+-
+-
+-## 文档
+-
+-- [安装指南](../docs/cn/install.md)
+-- [RisuAI 迁移指南](../docs/cn/migration.md)
+-- [远程访问指南](../docs/cn/remote.md)
+-- [Termux 安装指南 (Android)](../docs/cn/termux.md)
+-
+-
+-## RisuAI 兼容性
+-
+-PocketRisu 派生自 [RisuAI](https://github.com/kwaroran/RisuAI),针对自托管环境进行了改进。现有的 RisuAI 数据可以完整迁移,所有 RisuAI 生态资源都可以原样使用。
+-
+-- RisuRealm 角色下载
+-- 角色卡(`.charx`、`.risum`、`.risup` 等)
+-- 模块、世界书、预设
+-- 备份文件(`.bin`)双向兼容
+-
+-从现有 RisuAI 迁移的方法请参考[迁移指南](../docs/cn/migration.md)。
+-
+-
+-## 主要功能
+-
+-- **多种 AI 提供商**:支持 OpenAI、Claude、Gemini、DeepInfra、OpenRouter、Ollama 等
+-- **多设备访问**:运行一个服务器,通过网页浏览器从 PC、平板和智能手机访问
+-- **统一数据存储**:所有数据(角色、对话、设置、插图)都存储在服务器上的单个 SQLite 数据库中(无需依赖外部云服务)
+-- **便捷的服务器备份**:服务器直接处理备份和恢复,也支持本地 `.bin` 备份导出导入
+-- **强大的仪表板**:磁盘使用情况(按角色/模块)、可回收快照空间、SQLite 优化等,一屏管理
+-- **世界书 & 长期记忆**:世界信息/记忆书、HypaMemoryV3 等上下文保留功能
+-- **自动翻译**:自动翻译输入输出,实现跨语言角色扮演
+-- **正则脚本 & 插件**:修改模型输出,扩展功能
+-- **TTS & 附加资源**:语音合成、聊天中嵌入图像/音频/视频
+-- **自我更新**:自动检测新版本,便携版可通过网页界面更新
+-- **移动远程访问**:Quick Tunnel(URL + QR)或 Tailscale
+-- **多语言界面**:韩语、英语、日语、中文等
+-
+-
+-## 社区与联系
+-
+-- 错误报告/功能请求:[GitHub Issues](https://github.com/PocketRisu/PocketRisu/issues)
+-- 邮箱:contact@pocketrisu.com
+-
+-
+-## 许可证
+-
+-[GPL-3.0](../LICENSE)
+diff --git a/i18n/README.de.md b/i18n/README.de.md
+deleted file mode 100644
+index d25c52f71..000000000
+--- a/i18n/README.de.md
++++ /dev/null
+@@ -1,85 +0,0 @@
+-<p align="center">
+-  <img src="../assets/pocketrisu-banner-1024.png" alt="PocketRisu — Selbst gehostete KI-Rollenspiel-Chat-Plattform" width="900" />
+-</p>
+-
+-<h1 align="center">PocketRisu — Selbst gehostete KI-Rollenspiel-Chat-Plattform</h1>
+-
+-<p align="center">
+-  <a href="../README.md">English</a> | <a href="README.ko.md">한국어</a> | <strong>Deutsch</strong> | <a href="README.cn.md">简体中文</a> | <a href="README.es.md">Español</a> | <a href="README.vi.md">Tiếng Việt</a> | <a href="README.zh-Hant.md">繁體中文</a>
+-</p>
+-
+-<p align="center">
+-  <a href="https://github.com/PocketRisu/PocketRisu/releases">
+-    <img alt="Latest Release" src="https://img.shields.io/github/v/release/PocketRisu/PocketRisu?label=latest" />
+-  </a>
+-  <a href="../LICENSE">
+-    <img alt="License: GPL-3.0" src="https://img.shields.io/github/license/PocketRisu/PocketRisu" />
+-  </a>
+-  <a href="https://nodejs.org/">
+-    <img alt="Node" src="https://img.shields.io/badge/node-≥22.12-brightgreen" />
+-  </a>
+-</p>
+-
+-> 🌐 Diese README wurde maschinell übersetzt. Für die genauesten Informationen siehe die [englische](../README.md) oder [koreanische](README.ko.md) Version. Beiträge willkommen.
+-
+-PocketRisu ist eine selbstgehostete KI-Rollenspiel-Chat-Plattform, die Sie auf Ihrem PC oder persönlichen Server betreiben und über einen Webbrowser von PC, Tablet und Smartphone aus nutzen.
+-
+-<p align="center">
+-  <table>
+-    <tr>
+-      <td align="center"><img src="../assets/screenshots/screenshot-pc-chat.png" alt="PC-Chat" height="420" /></td>
+-      <td align="center"><img src="../assets/screenshots/screenshot-mobile-chat.png" alt="Mobiler Chat" height="420" /></td>
+-    </tr>
+-    <tr>
+-      <td align="center"><b>PC</b></td>
+-      <td align="center"><b>Mobil</b></td>
+-    </tr>
+-  </table>
+-</p>
+-
+-
+-## Dokumentation
+-
+-- [Installationsanleitung](../docs/de/install.md)
+-- [RisuAI-Migrationsleitfaden](../docs/de/migration.md)
+-- [Fernzugriff](../docs/de/remote.md)
+-- [Termux-Installationsanleitung (Android)](../docs/de/termux.md)
+-
+-
+-## RisuAI-Kompatibilität
+-
+-PocketRisu ist von [RisuAI](https://github.com/kwaroran/RisuAI) abgeleitet und für selbstgehostete Umgebungen optimiert. Bestehende RisuAI-Daten können vollständig migriert werden, und alle RisuAI-Ökosystem-Assets bleiben unverändert nutzbar.
+-
+-- RisuRealm-Charakter-Downloads
+-- Charakterkarten (`.charx`, `.risum`, `.risup` usw.)
+-- Module, Lorebooks, Presets
+-- Backup-Dateien (`.bin`) mit bidirektionaler Kompatibilität
+-
+-Für die Migration von einer bestehenden RisuAI-Installation siehe den [Migrationsleitfaden](../docs/de/migration.md).
+-
+-
+-## Funktionen
+-
+-- **Mehrere KI-Anbieter**: OpenAI, Claude, Gemini, DeepInfra, OpenRouter, Ollama und mehr
+-- **Mehrgerätezugriff**: Einen Server betreiben und von PC, Tablet und Smartphone über einen Webbrowser zugreifen
+-- **Vereinheitlichte Datenspeicherung**: Alle Daten (Charaktere, Chats, Einstellungen, Inlay-Bilder) werden in einer einzigen SQLite-Datenbank auf Ihrem Server gespeichert (keine externe Cloud-Abhängigkeit)
+-- **Einfaches serverseitiges Backup**: Der Server verwaltet Backup und Wiederherstellung direkt; lokaler `.bin`-Backup-Export und -Import werden ebenfalls unterstützt
+-- **Leistungsstarkes Dashboard**: Festplattennutzung (pro Charakter / pro Modul), wiederherstellbarer Snapshot-Speicher, SQLite-Optimierung und mehr — alles in einem Bildschirm
+-- **Lorebook & Langzeitgedächtnis**: World Info / Memory Book, HypaMemoryV3 und andere Kontext-Erhaltungsfunktionen
+-- **Automatische Übersetzung**: Automatische Übersetzung von Ein- und Ausgabe für sprachübergreifendes Rollenspiel
+-- **Regex-Skripte & Plugins**: Modellausgabe ändern und Funktionalität erweitern
+-- **TTS & zusätzliche Assets**: Sprachsynthese, eingebettete Bilder / Audio / Video im Chat
+-- **Selbstaktualisierung**: Automatische Versionserkennung; portable Distributionen aktualisieren sich über die Web-UI
+-- **Mobiler Fernzugriff**: Quick Tunnel (URL + QR) oder Tailscale
+-- **Mehrsprachige UI**: Koreanisch, Englisch, Japanisch, Chinesisch und mehr
+-
+-
+-## Community & Kontakt
+-
+-- Fehlerberichte / Funktionswünsche: [GitHub Issues](https://github.com/PocketRisu/PocketRisu/issues)
+-- E-Mail: contact@pocketrisu.com
+-
+-
+-## Lizenz
+-
+-[GPL-3.0](../LICENSE)
+diff --git a/i18n/README.en.md b/i18n/README.en.md
+new file mode 100644
+index 000000000..ed7cff10f
+--- /dev/null
++++ b/i18n/README.en.md
+@@ -0,0 +1,75 @@
++<p align="center">
++  <img src="../assets/pocketrisu-banner-1024.png" alt="PocketRisu Alter — Self-hosted AI Roleplay Chat Platform" width="900" />
++</p>
++
++<h1 align="center">PocketRisu Alter</h1>
++
++<p align="center">
++  <a href="../README.md">한국어</a> | <strong>English</strong>
++</p>
++
++<p align="center">
++  <a href="../LICENSE">
++    <img alt="License: GPL-3.0" src="https://img.shields.io/badge/license-GPL--3.0-blue" />
++  </a>
++  <a href="https://nodejs.org/">
++    <img alt="Node" src="https://img.shields.io/badge/node-%E2%89%A522.12-brightgreen" />
++  </a>
++</p>
++
++PocketRisu Alter is a modified fork of [PocketRisu](https://github.com/PocketRisu/PocketRisu) — a self-hosted AI roleplay chat platform you run on your PC or personal server and access from PC, tablet, and smartphone through a web browser.
++
++Based on PocketRisu v1.7.3 (commit `9eeccfd2`, June 8 2026). This is a nightly build with experimental features and UI changes on top.
++
++> **Warning:** This repository is an unstable nightly build. Features may break or change. Backup your data before use.
++
++<p align="center">
++  <table>
++    <tr>
++      <td align="center"><img src="../assets/screenshots/screenshot-pc-chat.png" alt="PC chat" height="420" /></td>
++      <td align="center"><img src="../assets/screenshots/screenshot-mobile-chat.png" alt="Mobile chat" height="420" /></td>
++    </tr>
++    <tr>
++      <td align="center"><b>PC</b></td>
++      <td align="center"><b>Mobile</b></td>
++    </tr>
++  </table>
++</p>
++
++## Supported Run Methods
++
++PocketRisu Alter supports Docker and source-based server execution only.
++
++- [Installation guide](../docs/en/install.md)
++- [RisuAI data migration guide](../docs/en/migration.md)
++- [Remote access guide](../docs/en/remote.md)
++
++Docker uses a separate volume (`pocketrisu_alter_save`) from PocketRisu/PocketRisu NodeOnly by default. Edit `docker-compose.yml` `volumes` to share storage.
++
++## Key Differences from PocketRisu
++
++- **Text streaming stability**: Adjusted streaming output refresh rates to reduce mobile rendering lag
++- **Server-side API calls**: Supported OpenAI-compatible requests run as server jobs; continues processing even if browser disconnects
++- **Theme and color changes**: Alter-specific design tokens, color schemes, chat bubble and settings page styles
++- **Model preset enhancements**: Backend execution indicator, image/system/role capability toggles, compatibility handling
++- **UI adjustments**: Refined sidebar, chat list, model profile browser, mobile header layouts and interactions
++- **Multi-Agent RP (MARP)**: Backend-integrated multi-agent roleplay pipeline using parallel AI agents for richer interactions. Ported from [MARP](https://github.com/Sallos725/MARP) by Sallos
++
++## Features
++
++Core features follow PocketRisu. See [PocketRisu](https://github.com/PocketRisu/PocketRisu) for details on supported AI providers, characters/chats, lorebooks, presets, plugins, backup/restore, and more.
++
++## RisuAI Compatibility
++
++PocketRisu Alter can import RisuAI/PocketRisu family data:
++
++- RisuRealm character downloads
++- Character cards (`.charx`, `.risum`, `.risup`, etc.)
++- Modules, lorebooks, presets
++- Backup files (`.bin`)
++
++See the [migration guide](../docs/en/migration.md) for details.
++
++## License
++
++[GPL-3.0](../LICENSE)
+diff --git a/i18n/README.es.md b/i18n/README.es.md
+deleted file mode 100644
+index 733927231..000000000
+--- a/i18n/README.es.md
++++ /dev/null
+@@ -1,85 +0,0 @@
+-<p align="center">
+-  <img src="../assets/pocketrisu-banner-1024.png" alt="PocketRisu — Plataforma de Chat de Roleplay con IA Autoalojada" width="900" />
+-</p>
+-
+-<h1 align="center">PocketRisu — Chat de Roleplay con IA Autoalojado</h1>
+-
+-<p align="center">
+-  <a href="../README.md">English</a> | <a href="README.ko.md">한국어</a> | <a href="README.de.md">Deutsch</a> | <a href="README.cn.md">简体中文</a> | <strong>Español</strong> | <a href="README.vi.md">Tiếng Việt</a> | <a href="README.zh-Hant.md">繁體中文</a>
+-</p>
+-
+-<p align="center">
+-  <a href="https://github.com/PocketRisu/PocketRisu/releases">
+-    <img alt="Latest Release" src="https://img.shields.io/github/v/release/PocketRisu/PocketRisu?label=latest" />
+-  </a>
+-  <a href="../LICENSE">
+-    <img alt="License: GPL-3.0" src="https://img.shields.io/github/license/PocketRisu/PocketRisu" />
+-  </a>
+-  <a href="https://nodejs.org/">
+-    <img alt="Node" src="https://img.shields.io/badge/node-≥22.12-brightgreen" />
+-  </a>
+-</p>
+-
+-> 🌐 Este README está traducido por máquina. Para obtener la información más precisa, consulte la versión en [inglés](../README.md) o [coreano](README.ko.md). Las contribuciones son bienvenidas.
+-
+-PocketRisu es una plataforma de chat de roleplay con IA autoalojada que se ejecuta en tu PC o servidor personal y se accede desde PC, tablet y smartphone a través de un navegador web.
+-
+-<p align="center">
+-  <table>
+-    <tr>
+-      <td align="center"><img src="../assets/screenshots/screenshot-pc-chat.png" alt="Chat en PC" height="420" /></td>
+-      <td align="center"><img src="../assets/screenshots/screenshot-mobile-chat.png" alt="Chat móvil" height="420" /></td>
+-    </tr>
+-    <tr>
+-      <td align="center"><b>PC</b></td>
+-      <td align="center"><b>Móvil</b></td>
+-    </tr>
+-  </table>
+-</p>
+-
+-
+-## Documentación
+-
+-- [Guía de instalación](../docs/es/install.md)
+-- [Guía de migración desde RisuAI](../docs/es/migration.md)
+-- [Acceso remoto](../docs/es/remote.md)
+-- [Guía de instalación de Termux (Android)](../docs/es/termux.md)
+-
+-
+-## Compatibilidad con RisuAI
+-
+-PocketRisu deriva de [RisuAI](https://github.com/kwaroran/RisuAI) y está adaptado para entornos autoalojados. Los datos existentes de RisuAI se pueden migrar por completo, y todos los recursos del ecosistema de RisuAI siguen siendo utilizables tal cual.
+-
+-- Descargas de personajes de RisuRealm
+-- Tarjetas de personaje (`.charx`, `.risum`, `.risup`, etc.)
+-- Módulos, lorebooks, presets
+-- Archivos de copia de seguridad (`.bin`) con compatibilidad bidireccional
+-
+-Para migrar desde una instalación existente de RisuAI, consulta la [guía de migración](../docs/es/migration.md).
+-
+-
+-## Funciones
+-
+-- **Múltiples proveedores de IA**: OpenAI, Claude, Gemini, DeepInfra, OpenRouter, Ollama y más
+-- **Acceso multidispositivo**: Ejecuta un servidor y accede desde PC, tablet y smartphone a través de un navegador web
+-- **Almacenamiento unificado de datos**: Todos los datos (personajes, chats, ajustes, imágenes inlay) se guardan en una única base de datos SQLite en tu servidor (sin dependencias de la nube externa)
+-- **Copia de seguridad fácil desde el servidor**: El servidor gestiona directamente la copia de seguridad y restauración; también se admite la exportación e importación de copias locales `.bin`
+-- **Panel potente**: Uso del disco (por personaje / por módulo), espacio de snapshot recuperable, optimización de SQLite y más — todo en una pantalla
+-- **Lorebook y memoria a largo plazo**: World info / memory book, HypaMemoryV3 y otras funciones de retención de contexto
+-- **Traducción automática**: Traducción automática de entrada y salida para roleplay multilingüe
+-- **Scripts regex y plugins**: Modifica la salida del modelo y extiende la funcionalidad
+-- **TTS y recursos adicionales**: Síntesis de voz, imágenes / audio / video integrados en el chat
+-- **Autoactualización**: Detección automática de versiones; las distribuciones portátiles se actualizan desde la interfaz web
+-- **Acceso remoto móvil**: Quick Tunnel (URL + QR) o Tailscale
+-- **Interfaz multilingüe**: Coreano, inglés, japonés, chino y más
+-
+-
+-## Comunidad y contacto
+-
+-- Reportes de errores / solicitudes de funciones: [GitHub Issues](https://github.com/PocketRisu/PocketRisu/issues)
+-- Correo electrónico: contact@pocketrisu.com
+-
+-
+-## Licencia
+-
+-[GPL-3.0](../LICENSE)
+diff --git a/i18n/README.ko.md b/i18n/README.ko.md
+deleted file mode 100644
+index 6028825b4..000000000
+--- a/i18n/README.ko.md
++++ /dev/null
+@@ -1,83 +0,0 @@
+-<p align="center">
+-  <img src="../assets/pocketrisu-banner-1024.png" alt="PocketRisu — 셀프호스팅 AI 롤플레이 채팅 플랫폼" width="900" />
+-</p>
+-
+-<h1 align="center">PocketRisu — 셀프호스팅 AI 롤플레이 채팅</h1>
+-
+-<p align="center">
+-  <a href="../README.md">English</a> | <strong>한국어</strong> | <a href="README.de.md">Deutsch</a> | <a href="README.cn.md">简体中文</a> | <a href="README.es.md">Español</a> | <a href="README.vi.md">Tiếng Việt</a> | <a href="README.zh-Hant.md">繁體中文</a>
+-</p>
+-
+-<p align="center">
+-  <a href="https://github.com/PocketRisu/PocketRisu/releases">
+-    <img alt="Latest Release" src="https://img.shields.io/github/v/release/PocketRisu/PocketRisu?label=latest" />
+-  </a>
+-  <a href="../LICENSE">
+-    <img alt="License: GPL-3.0" src="https://img.shields.io/github/license/PocketRisu/PocketRisu" />
+-  </a>
+-  <a href="https://nodejs.org/">
+-    <img alt="Node" src="https://img.shields.io/badge/node-≥22.12-brightgreen" />
+-  </a>
+-</p>
+-
+-PocketRisu는 PC나 개인 서버에 띄워두고, PC·태블릿·스마트폰 등 여러 기기에서 브라우저로 접속해 사용하는 나만의 AI 롤플레이 채팅 플랫폼입니다.
+-
+-<p align="center">
+-  <table>
+-    <tr>
+-      <td align="center"><img src="../assets/screenshots/screenshot-pc-chat.png" alt="PC 채팅" height="420" /></td>
+-      <td align="center"><img src="../assets/screenshots/screenshot-mobile-chat.png" alt="모바일 채팅" height="420" /></td>
+-    </tr>
+-    <tr>
+-      <td align="center"><b>PC</b></td>
+-      <td align="center"><b>모바일</b></td>
+-    </tr>
+-  </table>
+-</p>
+-
+-
+-## 문서
+-
+-- [설치 가이드](../docs/ko/install.md)
+-- [RisuAI 데이터 이전 가이드](../docs/ko/migration.md)
+-- [원격 접속 가이드](../docs/ko/remote.md)
+-- [Termux 설치 가이드 (Android)](../docs/ko/termux.md)
+-
+-
+-## RisuAI 호환
+-
+-PocketRisu는 [RisuAI](https://github.com/kwaroran/RisuAI)에서 파생되어, 셀프호스팅 환경에 맞게 개선한 프로젝트입니다. 기존 RisuAI의 데이터를 통째로 마이그레이션할 수 있고, RisuAI 생태계의 모든 자산을 그대로 사용할 수 있습니다.
+-
+-- RisuRealm 캐릭터 다운로드
+-- 캐릭터 카드 (`.charx`, `.risum`, `.risup` 등)
+-- 모듈, 로어북, 프리셋
+-- 백업 파일 (`.bin`) 양방향 호환
+-
+-기존 RisuAI에서 이전하는 방법은 [데이터 이전 가이드](../docs/ko/migration.md)를 참고하세요.
+-
+-
+-## 주요 기능
+-
+-- **다양한 AI 지원**: OpenAI, Claude, Gemini, DeepInfra, OpenRouter, Ollama 등 다양한 API 지원
+-- **다중 디바이스 접속**: 한 서버를 띄우고 PC·태블릿·스마트폰에서 브라우저로 접속
+-- **데이터 통합 저장**: 캐릭터·채팅·설정·삽화 등 모든 데이터를 서버의 SQLite DB 하나에 보관 (외부 클라우드 의존 없음)
+-- **간편한 서버 백업**: 서버가 직접 백업/복원을 처리, 로컬 백업(.bin) 내보내기도 지원
+-- **강력한 대시보드**: 디스크 사용량(캐릭터별·모듈별), 스냅샷 회수 가능 용량, SQLite 정리 등을 한 화면에서 관리
+-- **로어북·장기 메모리**: 세계관/메모리 북, HypaMemoryV3 등 컨텍스트 유지 기능
+-- **자동 번역**: 입력/출력 자동 번역, 다양한 언어로 롤플레이 가능
+-- **정규식 스크립트·플러그인**: 출력 가공, 기능 확장
+-- **TTS·추가 에셋**: 음성 변환, 채팅 내 이미지·오디오·비디오 임베드
+-- **셀프 업데이트**: 새 버전 자동 감지, 포터블 배포는 웹 UI에서 업데이트
+-- **모바일 원격 접속**: Quick Tunnel(URL+QR), Tailscale 권장
+-- **다국어 UI**: 한국어, 영어, 일본어, 중국어 등
+-
+-
+-## 커뮤니티 & 연락처
+-
+-- 버그 리포트 / 기능 제안: [GitHub Issues](https://github.com/PocketRisu/PocketRisu/issues)
+-- 이메일: contact@pocketrisu.com
+-
+-
+-## 라이선스
+-
+-[GPL-3.0](../LICENSE)
+diff --git a/i18n/README.vi.md b/i18n/README.vi.md
+deleted file mode 100644
+index e3da03cc9..000000000
+--- a/i18n/README.vi.md
++++ /dev/null
+@@ -1,85 +0,0 @@
+-<p align="center">
+-  <img src="../assets/pocketrisu-banner-1024.png" alt="PocketRisu — Nền tảng Trò chuyện Nhập vai AI Tự lưu trữ" width="900" />
+-</p>
+-
+-<h1 align="center">PocketRisu — Trò chuyện Nhập vai AI Tự lưu trữ</h1>
+-
+-<p align="center">
+-  <a href="../README.md">English</a> | <a href="README.ko.md">한국어</a> | <a href="README.de.md">Deutsch</a> | <a href="README.cn.md">简体中文</a> | <a href="README.es.md">Español</a> | <strong>Tiếng Việt</strong> | <a href="README.zh-Hant.md">繁體中文</a>
+-</p>
+-
+-<p align="center">
+-  <a href="https://github.com/PocketRisu/PocketRisu/releases">
+-    <img alt="Latest Release" src="https://img.shields.io/github/v/release/PocketRisu/PocketRisu?label=latest" />
+-  </a>
+-  <a href="../LICENSE">
+-    <img alt="License: GPL-3.0" src="https://img.shields.io/github/license/PocketRisu/PocketRisu" />
+-  </a>
+-  <a href="https://nodejs.org/">
+-    <img alt="Node" src="https://img.shields.io/badge/node-≥22.12-brightgreen" />
+-  </a>
+-</p>
+-
+-> 🌐 README này được dịch bằng máy. Để có thông tin chính xác nhất, vui lòng tham khảo phiên bản [tiếng Anh](../README.md) hoặc [tiếng Hàn](README.ko.md). Hoan nghênh đóng góp.
+-
+-PocketRisu là một nền tảng trò chuyện nhập vai AI tự lưu trữ, chạy trên PC hoặc máy chủ cá nhân của bạn và truy cập từ PC, máy tính bảng và điện thoại thông minh qua trình duyệt web.
+-
+-<p align="center">
+-  <table>
+-    <tr>
+-      <td align="center"><img src="../assets/screenshots/screenshot-pc-chat.png" alt="Trò chuyện trên PC" height="420" /></td>
+-      <td align="center"><img src="../assets/screenshots/screenshot-mobile-chat.png" alt="Trò chuyện trên di động" height="420" /></td>
+-    </tr>
+-    <tr>
+-      <td align="center"><b>PC</b></td>
+-      <td align="center"><b>Di động</b></td>
+-    </tr>
+-  </table>
+-</p>
+-
+-
+-## Tài liệu
+-
+-- [Hướng dẫn cài đặt](../docs/vi/install.md)
+-- [Hướng dẫn di chuyển từ RisuAI](../docs/vi/migration.md)
+-- [Truy cập từ xa](../docs/vi/remote.md)
+-- [Hướng dẫn cài đặt Termux (Android)](../docs/vi/termux.md)
+-
+-
+-## Tương thích với RisuAI
+-
+-PocketRisu được phát triển từ [RisuAI](https://github.com/kwaroran/RisuAI), được tối ưu hóa cho môi trường tự lưu trữ. Dữ liệu RisuAI hiện có có thể được di chuyển toàn bộ, và tất cả tài sản trong hệ sinh thái RisuAI vẫn có thể sử dụng nguyên trạng.
+-
+-- Tải xuống nhân vật RisuRealm
+-- Thẻ nhân vật (`.charx`, `.risum`, `.risup`, v.v.)
+-- Module, lorebook, preset
+-- Tệp sao lưu (`.bin`) tương thích hai chiều
+-
+-Để di chuyển từ cài đặt RisuAI hiện có, xem [hướng dẫn di chuyển](../docs/vi/migration.md).
+-
+-
+-## Tính năng
+-
+-- **Nhiều nhà cung cấp AI**: OpenAI, Claude, Gemini, DeepInfra, OpenRouter, Ollama và nhiều hơn
+-- **Truy cập đa thiết bị**: Chạy một máy chủ và truy cập từ PC, máy tính bảng, điện thoại thông minh qua trình duyệt web
+-- **Lưu trữ dữ liệu thống nhất**: Tất cả dữ liệu (nhân vật, cuộc trò chuyện, cài đặt, ảnh inlay) được lưu trong một cơ sở dữ liệu SQLite duy nhất trên máy chủ của bạn (không phụ thuộc vào dịch vụ đám mây bên ngoài)
+-- **Sao lưu phía máy chủ tiện lợi**: Máy chủ xử lý sao lưu và khôi phục trực tiếp; cũng hỗ trợ xuất/nhập sao lưu cục bộ `.bin`
+-- **Bảng điều khiển mạnh mẽ**: Sử dụng đĩa (theo nhân vật / theo module), không gian snapshot có thể thu hồi, tối ưu hóa SQLite và nhiều hơn — tất cả trong một màn hình
+-- **Lorebook & bộ nhớ dài hạn**: World info / memory book, HypaMemoryV3 và các tính năng giữ ngữ cảnh khác
+-- **Dịch tự động**: Tự động dịch đầu vào và đầu ra để nhập vai đa ngôn ngữ
+-- **Script regex & plugin**: Sửa đổi đầu ra của mô hình và mở rộng chức năng
+-- **TTS & tài nguyên bổ sung**: Tổng hợp giọng nói, nhúng hình ảnh / âm thanh / video trong trò chuyện
+-- **Tự cập nhật**: Tự động phát hiện phiên bản; các bản phân phối portable cập nhật từ giao diện web
+-- **Truy cập từ xa di động**: Quick Tunnel (URL + QR) hoặc Tailscale
+-- **Giao diện đa ngôn ngữ**: Tiếng Hàn, tiếng Anh, tiếng Nhật, tiếng Trung và nhiều hơn
+-
+-
+-## Cộng đồng & Liên hệ
+-
+-- Báo cáo lỗi / yêu cầu tính năng: [GitHub Issues](https://github.com/PocketRisu/PocketRisu/issues)
+-- Email: contact@pocketrisu.com
+-
+-
+-## Giấy phép
+-
+-[GPL-3.0](../LICENSE)
+diff --git a/i18n/README.zh-Hant.md b/i18n/README.zh-Hant.md
+deleted file mode 100644
+index 272261370..000000000
+--- a/i18n/README.zh-Hant.md
++++ /dev/null
+@@ -1,85 +0,0 @@
+-<p align="center">
+-  <img src="../assets/pocketrisu-banner-1024.png" alt="PocketRisu — 自架 AI 角色扮演聊天平台" width="900" />
+-</p>
+-
+-<h1 align="center">PocketRisu — 自架 AI 角色扮演聊天</h1>
+-
+-<p align="center">
+-  <a href="../README.md">English</a> | <a href="README.ko.md">한국어</a> | <a href="README.de.md">Deutsch</a> | <a href="README.cn.md">简体中文</a> | <a href="README.es.md">Español</a> | <a href="README.vi.md">Tiếng Việt</a> | <strong>繁體中文</strong>
+-</p>
+-
+-<p align="center">
+-  <a href="https://github.com/PocketRisu/PocketRisu/releases">
+-    <img alt="Latest Release" src="https://img.shields.io/github/v/release/PocketRisu/PocketRisu?label=latest" />
+-  </a>
+-  <a href="../LICENSE">
+-    <img alt="License: GPL-3.0" src="https://img.shields.io/github/license/PocketRisu/PocketRisu" />
+-  </a>
+-  <a href="https://nodejs.org/">
+-    <img alt="Node" src="https://img.shields.io/badge/node-≥22.12-brightgreen" />
+-  </a>
+-</p>
+-
+-> 🌐 此 README 由機器翻譯生成。如需獲取最準確的資訊,請參閱 [English](../README.md) 或 [한국어](README.ko.md) 版本。歡迎貢獻翻譯。
+-
+-PocketRisu 是一個自託管的 AI 角色扮演聊天平臺,您可以在自己的 PC 或個人伺服器上執行,並透過網頁瀏覽器從 PC、平板和智慧型手機存取。
+-
+-<p align="center">
+-  <table>
+-    <tr>
+-      <td align="center"><img src="../assets/screenshots/screenshot-pc-chat.png" alt="PC 聊天" height="420" /></td>
+-      <td align="center"><img src="../assets/screenshots/screenshot-mobile-chat.png" alt="行動裝置聊天" height="420" /></td>
+-    </tr>
+-    <tr>
+-      <td align="center"><b>PC</b></td>
+-      <td align="center"><b>行動裝置</b></td>
+-    </tr>
+-  </table>
+-</p>
+-
+-
+-## 文件
+-
+-- [安裝指南](../docs/zh-Hant/install.md)
+-- [RisuAI 遷移指南](../docs/zh-Hant/migration.md)
+-- [遠端存取指南](../docs/zh-Hant/remote.md)
+-- [Termux 安裝指南 (Android)](../docs/zh-Hant/termux.md)
+-
+-
+-## RisuAI 相容性
+-
+-PocketRisu 衍生自 [RisuAI](https://github.com/kwaroran/RisuAI),針對自託管環境進行了改進。現有的 RisuAI 資料可以完整遷移,所有 RisuAI 生態系統資源都可以原樣使用。
+-
+-- RisuRealm 角色下載
+-- 角色卡(`.charx`、`.risum`、`.risup` 等)
+-- 模組、世界書、預設
+-- 備份檔案(`.bin`)雙向相容
+-
+-從現有 RisuAI 遷移的方法請參考[遷移指南](../docs/zh-Hant/migration.md)。
+-
+-
+-## 主要功能
+-
+-- **多種 AI 提供者**:支援 OpenAI、Claude、Gemini、DeepInfra、OpenRouter、Ollama 等
+-- **多裝置存取**:執行一個伺服器,透過網頁瀏覽器從 PC、平板和智慧型手機存取
+-- **統一資料儲存**:所有資料(角色、對話、設定、插圖)都儲存在伺服器上的單一 SQLite 資料庫中(無需依賴外部雲端服務)
+-- **便利的伺服器備份**:伺服器直接處理備份和還原,也支援本地 `.bin` 備份匯出匯入
+-- **強大的儀表板**:磁碟使用情況(按角色/模組)、可回收快照空間、SQLite 最佳化等,一屏管理
+-- **世界書 & 長期記憶**:世界資訊/記憶書、HypaMemoryV3 等上下文保留功能
+-- **自動翻譯**:自動翻譯輸入輸出,實現跨語言角色扮演
+-- **正則指令碼 & 外掛**:修改模型輸出,擴展功能
+-- **TTS & 附加資源**:語音合成、聊天中嵌入圖像/音訊/影片
+-- **自我更新**:自動偵測新版本,可攜版可透過網頁介面更新
+-- **行動裝置遠端存取**:Quick Tunnel(URL + QR)或 Tailscale
+-- **多語言介面**:韓語、英語、日語、中文等
+-
+-
+-## 社群與聯絡
+-
+-- 錯誤回報/功能請求:[GitHub Issues](https://github.com/PocketRisu/PocketRisu/issues)
+-- 電子郵件:contact@pocketrisu.com
+-
+-
+-## 授權條款
+-
+-[GPL-3.0](../LICENSE)
+diff --git a/src/etc/sounds/CREDITS.md b/src/etc/sounds/CREDITS.md
+index 1347659da..7acd8b2f7 100644
+--- a/src/etc/sounds/CREDITS.md
++++ b/src/etc/sounds/CREDITS.md
+@@ -1,6 +1,6 @@
+ # Notification Sound Credits
+ 
+-Bundled notification sounds used by PocketRisu's "Notification & Sound" settings.
++Bundled notification sounds used by PocketRisu-Alter's "Notification & Sound" settings.
+ 
+ All files below are sourced from **Mixkit** (<https://mixkit.co/free-sound-effects/>)
+ under the **Mixkit Free License** — free for commercial use, no attribution

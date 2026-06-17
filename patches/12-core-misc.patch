@@ -1,0 +1,1011 @@
+diff --git a/src/lib/Others/AlertComp.svelte b/src/lib/Others/AlertComp.svelte
+index fe6804e0e..c1bbb7a4e 100644
+--- a/src/lib/Others/AlertComp.svelte
++++ b/src/lib/Others/AlertComp.svelte
+@@ -51,7 +51,7 @@
+     const userAgent = typeof navigator === "undefined" ? "Unknown" : navigator.userAgent || "Unknown";
+     const stackTraceCodeBlock = $derived.by(() => {
+         const lines = [
+-            `PocketRisu v${nodeOnlyVer}`,
++            `PocketRisu-Alter v${nodeOnlyVer}`,
+             `OS: ${osLabel}`,
+             `User-Agent: ${userAgent}`,
+             `Risu environment: ${risuEnvironment}`,
+diff --git a/src/lib/UI/Title.svelte b/src/lib/UI/Title.svelte
+index 071259aff..58b47a914 100644
+--- a/src/lib/UI/Title.svelte
++++ b/src/lib/UI/Title.svelte
+@@ -66,7 +66,7 @@ let specialDay = $state('')
+ <!-- svelte-ignore a11y_click_events_have_key_events -->
+ <h2 class="text-4xl text-textcolor mb-0 mt-6 font-black relative" class:text-bordered={specialDay === 'newYear'} onclick={onClick}>
+     {#if specialDay === 'midAutumn'}
+-        <span class="text-amber-400">🐉PocketRisu🐉</span>
++        <span class="text-amber-400">🐉PocketRisu-Alter🐉</span>
+     {:else if specialDay === 'chuseok'}
+         <div class="flex">
+             <span class="text-blue-500">P</span>
+@@ -81,7 +81,7 @@ let specialDay = $state('')
+             <span class="text-black">u</span>
+         </div>
+     {:else}
+-        PocketRisu
++        PocketRisu-Alter
+     {/if}
+     {#if specialDay === 'christmas'}
+         <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+@@ -111,7 +111,7 @@ let specialDay = $state('')
+ 
+ {#if specialDay === 'nodeonlyAnniversary'}
+     <h1>
+-        <span class="text-2xl font-extralight italic text-amber-400 hover:text-amber-600 transition">PocketRisu {
++        <span class="text-2xl font-extralight italic text-amber-400 hover:text-amber-600 transition">PocketRisu-Alter {
+             new Date().getFullYear() - 2026
+         }{getNumberPostfix(new Date().getFullYear() - 2026)} Anniversary!</span>
+     </h1>
+diff --git a/src/styles.css b/src/styles.css
+index 0a710cbc8..4636045de 100644
+--- a/src/styles.css
++++ b/src/styles.css
+@@ -1,21 +1,40 @@
+ @import "tailwindcss";
+ 
++/* AlterRisu design system tokens — semantic colors, typography, spacing, motion.
++   Keep this near the top so the legacy :root overrides below still win for
++   --risu-theme-* while AlterRisu tokens are available for new code. */
++@import "../AlterRisu-Design-System/tokens.css";
++
+ @plugin '@tailwindcss/typography';
+ 
+ @theme {
+   --breakpoint-xs: 25rem;
+ 
+-  --color-bgcolor: var(--risu-theme-bgcolor);
+-  --color-darkbg: var(--risu-theme-darkbg);
+-  --color-borderc: var(--risu-theme-borderc);
+-  --color-selected: var(--risu-theme-selected);
+-  --color-draculared: var(--risu-theme-draculared);
+-  --color-textcolor: var(--risu-theme-textcolor);
+-  --color-textcolor2: var(--risu-theme-textcolor2);
+-  --color-darkborderc: var(--risu-theme-darkborderc);
+-  --color-darkbutton: var(--risu-theme-darkbutton);
+-  --color-success: var(--risu-theme-success);
+-  --color-primary: var(--risu-theme-primary);
++  /* Map Tailwind utilities to AlterRisu semantic tokens. Legacy --risu-theme-*
++     remain for backward compatibility; new code should prefer these aliases. */
++  --color-bgcolor: var(--bg-base);
++  --color-darkbg: var(--bg-raised);
++  --color-borderc: var(--border-strong);
++  --color-selected: var(--bg-hover);
++  --color-draculared: var(--danger);
++  --color-textcolor: var(--text-primary);
++  --color-textcolor2: var(--text-secondary);
++  --color-darkborderc: var(--border-subtle);
++  --color-darkbutton: var(--bg-surface);
++  --color-success: var(--success);
++  --color-primary: var(--accent);
++
++  /* Keep legacy fallbacks as aliases so existing custom CSS continues to work. */
++  --color-risu-bgcolor: var(--risu-theme-bgcolor);
++  --color-risu-darkbg: var(--risu-theme-darkbg);
++  --color-risu-borderc: var(--risu-theme-borderc);
++  --color-risu-selected: var(--risu-theme-selected);
++  --color-risu-draculared: var(--risu-theme-draculared);
++  --color-risu-textcolor: var(--risu-theme-textcolor);
++  --color-risu-textcolor2: var(--risu-theme-textcolor2);
++  --color-risu-darkborderc: var(--risu-theme-darkborderc);
++  --color-risu-darkbutton: var(--risu-theme-darkbutton);
++  --color-risu-primary: var(--risu-theme-primary);
+ 
+   --color-primary-50: var(--risu-theme-primary-50);
+   --color-primary-100: var(--risu-theme-primary-100);
+@@ -330,41 +349,48 @@ body {
+   text-shadow: -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white;
+ }
+ 
++/* Global thin scrollbar — uses semantic tokens so it adapts per theme.
++   Firefox uses scrollbar-color (set on html); WebKit uses the pseudo-elements. */
++html {
++  scrollbar-width: thin;
++  scrollbar-color: color-mix(in srgb, var(--text-muted) 42%, transparent) transparent;
++}
++
+ ::-webkit-scrollbar {
+-  width: 4px;
+-  height: 4px;
++  width: 10px;
++  height: 10px;
+ }
+ 
+-/* Track */
+ ::-webkit-scrollbar-track {
+   background: transparent;
+ }
+ 
+-/* Handle — global auto-hide. Transparent by default; fades in on hover.
+-   The tint is a translucent form of the theme's secondary text color, so it
+-   adapts to every theme. `visibility`/`opacity` are avoided: on a webkit thumb
+-   they make Chrome fall back to the default system gray bar instead of hiding,
+-   so we toggle the thumb's background-color instead. */
+ ::-webkit-scrollbar-thumb {
+-  background-color: transparent;
+-  border-radius: 9999px;
+-  transition: background-color 0.3s linear;
++  background: color-mix(in srgb, var(--text-muted) 42%, transparent);
++  border: 3px solid transparent;
++  border-radius: var(--radius-pill, 999px);
++  background-clip: padding-box;
++}
++
++::-webkit-scrollbar-thumb:hover {
++  background: color-mix(in srgb, var(--text-secondary) 62%, transparent);
++  background-clip: padding-box;
+ }
+ 
+-/* Hovering any scrollable area (hover bubbles to ancestors) reveals the thumb. */
+-*:hover::-webkit-scrollbar-thumb {
+-  background-color: color-mix(in srgb, var(--color-textcolor2) 35%, transparent);
++.n-scroll::-webkit-scrollbar-thumb {
++  visibility: hidden;
++  opacity: 0;
++  transition: visibility 0.5s, opacity 0.5s linear;
+ }
+ 
+-/* Stronger when pointing directly at the thumb. */
+-::-webkit-scrollbar-thumb:hover {
+-  background-color: color-mix(in srgb, var(--color-textcolor2) 55%, transparent);
++.n-scroll:hover::-webkit-scrollbar-thumb {
++  visibility: visible;
++  opacity: 1;
+ }
+ 
+-/* Firefox: thin neutral scrollbar (inherits from root; no per-element auto-hide). */
+-html {
+-  scrollbar-width: thin;
+-  scrollbar-color: color-mix(in srgb, var(--color-textcolor2) 35%, transparent) transparent;
++.n-scroll:focus::-webkit-scrollbar-thumb {
++  visibility: visible;
++  opacity: 1;
+ }
+ 
+ * {
+@@ -375,6 +401,17 @@ html {
+   margin-top: 0.3rem;
+ }
+ 
++.chattext img {
++  display: block;
++  width: 100% !important;
++  height: auto !important;
++  max-width: min(100%, calc(100vw - 4rem)) !important;
++  max-height: min(88svh, 72rem) !important;
++  object-fit: contain;
++  margin-left: auto;
++  margin-right: auto;
++}
++
+ #app {
+   width: 100%;
+   height: 100%;
+@@ -495,15 +532,25 @@ html {
+ }
+ 
+ .x-risu-risu-inlay-image {
+-  @apply w-full flex justify-center;
++  @apply w-full max-w-full flex justify-center;
+ }
+ 
+ .x-risu-risu-inlay-image img {
+-  @apply rounded-lg focus:outline-hidden max-w-80 w-full;
++  @apply rounded-lg focus:outline-hidden;
++  width: 100% !important;
++  height: auto !important;
++  max-width: 100% !important;
++  max-height: min(88svh, 72rem) !important;
++  object-fit: contain;
+ }
+ 
+ .x-risu-risu-inlay-image video {
+-  @apply rounded-lg focus:outline-hidden max-w-80 w-full;
++  @apply rounded-lg focus:outline-hidden;
++  width: 100% !important;
++  height: auto !important;
++  max-width: 100% !important;
++  max-height: min(88svh, 72rem) !important;
++  object-fit: contain;
+ }
+ 
+ .x-risu-risu-inlay-image audio {
+@@ -577,29 +624,315 @@ html {
+ }
+ 
+ .root-loaded-image {
+-  /* This class is used to indicate that the image has been with root-loaded method */
+-  /* We need to style it to centered and pretty */
+   display: block;
+-  margin-left: auto;
+-  margin-right: auto;
+-  width: calc(100% - 1rem);
+-  max-width: 20rem;
++  width: 100% !important;
+   height: auto;
++  max-width: 100% !important;
++  max-height: min(88svh, 72rem) !important;
++  object-fit: contain;
+   border-radius: 0.5rem;
+   box-shadow: 0 2px 4px rgba(137, 137, 137, 0.1);
+ }
+ 
+ .root-loaded-image-dynamic {
+-  max-height: 14rem;
++  max-height: min(88svh, 72rem) !important;
+   transition: max-height 0.5s ease;
+-  object-fit: cover;
+-  object-position: top;
++  object-fit: contain;
++  object-position: center;
+ }
+ 
+ .root-loaded-image-dynamic:hover {
+-  max-height: 30rem;
++  max-height: min(88svh, 72rem) !important;
+ }
+ 
+ annotation {
+   display: none;
+ }
++
++/* ---- AlterRisu motion & performance helpers ---- */
++
++/* Micro-interactions: color and transform transitions for common interactive
++   elements. Use transform/opacity where possible to stay on the compositor. */
++button,
++[role="button"],
++a,
++input,
++textarea,
++select,
++.chat-message-container,
++.sidebar-item,
++.menu-item {
++  transition-property: color, background-color, border-color, box-shadow, opacity, transform;
++  transition-duration: var(--dur-fast);
++  transition-timing-function: var(--ease-out);
++}
++
++button:active,
++[role="button"]:active,
++a:active {
++  transform: scale(0.98);
++}
++
++/* Respect reduced motion system preference. */
++@media (prefers-reduced-motion: reduce) {
++  *,
++  *::before,
++  *::after {
++    animation-duration: 0.01ms !important;
++    animation-iteration-count: 1 !important;
++    transition-duration: 0.01ms !important;
++    scroll-behavior: auto !important;
++  }
++}
++
++/* Prevent native image drag ghosting on mobile/touch browsers. Images and
++   media should not follow the finger during scroll or swipe gestures. */
++img,
++video,
++audio,
++canvas,
++svg {
++  -webkit-user-drag: none;
++  -khtml-user-drag: none;
++  -moz-user-drag: none;
++  -o-user-drag: none;
++  user-drag: none;
++  -webkit-touch-callout: none;
++  user-select: none;
++  -webkit-user-select: none;
++  -moz-user-select: none;
++  -ms-user-select: none;
++}
++
++/* mobile-drag-drop polyfill creates a drag image that follows the finger.
++   Keep the reorder behavior but hide the visual ghost so images don't appear
++   to stick to the touch point during scroll or accidental long-press. */
++.dnd-poly-drag-image,
++.dnd-poly-drag-image * {
++  opacity: 0 !important;
++  visibility: hidden !important;
++}
++
++/* Allow selectable text in inputs and editable/chat areas while still
++   blocking native drag previews. */
++input,
++textarea,
++[contenteditable="true"],
++.chattext,
++.prose {
++  user-select: text;
++  -webkit-user-select: text;
++}
++
++/* Contain paint for scrollable lists and chat messages to reduce repaints. */
++.scroll-container,
++.chat-scroll,
++.chat-message-container {
++  content-visibility: auto;
++  contain-intrinsic-size: 0 56px;
++}
++
++/* Lazy-loaded images should fade in instead of popping. */
++img[loading="lazy"] {
++  opacity: 0;
++  transition: opacity var(--dur-base) var(--ease-out);
++}
++
++img[loading="lazy"].loaded,
++img[loading="lazy"]:not([src=""]) {
++  opacity: 1;
++}
++
++/* Sidebar slide transition. */
++.sidebar-enter {
++  transform: translateX(-100%);
++  opacity: 0;
++}
++
++.sidebar-enter-active {
++  transform: translateX(0);
++  opacity: 1;
++  transition: transform var(--dur-base) var(--ease-out), opacity var(--dur-base) var(--ease-out);
++}
++
++.sidebar-exit {
++  transform: translateX(0);
++  opacity: 1;
++}
++
++.sidebar-exit-active {
++  transform: translateX(-100%);
++  opacity: 0;
++  transition: transform var(--dur-base) var(--ease-out), opacity var(--dur-base) var(--ease-out);
++}
++
++/* Dialog/modal backdrop and panel transitions. */
++.modal-backdrop {
++  opacity: 0;
++  transition: opacity var(--dur-base) var(--ease-out);
++}
++
++.modal-backdrop.open {
++  opacity: 1;
++}
++
++.modal-panel {
++  transform: scale(0.96);
++  opacity: 0;
++  transition: transform var(--dur-base) var(--ease-out), opacity var(--dur-base) var(--ease-out);
++}
++
++.modal-panel.open {
++  transform: scale(1);
++  opacity: 1;
++}
++
++/* Toast / notification slide-in. */
++.toast-enter {
++  transform: translateY(-8px);
++  opacity: 0;
++}
++
++.toast-enter-active {
++  transform: translateY(0);
++  opacity: 1;
++  transition: transform var(--dur-fast) var(--ease-out), opacity var(--dur-fast) var(--ease-out);
++}
++
++/* Composer expand / collapse micro motion. */
++.composer {
++  transition: max-height var(--dur-base) var(--ease-out), padding var(--dur-base) var(--ease-out);
++}
++
++/* Chat message appear animation. */
++@keyframes message-enter {
++  from {
++    opacity: 0;
++    transform: translateY(6px);
++  }
++  to {
++    opacity: 1;
++    transform: translateY(0);
++  }
++}
++
++.chat-message-appear {
++  animation: message-enter var(--dur-base) var(--ease-out) forwards;
++}
++
++/* Chat bubble customization
++   ---------------------------------------------------------------------------
++   Activated by `data-chat-bubble-mode="bubble"` or `"glass"` on <html>.
++   Strips the default card background so the .chattext bubble stands alone.
++   Colors fall back to the active theme's `--msg-*` tokens when the user
++   hasn't overridden them. */
++:root[data-chat-bubble-mode="bubble"] .chat-message-container .bg-bgcolor.sm\:rounded-lg,
++:root[data-chat-bubble-mode="glass"]  .chat-message-container .bg-bgcolor.sm\:rounded-lg {
++  background-color: transparent !important;
++  padding: 0.5rem !important;
++  border-radius: 0 !important;
++}
++
++/* Shared bubble shape: inline-block with rounded padding */
++:root[data-chat-bubble-mode="bubble"] .chat-message-container .chattext,
++:root[data-chat-bubble-mode="glass"]  .chat-message-container .chattext {
++  display: inline-block;
++  vertical-align: top;
++  width: fit-content;
++  max-width: 100%;
++  border-radius: var(--radius-md, 10px);
++  padding: 0.5rem 0.75rem;
++}
++
++/* ── bubble mode ── */
++:root[data-chat-bubble-mode="bubble"] .chat-message-container[data-role="user"] .chattext {
++  background-color: var(--chat-user-bg, var(--msg-user-bg, var(--bg-surface)));
++  border: 1px solid var(--chat-user-border, var(--msg-user-border, var(--border-subtle)));
++}
++:root[data-chat-bubble-mode="bubble"] .chat-message-container[data-role="char"] .chattext {
++  background-color: var(--chat-char-bg, var(--msg-char-bg, var(--bg-raised)));
++  border: 1px solid var(--chat-char-border, var(--msg-char-border, var(--border-subtle)));
++}
++
++/* ── glass mode ── */
++:root[data-chat-bubble-mode="glass"] .chat-message-container[data-role="user"] .chattext {
++  background-color: color-mix(in srgb, var(--chat-user-bg, var(--msg-user-bg, var(--bg-surface))) 55%, transparent);
++  border: 1px solid var(--chat-user-border, var(--msg-user-border, var(--border-subtle)));
++  backdrop-filter: blur(8px);
++  -webkit-backdrop-filter: blur(8px);
++}
++:root[data-chat-bubble-mode="glass"] .chat-message-container[data-role="char"] .chattext {
++  background-color: color-mix(in srgb, var(--chat-char-bg, var(--msg-char-bg, var(--bg-raised))) 38%, transparent);
++  border: 1px solid var(--chat-char-border, var(--msg-char-border, var(--border-subtle)));
++  backdrop-filter: blur(8px);
++  -webkit-backdrop-filter: blur(8px);
++}
++
++/* Em (italic emphasis) recolor — applied regardless of bubble mode when set */
++.chat-message-container .chattext em {
++  color: var(--chat-em-color, var(--msg-em-color, inherit));
++}
++
++/* Streaming border indicator (when chat marks itself streaming, downstream
++   themes may add the `.is-streaming` class — this is a forward-looking hook). */
++.chat-message-container.is-streaming .chattext {
++  box-shadow: inset 0 0 0 1px var(--chat-streaming-color, var(--msg-streaming-border, var(--accent-press)));
++}
++
++/* Panel-in: subtle fade-up for view/panel transitions. From AlterRisu.
++   Transform+opacity only (GPU-friendly). Honors prefers-reduced-motion via
++   --dur-base falling to 0ms. */
++@keyframes panel-in {
++  from {
++    opacity: 0;
++    transform: translateY(6px);
++  }
++  to {
++    opacity: 1;
++    transform: none;
++  }
++}
++
++.rs-panel-in {
++  animation: panel-in var(--dur-base) var(--ease-out) backwards;
++}
++
++/* Streaming indicator pulse. */
++@keyframes streaming-pulse {
++  0%, 100% { opacity: 1; }
++  50% { opacity: 0.4; }
++}
++
++.streaming-dot {
++  animation: streaming-pulse 1.2s var(--ease-out) infinite;
++}
++
++/* Smooth scrolling for chat containers without forcing it everywhere. */
++.chat-scroll {
++  scroll-behavior: smooth;
++}
++
++@media (prefers-reduced-motion: reduce) {
++  .chat-scroll {
++    scroll-behavior: auto;
++  }
++}
++
++/* GPU hint for animated overlays. */
++.gpu-layer {
++  will-change: transform, opacity;
++  transform: translateZ(0);
++  backface-visibility: hidden;
++}
++
++/* Avoid layout shift from lazy images by reserving space via aspect-ratio. */
++img {
++  max-width: 100%;
++  height: auto;
++}
++
++/* Reduce paint cost for large static backgrounds. */
++body,
++#app {
++  contain: paint;
++}
+diff --git a/src/ts/bootstrap.ts b/src/ts/bootstrap.ts
+index 27978b664..b30e6b5bd 100644
+--- a/src/ts/bootstrap.ts
++++ b/src/ts/bootstrap.ts
+@@ -3,11 +3,9 @@ import { v4 as uuidv4 } from 'uuid';
+ import { get } from "svelte/store";
+ import { setDatabase, defaultSdDataFunc, getDatabase, changeToThemePreset } from "./storage/database.svelte";
+ import { chatDraftKey, sweepOrphanDrafts } from "./storage/chatDraft";
+-import { checkRisuUpdate } from "./update";
+-import { fetchPublicStats } from "./publicStats";
+ import { MobileGUI, botMakerMode, selectedCharID, loadedStore, DBState, LoadingStatusState, bootBackupPromptStore } from "./stores.svelte";
+ import { loadPlugins } from "./plugins/plugins.svelte";
+-import { alertError, alertMd, alertTOS, waitAlert, alertConfirm, alertInput } from "./alert";
++import { alertError, alertMd, alertTOS, waitAlert, alertConfirm } from "./alert";
+ import { characterURLImport } from "./characterCards";
+ import { defaultJailbreak, defaultMainPrompt, oldJailbreak, oldMainPrompt } from "./storage/defaultPrompts";
+ import { decodeRisuSave, encodeRisuSaveLegacy } from "./storage/risuSave";
+@@ -83,7 +81,7 @@ export async function loadData() {
+             }
+             if (createdFreshDatabase) {
+                 // Brand-new instance (no save file existed): apply the default
+-                // theme preset (#0 = PocketRisu Standard) so the active display
++                // theme preset (#0 = PocketRisu-Alter Standard) so the active display
+                 // settings (zoomsize 120, iconsize, line height, etc.) match the
+                 // standard theme instead of upstream's raw DB defaults. setDatabase
+                 // creates this preset but never applies it. Gated on
+@@ -173,8 +171,6 @@ export async function loadData() {
+             setTimeout(() => {
+                 cleanChunks().catch(console.error)
+             }, 5_000)
+-            checkRisuUpdate()
+-            fetchPublicStats()
+             if (import.meta.env.VITE_RISU_TOS === 'TRUE') {
+                 alertTOS().then((a) => {
+                     if (a === false) {
+diff --git a/src/ts/characters.ts b/src/ts/characters.ts
+index 73890d860..511c6feb3 100644
+--- a/src/ts/characters.ts
++++ b/src/ts/characters.ts
+@@ -2,13 +2,14 @@ import { get, writable } from "svelte/store";
+ import { saveImage, setDatabase, type character, type Chat, defaultSdDataFunc, type loreBook, getDatabase, getCharacterByIndex, setCharacterByIndex, getCurrentChat, loadTogglesFromChat, normalizeChat, newChatModelDefaults } from "./storage/database.svelte";
+ import { ensureChatHydrated } from "./storage/chatStorage";
+ import { alertAddCharacter, alertConfirm, alertError, alertSelect, alertStore, alertWait, notifySuccess, notifyInfo } from "./alert";
+-import { loadingOverlayStore, chatDeselected } from "./stores.svelte";
++import { loadingOverlayStore, chatDeselected, ReloadGUIPointer, DBState } from "./stores.svelte";
+ import { language } from "../lang";
+ import { checkNullish, findCharacterbyId, getUserName, selectMultipleFile, selectSingleFile } from "./util";
+ import { v4 as uuidv4, v4 } from 'uuid';
+ import { getImageType } from "./media";
+ import { MobileGUIStack, OpenRealmStore, selectedCharID } from "./stores.svelte";
+ import { AppendableBuffer, changeChatTo, checkCharOrder, downloadFile, getFileSrc, requiresFullEncoderReload } from "./globalApi.svelte";
++import { applyPendingBackendChatResults } from "./process/request/backendJob";
+ import { updateInlayScreen } from "./process/inlayScreen";
+ import { parseMarkdownSafe } from "./parser/parser.svelte";
+ import { translateHTML } from "./translator/translator";
+@@ -309,7 +310,7 @@ export async function exportChat(page:number){
+                     </tr>
+                     ${chatContentHTML}
+                 </table>
+-                <p>Chat from PocketRisu</p>
++                <p>Chat from PocketRisu-Alter</p>
+             `
+ 
+             //copy to clipboard
+@@ -791,6 +792,18 @@ export function changeChar(index: number, arg:{
+                     const activeChatId = currentChar?.chats?.[currentChar.chatPage]?.id
+                     if(hydrated && get(selectedCharID) === capturedIndex && activeChatId === capturedChatId) {
+                         loadTogglesFromChat(hydrated)
++                        if(getDatabase().useBackendChatJobs) {
++                            const reactiveChar = DBState.db.characters[capturedIndex]
++                            // Use the reactive proxy stored at chats[chatPage], not the raw `hydrated`
++                            // reference returned from ensureChatHydrated. Mutations on the raw object
++                            // bypass Svelte 5's signal tracking and won't trigger UI updates.
++                            const reactiveChat = reactiveChar?.chats?.[reactiveChar.chatPage]
++                            if(reactiveChat) {
++                                void applyPendingBackendChatResults(reactiveChar, reactiveChat).then((applied) => {
++                                    if(applied > 0) ReloadGUIPointer.set(Math.random())
++                                }).catch(console.error)
++                            }
++                        }
+                     }
+                 }).catch((e) => {
+                     console.error('[selectCharacter] hydration failed:', e)
+@@ -800,6 +813,15 @@ export function changeChar(index: number, arg:{
+             }
+         } else {
+             loadTogglesFromChat(chat)
++            if(getDatabase().useBackendChatJobs) {
++                const reactiveChar = DBState.db.characters[index]
++                const reactiveChat = reactiveChar?.chats?.[reactiveChar.chatPage]
++                if(reactiveChat) {
++                    void applyPendingBackendChatResults(reactiveChar, reactiveChat).then((applied) => {
++                        if(applied > 0) ReloadGUIPointer.set(Math.random())
++                    }).catch(console.error)
++                }
++            }
+         }
+     }
+ }
+diff --git a/src/ts/globalApi.svelte.ts b/src/ts/globalApi.svelte.ts
+index 648113705..e55b7b4cb 100644
+--- a/src/ts/globalApi.svelte.ts
++++ b/src/ts/globalApi.svelte.ts
+@@ -4,7 +4,7 @@ import { tick } from "svelte";
+ import { get } from "svelte/store";
+ import streamSaver from 'streamsaver';
+ import { setDatabase, type Database, defaultSdDataFunc, getDatabase, appVer, nodeOnlyVer, getCurrentCharacter, loadTogglesFromChat } from "./storage/database.svelte";
+-import { checkRisuUpdate } from "./update";
++
+ import { MobileGUI, botMakerMode, selectedCharID, loadedStore, DBState, LoadingStatusState, selIdState, ReloadGUIPointer, bodyIntercepterStore, loadingOverlayStore, chatDeselected } from "./stores.svelte";
+ import { loadPlugins } from "./plugins/plugins.svelte";
+ import { alertConfirm, alertError, alertMd, alertNormalWait, alertSelect, alertTOS, waitAlert, notifySuccess, notifyError } from "./alert";
+@@ -27,6 +27,7 @@ import { initMobileGesture } from "./hotkey";
+ import { moduleUpdate } from "./process/modules";
+ import { isLocalNetworkUrl } from "./network/localNetwork";
+ import { decodeProxyJobWsChunk, formatProxyStreamErrorMessage, parseProxyJobWsEvent } from "./network/proxyJobWs";
++import { applyPendingBackendChatResults } from "./process/request/backendJob";
+ 
+ export const forageStorage = new AutoStorage()
+ 
+@@ -2749,7 +2750,21 @@ export function changeChatTo(IdOrIndex: string | number) {
+             }})
+             void ensureChatHydrated(char.chats, capturedIndex, char.chaId).then((hydrated) => {
+                 if(cancelled) return
+-                if(hydrated && char.chatPage === capturedIndex) loadTogglesFromChat(hydrated)
++                if(hydrated && char.chatPage === capturedIndex) {
++                    loadTogglesFromChat(hydrated)
++                    if(getDatabase().useBackendChatJobs){
++                        // Use the reactive proxy at chats[chatPage], not the raw `hydrated` reference.
++                        // Direct mutations on the raw object bypass Svelte 5 signal tracking.
++                        const reactiveChat = char.chats[capturedIndex]
++                        if(reactiveChat) {
++                            void applyPendingBackendChatResults(char, reactiveChat).then((applied) => {
++                                if(applied > 0) {
++                                    ReloadGUIPointer.set(Math.random());
++                                }
++                            }).catch(console.error)
++                        }
++                    }
++                }
+             }).catch((e) => {
+                 console.error('[changeChatTo] hydration failed:', e)
+             }).finally(() => {
+@@ -2757,6 +2772,13 @@ export function changeChatTo(IdOrIndex: string | number) {
+             })
+         } else {
+             loadTogglesFromChat(newChat)
++            if(getDatabase().useBackendChatJobs){
++                void applyPendingBackendChatResults(char, newChat).then((applied) => {
++                    if(applied > 0) {
++                        ReloadGUIPointer.set(Math.random());
++                    }
++                }).catch(console.error)
++            }
+         }
+     }
+     ReloadGUIPointer.set(Math.random())
+diff --git a/src/ts/hotkey.ts b/src/ts/hotkey.ts
+index c62eb4aa4..f3a537ef1 100644
+--- a/src/ts/hotkey.ts
++++ b/src/ts/hotkey.ts
+@@ -177,10 +177,9 @@ export function initHotkey(){
+ 
+ 
+         if(ev.key === 'Escape'){
+-            // 모달(AlertComp 팝업 또는 Sh*Dialog)이 열려있을 땐 전역 ESC 동작을 중단한다.
+-            // bits-ui Dialog는 preventDefault만 하고 stopPropagation은 하지 않기 때문에,
+-            // 가드 없이는 Dialog 자체는 유지되지만 뒤에 있는 설정 드로어가 함께 닫히는 현상이 있다.
+-            if(doingAlert() || document.querySelector('[aria-modal="true"][data-state="open"]')){
++            if(doingAlert() || document.querySelector('[aria-modal="true"][data-state="open"], [data-risu-modal]')){
++                const modals = document.querySelectorAll('[data-risu-modal]');
++                if (modals.length > 0) (modals[modals.length - 1] as HTMLElement).click();
+                 ev.preventDefault()
+                 return
+             }
+diff --git a/src/ts/polyfill.ts b/src/ts/polyfill.ts
+index da4b9dc91..fc0727428 100644
+--- a/src/ts/polyfill.ts
++++ b/src/ts/polyfill.ts
+@@ -1,8 +1,12 @@
+-import { ReadableStream, WritableStream, TransformStream } from "web-streams-polyfill/ponyfill/es2018";
+-import { Buffer as BufferPolyfill } from 'buffer'
+-import { polyfill as dragPolyfill} from "mobile-drag-drop"
+-import {scrollBehaviourDragImageTranslateOverride} from 'mobile-drag-drop/scroll-behaviour'
+-import rfdc from 'rfdc'
++import {
++  ReadableStream,
++  WritableStream,
++  TransformStream,
++} from "web-streams-polyfill/ponyfill/es2018";
++import { Buffer as BufferPolyfill } from "buffer";
++import { polyfill as dragPolyfill } from "mobile-drag-drop";
++import { scrollBehaviourDragImageTranslateOverride } from "mobile-drag-drop/scroll-behaviour";
++import rfdc from "rfdc";
+ import { isIOS } from "./platform";
+ /**
+  * Polyfill for structuredClone.
+@@ -10,40 +14,41 @@ import { isIOS } from "./platform";
+  */
+ 
+ const rfdcClone = rfdc({
+-  circles:true,
+-})
+-export function safeStructuredClone<T>(data:T):T{
++  circles: true,
++});
++export function safeStructuredClone<T>(data: T): T {
+   try {
+-      return structuredClone(data)
++    return structuredClone(data);
+   } catch (error) {
+-      return rfdcClone(data)
++    return rfdcClone(data);
+   }
+ }
+ 
+ try {
+-    const testDom = document.createElement('div');
+-    const supports  = ('draggable' in testDom) || ('ondragstart' in testDom && 'ondrop' in testDom);
+-    testDom.remove()
+-    
+-    if((!supports) || isIOS()){
+-      globalThis.polyfilledDragDrop = true
+-      dragPolyfill({
+-        // use this to make use of the scroll behaviour
+-        dragImageTranslateOverride: scrollBehaviourDragImageTranslateOverride,
+-        // holdToDrag: 400,
+-        forceApply: true
+-      });
+-    }
+-} catch (error) {
+-    
+-}
++  const testDom = document.createElement("div");
++  const supports =
++    "draggable" in testDom || ("ondragstart" in testDom && "ondrop" in testDom);
++  testDom.remove();
++
++  if (!supports || isIOS()) {
++    globalThis.polyfilledDragDrop = true;
++    dragPolyfill({
++      // use this to make use of the scroll behaviour
++      dragImageTranslateOverride: scrollBehaviourDragImageTranslateOverride,
++      // Raise the long-press threshold so casual scrolls and swipes don't
++      // trigger a drag preview, while intentional reorder drags still work.
++      holdToDrag: 650,
++      forceApply: true,
++    });
++  }
++} catch (error) {}
+ 
+-globalThis.safeStructuredClone = safeStructuredClone
++globalThis.safeStructuredClone = safeStructuredClone;
+ 
+-globalThis.Buffer = BufferPolyfill
++globalThis.Buffer = BufferPolyfill;
+ //@ts-expect-error ponyfill WritableStream type is incompatible with globalThis.WritableStream
+-globalThis.WritableStream = globalThis.WritableStream ?? WritableStream
++globalThis.WritableStream = globalThis.WritableStream ?? WritableStream;
+ //@ts-expect-error ponyfill ReadableStream type is incompatible with globalThis.ReadableStream
+-globalThis.ReadableStream = globalThis.ReadableStream ?? ReadableStream
++globalThis.ReadableStream = globalThis.ReadableStream ?? ReadableStream;
+ //@ts-expect-error ponyfill TransformStream type is incompatible with globalThis.TransformStream
+-globalThis.TransformStream = globalThis.TransformStream ?? TransformStream   
++globalThis.TransformStream = globalThis.TransformStream ?? TransformStream;
+diff --git a/src/ts/setting/advancedSettingsData.ts b/src/ts/setting/advancedSettingsData.ts
+index 87b82f647..9cc56694b 100644
+--- a/src/ts/setting/advancedSettingsData.ts
++++ b/src/ts/setting/advancedSettingsData.ts
+@@ -211,6 +211,15 @@ export const advancedSettingsItems: SettingItem[] = [
+     },
+ 
+     // Unrecommended Extra (Condition: showUnrecommended)
++    {
++        id: 'adv.backendChatJobs', type: 'check', labelKey: 'useBackendChatJobs', bindKey: 'useBackendChatJobs',
++        helpKey: 'useBackendChatJobs', showExperimental: true, classes: 'mt-4'
++    },
++    {
++        id: 'adv.backendMultiagent', type: 'check', labelKey: 'useBackendMultiagent', bindKey: 'useBackendMultiagent',
++        helpKey: 'useBackendMultiagent', showExperimental: true,
++        condition: (ctx) => ctx.db.useBackendChatJobs,
++    },
+     {
+         id: 'adv.plainFetch', type: 'check', labelKey: 'forcePlainFetch', bindKey: 'usePlainFetch',
+         condition: (ctx) => ctx.db.showUnrecommended, helpKey: 'forcePlainFetch', helpUnrecommended: true, classes: 'mt-4'
+diff --git a/src/ts/setting/customComponents.ts b/src/ts/setting/customComponents.ts
+index 4212faa0d..9bc7ac20d 100644
+--- a/src/ts/setting/customComponents.ts
++++ b/src/ts/setting/customComponents.ts
+@@ -23,6 +23,7 @@ import InlayCompressButton from 'src/lib/Setting/Pages/Advanced/InlayCompressBut
+ import ColorSchemeSelect from 'src/lib/Setting/Pages/Display/ColorSchemeSelect.svelte';
+ import CustomColorSchemeEditor from 'src/lib/Setting/Pages/Display/CustomColorSchemeEditor.svelte';
+ import CustomTextThemeEditor from 'src/lib/Setting/Pages/Display/CustomTextThemeEditor.svelte';
++import ChatBubbleEditor from 'src/lib/Setting/Pages/Display/ChatBubbleEditor.svelte';
+ import CustomBackgroundToggle from 'src/lib/Setting/Pages/Display/CustomBackgroundToggle.svelte';
+ import NullableTextColorToggle from 'src/lib/Setting/Pages/Display/NullableTextColorToggle.svelte';
+ import NotificationToggle from 'src/lib/Setting/Pages/Display/NotificationToggle.svelte';
+@@ -47,6 +48,7 @@ export const customComponents: Record<string, Component<any>> = {
+     'ColorSchemeSelect': ColorSchemeSelect,
+     'CustomColorSchemeEditor': CustomColorSchemeEditor,
+     'CustomTextThemeEditor': CustomTextThemeEditor,
++    'ChatBubbleEditor': ChatBubbleEditor,
+     'CustomBackgroundToggle': CustomBackgroundToggle,
+     'NullableTextColorToggle': NullableTextColorToggle,
+     'NotificationToggle': NotificationToggle,
+diff --git a/src/ts/setting/displaySettingsData.svelte.ts b/src/ts/setting/displaySettingsData.svelte.ts
+index 69d0273bb..b7b970b64 100644
+--- a/src/ts/setting/displaySettingsData.svelte.ts
++++ b/src/ts/setting/displaySettingsData.svelte.ts
+@@ -19,11 +19,7 @@ export const displayThemeSettingsItems: SettingItem[] = [
+         classes: 'mt-4',
+         options: {
+             selectOptions: [
+-                { value: '', label: 'PocketRisu Standard' },
+-                { value: 'standardRisu', label: 'Standard Risu' },
+-                { value: 'waifu', label: 'Waifulike' },
+-                { value: 'mobilechat', label: 'Mobile Chat' },
+-                { value: 'cardboard', label: 'CardBoard' },
++                { value: '', label: 'PocketRisu-Alter Standard' },
+                 { value: 'customHTML', label: 'Custom HTML' },
+             ],
+         },
+@@ -38,14 +34,6 @@ export const displayThemeSettingsItems: SettingItem[] = [
+         condition: (ctx) => ctx.db.theme === 'customHTML',
+         keywords: ['custom', 'html', 'chat'],
+     },
+-    {
+-        id: 'display.guiHTML.warning',
+-        type: 'custom',
+-        componentId: 'CustomizationWarning',
+-        componentProps: { messageKey: 'customHTMLWarning' },
+-        condition: (ctx) => ctx.db.theme === 'customHTML',
+-        keywords: ['custom', 'html', 'warning'],
+-    },
+     {
+         id: 'display.nodeOnlyStandardChatWidth',
+         type: 'select',
+@@ -73,43 +61,6 @@ export const displayThemeSettingsItems: SettingItem[] = [
+         onChange: () => updateTextThemeAndCSS(),
+         keywords: ['custom', 'css'],
+     },
+-    {
+-        id: 'display.customCSS.warning',
+-        type: 'custom',
+-        componentId: 'CustomizationWarning',
+-        componentProps: { messageKey: 'customCSSWarning' },
+-        keywords: ['custom', 'css', 'warning'],
+-    },
+-    {
+-        id: 'display.waifuWidth',
+-        type: 'slider',
+-        labelKey: 'waifuWidth',
+-        helpKey: 'waifuWidth',
+-        bindKey: 'waifuWidth',
+-        condition: (ctx) => ctx.db.theme === 'waifu',
+-        options: {
+-            min: 50,
+-            max: 200,
+-            customText: (value) => `${value}%`,
+-        },
+-        classes: 'mt-4',
+-        keywords: ['waifu', 'width'],
+-    },
+-    {
+-        id: 'display.waifuWidth2',
+-        type: 'slider',
+-        labelKey: 'waifuWidth2',
+-        helpKey: 'waifuWidth2',
+-        bindKey: 'waifuWidth2',
+-        condition: (ctx) => ctx.db.theme === 'waifu',
+-        options: {
+-            min: 20,
+-            max: 150,
+-            customText: (value) => `${value}%`,
+-        },
+-        classes: 'mt-4',
+-        keywords: ['waifu', 'width'],
+-    },
+     {
+         id: 'display.colorScheme',
+         type: 'custom',
+@@ -147,6 +98,12 @@ export const displayThemeSettingsItems: SettingItem[] = [
+         condition: (ctx) => ctx.db.textTheme === 'custom',
+         keywords: ['custom', 'text', 'color', 'theme'],
+     },
++    {
++        id: 'display.chatBubble',
++        type: 'custom',
++        componentId: 'ChatBubbleEditor',
++        keywords: ['chat', 'bubble', 'message', 'glass', 'color'],
++    },
+     {
+         id: 'display.font',
+         type: 'select',
+diff --git a/src/ts/storage/autoStorage.ts b/src/ts/storage/autoStorage.ts
+index 16a282245..a45ce567d 100644
+--- a/src/ts/storage/autoStorage.ts
++++ b/src/ts/storage/autoStorage.ts
+@@ -38,6 +38,13 @@ export class AutoStorage{
+         return this.realStorage.createAuth()
+     }
+ 
++    async authenticatedFetch(input: RequestInfo | URL, init: RequestInit = {}): Promise<Response> {
++        await this.Init()
++        const headers = new Headers(init.headers)
++        headers.set('risu-auth', await this.realStorage.createAuth())
++        return fetch(input, { ...init, headers })
++    }
++
+     async exportBackup(opts?: { target?: 'upstream' }) {
+         await this.Init()
+         return this.realStorage.exportBackup(opts)
+diff --git a/src/ts/storage/database.svelte.ts b/src/ts/storage/database.svelte.ts
+index f4dcf773c..055a0e002 100644
+--- a/src/ts/storage/database.svelte.ts
++++ b/src/ts/storage/database.svelte.ts
+@@ -560,6 +560,15 @@ export function setDatabase(data:Database){
+     data.falModel ??= 'fal-ai/flux/dev'
+     data.falLoraScale ??= 1
+     data.customCSS ??= ''
++    data.chatBubble ??= {
++        mode: 'none',
++        userBg: '',
++        userBorder: '',
++        charBg: '',
++        charBorder: '',
++        emColor: '',
++        streamingColor: '',
++    }
+     data.strictJsonSchema ??= true
+     data.statics ??= {
+         messages: 0,
+@@ -724,6 +733,10 @@ export function setDatabase(data:Database){
+     if (typeof data.localNetworkMode !== 'boolean') data.localNetworkMode = false
+     data.localNetworkTimeoutSec ??= 600
+     if (typeof data.localNetworkTimeoutSec !== 'number' || Number.isNaN(data.localNetworkTimeoutSec)) data.localNetworkTimeoutSec = 600
++    data.useBackendChatJobs ??= false
++    if (typeof data.useBackendChatJobs !== 'boolean') data.useBackendChatJobs = false
++    data.useBackendMultiagent ??= false
++    if (typeof data.useBackendMultiagent !== 'boolean') data.useBackendMultiagent = false
+     data.pluginCustomStorage ??= {}
+     data.longPressToPopupEditor ??= false
+     data.showInputActionBar ??= true
+@@ -1056,6 +1069,15 @@ export interface Database{
+         FontColorQuote1 : string,
+         FontColorQuote2 : string
+     }
++    chatBubble?: {
++        mode: 'none'|'bubble'|'glass',
++        userBg: string,
++        userBorder: string,
++        charBg: string,
++        charBorder: string,
++        emColor: string,
++        streamingColor: string,
++    }
+     requestRetrys:number
+     emotionPrompt2:string
+     useSayNothing:boolean
+@@ -1121,6 +1143,8 @@ export interface Database{
+     useChatSticker:boolean,
+     useAdditionalAssetsPreview:boolean,
+     usePlainFetch:boolean
++    useBackendChatJobs:boolean
++    useBackendMultiagent:boolean
+     localNetworkMode:boolean
+     localNetworkTimeoutSec:number
+     memoryAlgorithmType:string // To enable new memory module/algorithms
