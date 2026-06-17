@@ -143,10 +143,31 @@ index 6f4a5c2a0..1804ac875 100644
 +    }
 +</style>
 diff --git a/src/lib/SideBars/Sidebar.svelte b/src/lib/SideBars/Sidebar.svelte
-index 6cbd317c8..1e18bf6f2 100644
+index 6cbd317c8..f8295ba8f 100644
 --- a/src/lib/SideBars/Sidebar.svelte
 +++ b/src/lib/SideBars/Sidebar.svelte
-@@ -98,6 +98,7 @@
+@@ -34,7 +34,11 @@
+     User2Icon,
+     ChevronsLeft,
+     ArrowRight,
++    MailIcon,
++    SendIcon,
++    UsersIcon,
+   } from "@lucide/svelte";
++  import GithubIcon from "../UI/GithubIcon.svelte";
+     import {
+   addCharacter,
+     changeChar,
+@@ -48,7 +52,7 @@
+     import BaseRoundedButton from "../UI/BaseRoundedButton.svelte";
+     import { getCharacterIndexObject, makeAgoText, selectSingleFile } from "src/ts/util";
+     import { v4 } from "uuid";
+-    import { checkCharOrder, getFileSrc, saveAsset } from "src/ts/globalApi.svelte";
++    import { checkCharOrder, getFileSrc, openURL, saveAsset } from "src/ts/globalApi.svelte";
+     import { alertInput, alertSelect } from "src/ts/alert";
+     import SideChatList from "./SideChatList.svelte";
+ 
+@@ -98,6 +102,7 @@
    let { openGrid = () => {}, hidden = false }: Props = $props();
  
    sideBarClosing.set(false)
@@ -154,7 +175,7 @@ index 6cbd317c8..1e18bf6f2 100644
  
    $effect(() => {
      let newCharImages: sortType[] = [];
-@@ -503,20 +504,17 @@
+@@ -503,20 +508,17 @@
  </script>
  {#if DBState.db.menuSideBar}
  <div
@@ -179,7 +200,7 @@ index 6cbd317c8..1e18bf6f2 100644
    onclick={() => {
      reseter();
      selectedCharID.set(-1)
-@@ -524,12 +522,12 @@
+@@ -524,12 +526,12 @@
      OpenRealmStore.set(false)
    }}
  >
@@ -196,7 +217,7 @@ index 6cbd317c8..1e18bf6f2 100644
    onclick={() => {
      if ($settingsOpen) {
        reseter();
-@@ -540,69 +538,65 @@
+@@ -540,69 +542,65 @@
      }
    }}
  >
@@ -284,7 +305,7 @@ index 6cbd317c8..1e18bf6f2 100644
          <BarIcon
          onClick={() => {
            if ($settingsOpen) {
-@@ -642,7 +636,7 @@
+@@ -642,7 +640,7 @@
          }}><LayoutGridIcon /></BarIcon
        >
        {#if additionalHamburgerMenu.length > 0}
@@ -293,7 +314,7 @@ index 6cbd317c8..1e18bf6f2 100644
          {#each additionalHamburgerMenu as menu}
            <div class="mt-2"></div>
            <BarIcon
-@@ -925,9 +919,9 @@
+@@ -925,9 +923,9 @@
      </div>
    </div>
    {#if DBState.db.hamburgerButtonBottom}
@@ -305,7 +326,7 @@ index 6cbd317c8..1e18bf6f2 100644
          <BarIcon
          onClick={() => {
            if ($settingsOpen) {
-@@ -967,7 +961,7 @@
+@@ -967,7 +965,7 @@
          }}><LayoutGridIcon /></BarIcon
        >
        {#if additionalHamburgerMenu.length > 0}
@@ -314,7 +335,7 @@ index 6cbd317c8..1e18bf6f2 100644
          {#each additionalHamburgerMenu as menu}
            <div class="mt-2"></div>
            <BarIcon
-@@ -985,25 +979,25 @@
+@@ -985,25 +983,25 @@
    </div>
    {#if !DBState.db.hideLeftBarCollapseButton}
    <button
@@ -345,7 +366,7 @@ index 6cbd317c8..1e18bf6f2 100644
    class:risu-sidebar={!$sideBarClosing}
    class:w-96={$sideBarSize === 0}
    class:w-110={$sideBarSize === 1}
-@@ -1019,7 +1013,10 @@
+@@ -1019,7 +1017,10 @@
    class:dynamic-sidebar={$DynamicGUI}
    class:hidden={hidden}
    class:flex={!hidden}
@@ -356,7 +377,7 @@ index 6cbd317c8..1e18bf6f2 100644
      if($sideBarClosing){
        $sideBarClosing = false
        sideBarStore.set(false)
-@@ -1056,6 +1053,61 @@
+@@ -1056,6 +1057,61 @@
            onCheckedChange={(v) => (DBState.db.nodeOnlyHideRecentChats = v)}
          />
        </div>
@@ -418,7 +439,7 @@ index 6cbd317c8..1e18bf6f2 100644
        {#if DBState.db.nodeOnlyHideRecentChats}
          <!-- list hidden by user preference -->
        {:else if recentChars.length === 0}
-@@ -1097,20 +1149,20 @@
+@@ -1097,20 +1153,20 @@
      {:else if DBState.db.characters[$selectedCharID]?.chaId === '§playground'}
        <SideChatList bind:chara={ DBState.db.characters[$selectedCharID]} />
      {:else}
@@ -444,7 +465,7 @@ index 6cbd317c8..1e18bf6f2 100644
            </button>
          {/if}
        </div>
-@@ -1153,6 +1205,92 @@
+@@ -1153,6 +1209,92 @@
    .editMode {
      min-width: 6rem;
    }
