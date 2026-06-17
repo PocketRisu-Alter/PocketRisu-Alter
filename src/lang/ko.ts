@@ -1013,6 +1013,9 @@ export const languageKorean = {
   backendMultiagent: {
     sectionName: "백엔드 MultiAgent",
     description: "서버 측 MultiAgent 파이프라인의 네이티브 설정입니다. 플러그인 설치가 필요 없습니다 — 여기에 API 키만 입력하면 서버가 내장 에이전트 프롬프트로 파이프라인을 실행합니다. 프롬프트를 비워두면 서버 기본값을 사용합니다.",
+    connectionSource: "연결 소스",
+    connectionSourceManual: "직접 입력",
+    usingPresetConnection: "선택한 모델 프리셋의 API 키·엔드포인트·모델을 사용합니다. OpenAI 호환 프리셋만 지원됩니다.",
     apiKey: "분석 에이전트 API 키",
     apiKeyPlaceholder: "파이프라인 활성화에 필요",
     baseUrl: "Base URL",

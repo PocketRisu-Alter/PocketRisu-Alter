@@ -930,6 +930,9 @@ export const languageEnglish = {
     backendMultiagent: {
         sectionName: "Backend MultiAgent",
         description: "Native config for the server-side MultiAgent pipeline. No plugin install required — set an API key here and the backend runs the pipeline using its built-in agent prompts. Leave a prompt blank to use the server default.",
+        connectionSource: "Connection source",
+        connectionSourceManual: "Manual entry",
+        usingPresetConnection: "Using the selected model preset's API key, endpoint, and model. Only OpenAI-compatible presets are supported.",
         apiKey: "Analysis agent API key",
         apiKeyPlaceholder: "Required to enable the pipeline",
         baseUrl: "Base URL",

@@ -752,6 +752,7 @@ export function setDatabase(data:Database){
             }
         }
         data.backendMultiagentConfig = {
+            sourcePresetId: typeof conf.sourcePresetId === 'string' ? conf.sourcePresetId : defaults.sourcePresetId,
             provider: typeof conf.provider === 'string' ? conf.provider : defaults.provider,
             baseUrl: typeof conf.baseUrl === 'string' ? conf.baseUrl : defaults.baseUrl,
             apiKey: typeof conf.apiKey === 'string' ? conf.apiKey : defaults.apiKey,
@@ -1017,6 +1018,10 @@ export interface BackendMultiagentAgentConfig {
  * so the backend option works without installing/configuring that plugin.
  */
 export interface BackendMultiagentConfig {
+    /** When set, the connection fields (provider/baseUrl/apiKey/model) are
+     * derived at request time from this PocketRisu model preset instead of the
+     * manual fields below. Empty string = manual entry. */
+    sourcePresetId: string
     provider: string
     baseUrl: string
     apiKey: string
@@ -1040,6 +1045,7 @@ export interface BackendMultiagentConfig {
 export function createDefaultBackendMultiagentConfig(): BackendMultiagentConfig {
     const agent = (): BackendMultiagentAgentConfig => ({ enabled: true, systemPrompt: '', userPromptTemplate: '' })
     return {
+        sourcePresetId: '',
         provider: '',
         baseUrl: '',
         apiKey: '',

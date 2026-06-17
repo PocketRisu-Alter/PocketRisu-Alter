@@ -1,8 +1,9 @@
 import { getCurrentCharacter, getCurrentChat, getDatabase, type character, type Chat } from "../../storage/database.svelte";
 import type { ModelModeExtended } from "./shared";
 import { requestChatData, type requestDataArgument, type requestDataResponse, type StreamResponseChunk } from "./request";
-import { resolveChatModelBinding } from "./modelPresetBinding";
+import { resolveChatModelBinding, buildModelPresetCredential } from "./modelPresetBinding";
 import { getModelPresetBackendExecutionSupport } from "../../preset/backendExecutionSupport";
+import type { ModelPreset } from "../../preset/types";
 import { v4 as uuidv4 } from "uuid";
 import { startStatus, setKind, markPhase, appendText, endStatus } from "../../status/requestStatus";
 const MULTIAGENT_VAULT_KEY = 'risu_multiagent_lite_config_vault_v1';
@@ -27,14 +28,41 @@ function safeStatus(fn: () => void): void {
     try { fn(); } catch (e) { console.error('[BackendJob] status publish failed', e); }
 }
 
+// Derive the multiagent connection fields from a PocketRisu model preset so the
+// analysis agent can reuse an existing key/endpoint/model. Only OpenAI-compatible
+// presets are supported — that is the multiagent backend's primary agent wire
+// (`POST {baseUrl}/chat/completions`); other adapter kinds keep manual entry.
+// endpoint.url is the full chat/completions URL, so strip that suffix to get the
+// base the backend re-appends. Returns null when the preset can't supply a key.
+function deriveMultiagentFromPreset(preset: ModelPreset): Record<string, any> | null {
+    if (preset.profileSnapshot.adapterKind !== 'openai-compatible') return null;
+    const apiKey = buildModelPresetCredential(preset)?.apiKey;
+    if (!apiKey) return null;
+    const fullUrl = preset.profileSnapshot.endpoint?.url ?? '';
+    const baseUrl = fullUrl.replace(/\/chat\/completions\/?(\?.*)?$/, '');
+    return {
+        provider: 'openai',
+        apiKey,
+        baseUrl,
+        model: preset.profileSnapshot.modelId,
+    };
+}
+
 function readMultiagentConfig(): Record<string, any> | null {
     const db = getDatabase();
     // Native config first — no plugin install/setup required. The backend
     // (server/node/multiagent.cjs) supplies built-in agent prompts, so only
     // an apiKey is strictly required for the pipeline to run.
     const native = db.backendMultiagentConfig;
-    if (native && native.apiKey) {
-        return native;
+    if (native) {
+        const conf: Record<string, any> = { ...native };
+        // Optional: reuse a model preset's key/endpoint/model for the connection.
+        if (native.sourcePresetId) {
+            const preset = (db.modelPresets ?? []).find((p) => p.id === native.sourcePresetId);
+            const derived = preset ? deriveMultiagentFromPreset(preset) : null;
+            if (derived) Object.assign(conf, derived);
+        }
+        if (conf.apiKey) return conf;
     }
     // Backward compatibility: fall back to the MultiAgent browser plugin's
     // config vault for users who configured it before native settings existed.

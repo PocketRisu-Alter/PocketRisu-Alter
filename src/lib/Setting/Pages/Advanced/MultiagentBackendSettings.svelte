@@ -19,6 +19,15 @@
 
     const conf = $derived(DBState.db.backendMultiagentConfig);
 
+    // Model presets the multiagent backend can reuse for its connection. The
+    // analysis agent speaks the OpenAI-compatible wire only, so filter to those.
+    const presetOptions = $derived(
+        (DBState.db.modelPresets ?? []).filter(
+            (p) => p.profileSnapshot?.adapterKind === 'openai-compatible'
+        )
+    );
+    const usingPreset = $derived(!!conf.sourcePresetId);
+
     // NumberInput binds a number; maxTokens is number | null (blank = provider
     // default). Bridge through a local that maps NaN/empty back to null.
     let maxTokensInput = $state<number | undefined>(
@@ -47,18 +56,31 @@
         {language.backendMultiagent.description}
     </p>
 
-    <!-- Analysis agent connection -->
-    <span class="text-textcolor2 text-sm">{language.backendMultiagent.apiKey}</span>
-    <SecretInput fullwidth bind:value={conf.apiKey} placeholder={language.backendMultiagent.apiKeyPlaceholder} />
+    <!-- Connection source: manual fields, or reuse a model preset -->
+    <span class="text-textcolor2 text-sm">{language.backendMultiagent.connectionSource}</span>
+    <SelectInput bind:value={conf.sourcePresetId}>
+        <option value="">{language.backendMultiagent.connectionSourceManual}</option>
+        {#each presetOptions as preset (preset.id)}
+            <option value={preset.id}>{preset.name}</option>
+        {/each}
+    </SelectInput>
 
-    <span class="text-textcolor2 text-sm mt-3 block">{language.backendMultiagent.baseUrl}</span>
-    <TextInput fullwidth bind:value={conf.baseUrl} placeholder="https://api.openai.com/v1" />
+    {#if usingPreset}
+        <p class="text-textcolor2 text-sm mt-2">{language.backendMultiagent.usingPresetConnection}</p>
+    {:else}
+        <!-- Analysis agent connection (manual) -->
+        <span class="text-textcolor2 text-sm mt-3 block">{language.backendMultiagent.apiKey}</span>
+        <SecretInput fullwidth bind:value={conf.apiKey} placeholder={language.backendMultiagent.apiKeyPlaceholder} />
 
-    <span class="text-textcolor2 text-sm mt-3 block">{language.backendMultiagent.model}</span>
-    <TextInput fullwidth bind:value={conf.model} placeholder="gpt-4o-mini" />
+        <span class="text-textcolor2 text-sm mt-3 block">{language.backendMultiagent.baseUrl}</span>
+        <TextInput fullwidth bind:value={conf.baseUrl} placeholder="https://api.openai.com/v1" />
 
-    <span class="text-textcolor2 text-sm mt-3 block">{language.backendMultiagent.provider}</span>
-    <TextInput fullwidth bind:value={conf.provider} placeholder="openai" />
+        <span class="text-textcolor2 text-sm mt-3 block">{language.backendMultiagent.model}</span>
+        <TextInput fullwidth bind:value={conf.model} placeholder="gpt-4o-mini" />
+
+        <span class="text-textcolor2 text-sm mt-3 block">{language.backendMultiagent.provider}</span>
+        <TextInput fullwidth bind:value={conf.provider} placeholder="openai" />
+    {/if}
 
     <div class="flex gap-4 mt-3 flex-wrap">
         <div class="flex flex-col">
