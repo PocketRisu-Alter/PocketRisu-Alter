@@ -5,7 +5,8 @@ import { resolveChatModelBinding, buildModelPresetCredential } from "./modelPres
 import { getModelPresetBackendExecutionSupport } from "../../preset/backendExecutionSupport";
 import type { ModelPreset } from "../../preset/types";
 import { v4 as uuidv4 } from "uuid";
-import { startStatus, setKind, markPhase, appendText, endStatus } from "../../status/requestStatus";
+import { startStatus, setKind, markPhase, appendText, addBadge, endStatus, type StatusBadge } from "../../status/requestStatus";
+import { language } from "../../../lang";
 const MULTIAGENT_VAULT_KEY = 'risu_multiagent_lite_config_vault_v1';
 
 // Request-status indicator bridge (gated by db.showRequestStatus). Wrapped so
@@ -26,6 +27,29 @@ function backendStatusEnabled(): boolean {
 
 function safeStatus(fn: () => void): void {
     try { fn(); } catch (e) { console.error('[BackendJob] status publish failed', e); }
+}
+
+// Per-agent badge for the MultiAgent pipeline (worldbuilding/plot/character),
+// shown on the status indicator so each agent's progress/completion is visible.
+function multiagentAgentLabel(name: string): string {
+    const rs = language.requestStatus as Record<string, string> | undefined;
+    switch (name) {
+        case 'worldbuilding': return rs?.agentWorldbuilding ?? 'World';
+        case 'plot': return rs?.agentPlot ?? 'Plot';
+        case 'character': return rs?.agentCharacter ?? 'Character';
+        default: return name;
+    }
+}
+
+function multiagentAgentBadge(name: string, agentStatus: string): StatusBadge {
+    const label = multiagentAgentLabel(name);
+    const key = `ma-${name}`;
+    switch (agentStatus) {
+        case 'done': return { key, text: `${label} ✓`, tone: 'success' };
+        case 'error': return { key, text: `${label} ✗`, tone: 'warn' };
+        case 'skipped': return { key, text: `${label} —`, tone: 'info' };
+        default: return { key, text: `${label} …`, tone: 'info' };
+    }
 }
 
 // Derive the multiagent connection fields from a PocketRisu model preset so the
@@ -362,6 +386,18 @@ function createBackendJobStream(
                         safeStatus(() => { setKind(status.genId, 'multiagent', Date.now()); markPhase(status.genId, 'thinking', Date.now()); });
                     } else if (data.phase === 'main') {
                         safeStatus(() => { setKind(status.genId, 'main', Date.now()); markPhase(status.genId, 'connecting', Date.now()); });
+                    }
+                    return;
+                }
+                // Per-agent MultiAgent progress → status-indicator badges.
+                if (data.type === 'agent') {
+                    if (!status || statusEnded) return;
+                    if (data.phase === 'agents-init' && Array.isArray(data.agents)) {
+                        for (const name of data.agents) {
+                            safeStatus(() => addBadge(status.genId, multiagentAgentBadge(name, 'start')));
+                        }
+                    } else if (typeof data.agent === 'string') {
+                        safeStatus(() => addBadge(status.genId, multiagentAgentBadge(data.agent, data.status)));
                     }
                     return;
                 }

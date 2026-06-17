@@ -296,8 +296,12 @@ async function runJob(job) {
             // pipeline runs server-side before main generation, so the browser
             // sees no chunks during it. This lets the toast show "MultiAgent".
             pushEvent(job, { type: 'phase', phase: 'multiagent' });
+            // Forward per-agent progress to the client status indicator.
+            const onAgentProgress = (ev) => {
+                try { pushEvent(job, { type: 'agent', ...ev }); } catch { /* ignore */ }
+            };
             try {
-                job.descriptor.body.messages = await runMultiagentPipeline(ma, msgs);
+                job.descriptor.body.messages = await runMultiagentPipeline(ma, msgs, onAgentProgress);
                 logger.info(`[ChatJob] Multiagent pipeline finished for job ${job.id}`);
             } catch (maErr) {
                 logger.error('[ChatJob] Multiagent pipeline error:', maErr);
