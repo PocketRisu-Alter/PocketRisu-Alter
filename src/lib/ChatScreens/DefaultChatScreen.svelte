@@ -1136,6 +1136,7 @@ import { isMobile } from 'src/ts/platform'
             <Chats
                 bind:this={chatsInstance}
                 messages={currentChat}
+                bottomInset={composerOverlayHeight + 12}
                 loadPages={loadPages}
                 onReroll={reroll}
                 onNextSwipe={nextSwipe}

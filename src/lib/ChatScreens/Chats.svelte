@@ -27,6 +27,7 @@
         userIcon,
         loadPages,
         userIconPortrait,
+        bottomInset = 0,
         hasNewUnreadMessage = $bindable(false)
     }:{
         messages: Message[]
@@ -39,6 +40,7 @@
         userIcon: string
         loadPages: number
         userIconPortrait?: boolean
+        bottomInset?: number
         hasNewUnreadMessage?: boolean
     } = $props();
 
@@ -217,7 +219,10 @@
         if (!lastEl) return true;
         const rect = lastEl.getBoundingClientRect();
         const scRect = chatBody.parentElement.getBoundingClientRect();
-        return rect.bottom <= scRect.bottom + STICK_THRESHOLD;
+        // When pinned, the latest message rests `bottomInset` above the raw
+        // viewport bottom (the floating composer occupies that strip), so the
+        // stick zone is measured against `scRect.bottom - bottomInset`.
+        return rect.bottom <= scRect.bottom - bottomInset + STICK_THRESHOLD;
     }
 
     let pinnedToBottom = true;
@@ -281,7 +286,7 @@
                 const lastEl = chatBody?.firstElementChild as HTMLElement | null;
                 if (lastEl) {
                     withSuppressedScroll(() => {
-                        scrollWithinContainer(lastEl, container, { block: 'end', behavior: 'instant' });
+                        scrollWithinContainer(lastEl, container, { block: 'end', behavior: 'instant', bottomInset });
                     });
                 }
             } else if (anchorEl && chatBody?.contains(anchorEl)) {
@@ -309,7 +314,7 @@
         const element = chatBody.firstElementChild as HTMLElement | null;
         const chatScreen = chatBody.parentElement;
         if(!element || !chatScreen) return;
-        scrollWithinContainer(element, chatScreen, { block: 'end', behavior: 'instant' });
+        scrollWithinContainer(element, chatScreen, { block: 'end', behavior: 'instant', bottomInset });
     }
 
     export const scrollToLatestMessage = () => {
