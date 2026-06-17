@@ -2315,12 +2315,6 @@ export const languageKorean = {
     "현재 데이터로 새 백업을 만들어 사용자 기기로 즉시 다운로드합니다.",
   backupLocalRestoreDesc: "사용자 기기의 백업 파일에서 복원합니다.",
 
-  relatedGithub: "GitHub",
-  relatedGithubDesc: "Star를 눌러 프로젝트를 응원해주세요.",
-  relatedFeedbackForm: "의견 보내기",
-  relatedFeedbackFormDesc: "이슈 제보 및 의견을 보내주세요.",
-  relatedContactEmail: "개발자 이메일",
-  relatedContactEmailDesc: "개발자에게 직접 메일을 보낼 수 있어요.",
   relatedArcaLive: "아카라이브 채널",
   relatedArcaLiveDesc: "AI 채팅 채널에서 다른 사용자와 이야기를 나눠보세요.",
 

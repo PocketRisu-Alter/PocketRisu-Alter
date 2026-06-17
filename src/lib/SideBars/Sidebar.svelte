@@ -34,11 +34,8 @@
     User2Icon,
     ChevronsLeft,
     ArrowRight,
-    MailIcon,
-    SendIcon,
     UsersIcon,
   } from "@lucide/svelte";
-  import GithubIcon from "../UI/GithubIcon.svelte";
     import {
   addCharacter,
     changeChar,
@@ -1059,45 +1056,6 @@
       </div>
       <span class="block text-sm text-textcolor2 mt-2">{language.selectBotHint}</span>
       <div class="flex flex-col gap-1.5 mt-2">
-        <button
-          type="button"
-          class="group flex items-center gap-2.5 rounded-md border border-darkborderc bg-transparent p-2.5 text-left transition-colors duration-150 ease-out hover:border-borderc hover:bg-selected/40"
-          onclick={() => openURL("https://github.com/PocketRisu/PocketRisu")}
-        >
-          <div class="shrink-0 flex items-center justify-center w-8 h-8 rounded-md bg-selected/30 text-textcolor2 group-hover:text-textcolor transition-colors duration-150 ease-out">
-            <GithubIcon size={18} />
-          </div>
-          <div class="flex-1 min-w-0">
-            <div class="text-sm font-semibold text-textcolor leading-tight truncate">{language.relatedGithub}</div>
-            <div class="text-xs text-textcolor2 leading-tight truncate">{language.relatedGithubDesc}</div>
-          </div>
-        </button>
-        <button
-          type="button"
-          class="group flex items-center gap-2.5 rounded-md border border-darkborderc bg-transparent p-2.5 text-left transition-colors duration-150 ease-out hover:border-borderc hover:bg-selected/40"
-          onclick={() => openURL("https://forms.gle/5ms5XntMrfaxmHTSA")}
-        >
-          <div class="shrink-0 flex items-center justify-center w-8 h-8 rounded-md bg-selected/30 text-textcolor2 group-hover:text-textcolor transition-colors duration-150 ease-out">
-            <SendIcon size={16} strokeWidth={1.5} />
-          </div>
-          <div class="flex-1 min-w-0">
-            <div class="text-sm font-semibold text-textcolor leading-tight truncate">{language.relatedFeedbackForm}</div>
-            <div class="text-xs text-textcolor2 leading-tight truncate">{language.relatedFeedbackFormDesc}</div>
-          </div>
-        </button>
-        <button
-          type="button"
-          class="group flex items-center gap-2.5 rounded-md border border-darkborderc bg-transparent p-2.5 text-left transition-colors duration-150 ease-out hover:border-borderc hover:bg-selected/40"
-          onclick={() => openURL("mailto:contact@pocketrisu.com")}
-        >
-          <div class="shrink-0 flex items-center justify-center w-8 h-8 rounded-md bg-selected/30 text-textcolor2 group-hover:text-textcolor transition-colors duration-150 ease-out">
-            <MailIcon size={16} strokeWidth={1.5} />
-          </div>
-          <div class="flex-1 min-w-0">
-            <div class="text-sm font-semibold text-textcolor leading-tight truncate">{language.relatedContactEmail}</div>
-            <div class="text-xs text-textcolor2 leading-tight truncate">{language.relatedContactEmailDesc}</div>
-          </div>
-        </button>
         <button
           type="button"
           class="group flex items-center gap-2.5 rounded-md border border-darkborderc bg-transparent p-2.5 text-left transition-colors duration-150 ease-out hover:border-borderc hover:bg-selected/40"
