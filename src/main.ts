@@ -1,4 +1,5 @@
 import "./ts/polyfill";
+import "./styles/chat-images.css";
 import "core-js/actual"
 import "./ts/log-capture"
 import "./ts/storage/database.svelte"

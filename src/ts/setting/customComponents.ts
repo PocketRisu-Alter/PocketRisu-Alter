@@ -23,6 +23,7 @@ import InlayCompressButton from 'src/lib/Setting/Pages/Advanced/InlayCompressBut
 import ColorSchemeSelect from 'src/lib/Setting/Pages/Display/ColorSchemeSelect.svelte';
 import CustomColorSchemeEditor from 'src/lib/Setting/Pages/Display/CustomColorSchemeEditor.svelte';
 import CustomTextThemeEditor from 'src/lib/Setting/Pages/Display/CustomTextThemeEditor.svelte';
+import ChatBubbleEditor from 'src/lib/Setting/Pages/Display/ChatBubbleEditor.svelte';
 import CustomBackgroundToggle from 'src/lib/Setting/Pages/Display/CustomBackgroundToggle.svelte';
 import NullableTextColorToggle from 'src/lib/Setting/Pages/Display/NullableTextColorToggle.svelte';
 import NotificationToggle from 'src/lib/Setting/Pages/Display/NotificationToggle.svelte';
@@ -47,6 +48,7 @@ export const customComponents: Record<string, Component<any>> = {
     'ColorSchemeSelect': ColorSchemeSelect,
     'CustomColorSchemeEditor': CustomColorSchemeEditor,
     'CustomTextThemeEditor': CustomTextThemeEditor,
+    'ChatBubbleEditor': ChatBubbleEditor,
     'CustomBackgroundToggle': CustomBackgroundToggle,
     'NullableTextColorToggle': NullableTextColorToggle,
     'NotificationToggle': NotificationToggle,

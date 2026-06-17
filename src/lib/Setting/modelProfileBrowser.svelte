@@ -23,7 +23,9 @@
     } from "src/ts/preset/customProfiles";
     import { localizeDisplayName, localizeDescription } from "src/ts/preset/registry/i18n";
     import type { BaseProviderDefinition, ModelPreset, ModelProfile, RegistryCache, RegistryProfileStatus, ResolvedModelProfileSnapshot } from "src/ts/preset/types";
+    import { getAdapterBackendExecutionSupport } from "src/ts/preset/backendExecutionSupport";
     import TextInput from "../UI/GUI/TextInput.svelte";
+    import CapabilityTag from "../UI/GUI/CapabilityTag.svelte";
     import { v4 as uuidv4 } from "uuid";
 
     interface Props {
@@ -32,7 +34,6 @@
 
     let { close = () => {} }: Props = $props();
 
-    // Official = remote registry if synced, else bundled (reactive on the cache).
     const officialRegistry = $derived(getOfficialRegistry());
 
     let activeTab = $state<'official' | 'custom'>('official');
@@ -45,8 +46,6 @@
 
     const profileStatusOrder: RegistryProfileStatus[] = ['current', 'outdated', 'deprecated'];
 
-    // Active registry by tab. Official = bundled (read-only). Custom = the
-    // persisted cache's 'custom' registry (reactive: import/delete update it).
     const activeRegistry = $derived<RegistryCache>(
         activeTab === 'official'
             ? officialRegistry
@@ -54,10 +53,6 @@
     );
     const activeRegistryId = $derived(activeTab === 'official' ? getBundledRegistryId() : CUSTOM_REGISTRY_ID);
 
-    // Scope to the active tab's registry only. The custom cache object can hold
-    // multiple registries (e.g. the official 'bundled' entry is persisted into
-    // the same DB cache), so iterating all of them would leak official profiles
-    // into the custom tab.
     function buildEntries(registry: RegistryCache, registryId: string): Entry[] {
         const reg = registry.registries[registryId];
         if (!reg) return [];
@@ -71,8 +66,6 @@
         );
     }
 
-    // The catalog display level hides outdated/deprecated profiles on the
-    // official tab only. Custom profiles are the user's own — always shown.
     const entries = $derived.by(() => {
         const all = buildEntries(activeRegistry, activeRegistryId);
         if (activeTab !== 'official') return all;
@@ -95,9 +88,6 @@
         });
     });
 
-    // Both tabs group by provider (collapsible) — soon-large catalog, and a
-    // single list UI for official + custom. Within a provider, current profiles
-    // sort before outdated/deprecated.
     const groupedByProvider = $derived.by(() => {
         const buckets = new Map<string, { id: string; label: string; entries: Entry[] }>();
         for (const entry of filtered) {
@@ -118,16 +108,12 @@
         return [...buckets.values()].sort((a, b) => a.label.localeCompare(b.label));
     });
 
-    // Providers default collapsed; an active search force-expands everything so
-    // matches are always visible.
     let expandedProviders = $state(new Set<string>());
     const searching = $derived(query.trim() !== '');
     function isProviderExpanded(id: string): boolean {
         return searching || expandedProviders.has(id);
     }
     function toggleProvider(id: string) {
-        // Reassign a new Set — Svelte 5 $state does not proxy Set mutations
-        // (.add/.delete), so an in-place change wouldn't trigger reactivity.
         const next = new Set(expandedProviders);
         if (next.has(id)) next.delete(id);
         else next.add(id);
@@ -142,11 +128,6 @@
         return seeded;
     }
 
-    // A resolved snapshot must carry the data needed to build & dispatch a
-    // request. A degenerate snapshot (null auth/endpoint, empty schema) comes
-    // from an incomplete registry cache — refuse rather than persist a preset
-    // that renders blank and crashes on export. (always-persist sync should
-    // self-heal the cache on the next menu entry; this is the safety net.)
     function snapshotIncomplete(s: ResolvedModelProfileSnapshot): boolean {
         return !s.auth || !s.endpoint
             || !Array.isArray(s.schema) || s.schema.length === 0
@@ -181,9 +162,6 @@
         close();
     }
 
-    // Replace an existing preset's profile (custom-profiles plan §3): re-resolve
-    // the chosen profile's snapshot, carry over matching userValues keys, drop
-    // orphans, seed defaults for new fields, and re-stamp sourceProfile.
     async function replacePresetProfile(targetId: string, profile: ModelProfile): Promise<boolean> {
         const idx = DBState.db.modelPresets.findIndex((p) => p.id === targetId);
         if (idx < 0) return false;
@@ -194,8 +172,6 @@
         }
         const preset = DBState.db.modelPresets[idx];
         const { values, droppedKeys } = migrateUserValues(preset.userValues, snapshot.schema);
-        // Replacing the profile can lose settings — always confirm (a stronger,
-        // specific warning when settings will definitely be dropped).
         const warn = droppedKeys.length > 0 ? language.profileReplaceWarn : language.profileUpdateLossWarn;
         if (!(await alertConfirm(warn))) {
             return false;
@@ -231,8 +207,6 @@
         return id.replace(/[^a-z0-9._-]/gi, '_');
     }
 
-    // Export any profile (official or custom) as a self-contained, key-free
-    // fragment so it can be edited and shared as a JSON file.
     async function exportProfile(profile: ModelProfile, baseProvider: BaseProviderDefinition | undefined) {
         if (!baseProvider) {
             alertError(language.profileExportNoBase);
@@ -279,8 +253,10 @@
     }
 </script>
 
-<div class="absolute w-full h-full z-40 bg-black/50 flex justify-center items-center">
-    <div class="bg-darkbg p-4 break-any rounded-md flex flex-col max-w-3xl w-124 max-h-full overflow-hidden">
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div class="profile-browser-backdrop" data-risu-modal="" onkeydown={(e) => { if (e.key === 'Escape') { e.stopPropagation(); close(); }}} onclick={close}>
+    <div class="profile-browser-panel risu-modal-panel break-any" onclick={(e) => e.stopPropagation()}>
         <div class="flex items-center text-textcolor mb-4 shrink-0">
             <h2 class="mt-0 mb-0">{language.selectProfile}</h2>
             <div class="grow flex justify-end">
@@ -312,9 +288,10 @@
 
         {#snippet profileCard(profile: ModelProfile, baseProvider: BaseProviderDefinition | undefined)}
             {@const localizedDesc = localizeDescription(profile)}
-            <div class="flex items-start text-textcolor border border-darkborderc rounded-md p-3 hover:bg-selected/30 transition-colors">
+            {@const executionSupport = getAdapterBackendExecutionSupport(baseProvider?.adapterKind)}
+            <div class="profile-card flex items-start text-textcolor border border-darkborderc rounded-md p-3 hover:bg-selected/30 transition-colors">
                 <button class="flex flex-col min-w-0 grow cursor-pointer text-left" onclick={() => selectProfile(profile)}>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 flex-wrap">
                         <span class="text-sm text-textcolor truncate">{localizeDisplayName(profile)}</span>
                         {#if profile.profileStatus !== 'current'}
                             <span
@@ -327,6 +304,7 @@
                         {#if baseProvider}
                             <span class="text-xs text-textcolor2 shrink-0">[{baseProvider.displayName}]</span>
                         {/if}
+                        <CapabilityTag active={executionSupport.supported} />
                     </div>
                     <span class="text-xs text-textcolor2 truncate">{profile.id}</span>
                     {#if profile.updatedAt}
@@ -385,8 +363,58 @@
 </div>
 
 <style>
-    .break-any{
+    .profile-browser-backdrop {
+        position: absolute;
+        inset: 0;
+        z-index: 40;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        background: rgb(0 0 0 / 62%);
+        backdrop-filter: blur(7px);
+        animation: profile-backdrop-in 120ms ease both;
+    }
+    .profile-browser-panel {
+        display: flex;
+        width: min(760px, 100%);
+        max-height: min(820px, 100%);
+        flex-direction: column;
+        overflow: hidden;
+        padding: 1rem;
+        border: 1px solid color-mix(in srgb, var(--risu-theme-textcolor2) 18%, transparent);
+        border-radius: 12px;
+        background: color-mix(in srgb, var(--risu-theme-darkbg) 84%, var(--risu-theme-bgcolor));
+        box-shadow: 0 20px 70px rgb(0 0 0 / 42%);
+        animation: profile-panel-in 180ms cubic-bezier(.2, 0, 0, 1) both;
+    }
+    .profile-card {
+        border-color: color-mix(in srgb, var(--risu-theme-textcolor2) 14%, transparent);
+        background: color-mix(in srgb, var(--risu-theme-bgcolor) 72%, transparent);
+    }
+    .profile-card:hover {
+        border-color: color-mix(in srgb, var(--risu-theme-primary) 35%, transparent);
+        background: color-mix(in srgb, var(--risu-theme-primary) 7%, var(--risu-theme-bgcolor));
+    }
+    .break-any {
         word-break: normal;
         overflow-wrap: anywhere;
     }
+    @keyframes profile-backdrop-in {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @keyframes profile-panel-in {
+        from { opacity: 0; transform: translateY(10px) scale(.99); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .profile-browser-backdrop, .profile-browser-panel { animation: none; }
+    }@keyframes risu-modal-in {
+    from { opacity: 0; transform: scale(0.96) translateY(4px); }
+    to   { opacity: 1; transform: none; }
+}
+.risu-modal-panel {
+    animation: risu-modal-in var(--dur-base, 200ms) cubic-bezier(0.2, 0, 0, 1) both;
+}
 </style>

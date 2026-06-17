@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AlterRisu 디자인 토큰 미리보기</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+    * { box-sizing: border-box; margin: 0; }
+    body {
+        background: var(--bg-base); color: var(--text-primary);
+        font-family: var(--font-body); font-size: var(--text-md);
+        font-weight: var(--weight-body); line-height: var(--leading-ui);
+        padding: var(--space-6); max-width: 880px; margin: 0 auto;
+    }
+    h1, h2 { font-family: var(--font-display); line-height: var(--leading-tight); }
+    h1 { font-size: var(--text-2xl); margin-bottom: var(--space-2); }
+    h2 { font-size: var(--text-xl); margin: var(--space-6) 0 var(--space-4); }
+    .muted { color: var(--text-muted); font-size: var(--text-sm); }
+    .toggle {
+        position: fixed; top: var(--space-4); right: var(--space-4);
+        background: var(--bg-surface); color: var(--text-primary);
+        border: 1px solid var(--border-strong); border-radius: var(--radius-pill);
+        padding: var(--space-2) var(--space-4); cursor: pointer; font: inherit;
+        min-height: var(--touch-target);
+    }
+    .toggle:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+    .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--space-3); }
+    .swatch { border: 1px solid var(--border-subtle); border-radius: var(--radius-md); overflow: hidden; }
+    .swatch .chip { height: 56px; }
+    .swatch .label { padding: var(--space-2) var(--space-3); font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-secondary); }
+
+    .typescale div { margin-bottom: var(--space-2); }
+
+    /* chat mock */
+    .chat {
+        border: 1px solid var(--border-subtle); border-radius: var(--radius-lg);
+        background: var(--bg-base); overflow: hidden;
+    }
+    .chat-head {
+        display: flex; align-items: center; gap: var(--space-3);
+        background: var(--bg-raised); border-bottom: 1px solid var(--border-subtle);
+        padding: var(--space-3) var(--space-4);
+    }
+    .avatar {
+        width: 36px; height: 36px; border-radius: 50%;
+        background: var(--accent-press); color: var(--text-primary);
+        display: flex; align-items: center; justify-content: center;
+        font-family: var(--font-display);
+    }
+    .chat-head .name { font-family: var(--font-display); font-weight: var(--weight-medium); }
+    .stream-pill {
+        margin-left: auto; display: flex; align-items: center; gap: var(--space-2);
+        color: var(--text-muted); font-size: var(--text-xs);
+    }
+    .dot {
+        width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
+        animation: pulse 1.2s var(--ease-out) infinite;
+    }
+    @keyframes pulse { 50% { opacity: 0.3; } }
+
+    .conv { padding: var(--space-5) var(--space-4); max-width: var(--measure-chat); margin: 0 auto; display: flex; flex-direction: column; gap: var(--space-5); }
+    .m-char .who { font-family: var(--font-display); font-size: var(--text-sm); color: var(--text-secondary); margin-bottom: var(--space-1); }
+    .m-char .body { line-height: var(--leading-body); }
+    .m-char em { color: var(--msg-em-color); font-style: italic; }
+    .m-user {
+        align-self: flex-end; max-width: 80%;
+        background: var(--msg-user-bg); border: 1px solid var(--msg-user-border);
+        border-radius: var(--radius-md); padding: var(--space-3) var(--space-4);
+        line-height: var(--leading-body);
+    }
+    .m-streaming { border-left: 2px solid var(--msg-streaming-border); padding-left: var(--space-4); }
+
+    .composer {
+        display: flex; gap: var(--space-2); align-items: center;
+        background: var(--bg-raised); border-top: 1px solid var(--border-subtle);
+        padding: var(--space-3) var(--space-4) var(--space-4);
+    }
+    .composer .field {
+        flex: 1; display: flex; align-items: center;
+        background: var(--bg-surface); border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-pill); padding: var(--space-3) var(--space-4);
+        color: var(--text-muted); min-height: var(--touch-target);
+    }
+    .composer .send {
+        background: var(--accent); color: var(--text-on-accent); border: none;
+        border-radius: var(--radius-pill); padding: 0 var(--space-5);
+        min-height: var(--touch-target); font: inherit; font-weight: var(--weight-medium);
+        cursor: pointer; transition: background var(--dur-fast) var(--ease-out);
+    }
+    .composer .send:hover { background: var(--accent-hover); }
+    .composer .send:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+    .composer .stop {
+        background: none; border: 1px solid var(--border-strong); color: var(--text-secondary);
+        border-radius: var(--radius-pill); min-height: var(--touch-target);
+        padding: 0 var(--space-4); font: inherit; cursor: pointer;
+    }
+    .hint { text-align: center; margin-top: var(--space-2); }
+
+    .btnrow { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+    .btn {
+        background: var(--bg-surface); color: var(--text-primary);
+        border: 1px solid var(--border-subtle); border-radius: var(--radius-md);
+        min-height: var(--touch-target); padding: 0 var(--space-4); font: inherit; cursor: pointer;
+        transition: background var(--dur-fast) var(--ease-out);
+    }
+    .btn:hover { background: var(--bg-hover); }
+    .btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+    .btn.primary { background: var(--accent); border-color: transparent; color: var(--text-on-accent); }
+    .btn.primary:hover { background: var(--accent-hover); }
+    .btn.danger-hover:hover { color: var(--danger); }
+</style>
+</head>
+<body>
+<button class="toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'light' ? '' : 'light'">테마 전환</button>
+
+<h1>AlterRisu 디자인 토큰</h1>
+<p class="muted">design/tokens.css 라이브 미리보기 — 따뜻한 에디토리얼 다크 (규칙: SYSTEM.md)</p>
+
+<h2>채팅 목업</h2>
+<div class="chat">
+    <div class="chat-head">
+        <div class="avatar">T</div>
+        <div>
+            <div class="name">Tavern Keeper</div>
+            <div class="muted">fixture · CCv3</div>
+        </div>
+        <div class="stream-pill"><span class="dot"></span> 생성 중 — 창을 닫아도 계속됩니다</div>
+    </div>
+    <div class="conv">
+        <div class="m-char">
+            <div class="who">Tavern Keeper</div>
+            <div class="body"><em>*문이 삐걱이며 열린다*</em> 어서 와요, 카시. 비가 이렇게 오는 날엔
+            늘 당신이 올 줄 알았죠. 늘 앉던 자리, 벽난로 옆이 비어 있어요. <em>*잔을 닦으며 미소 짓는다*</em>
+            오늘은 따뜻한 꿀술이 좋겠네요 — 화요일엔 항상 비가 오니까, 이 마을에선요.</div>
+        </div>
+        <div class="m-user">고마워요. 오늘은 이야기가 좀 길어질 것 같은데, 괜찮죠?</div>
+        <div class="m-char m-streaming">
+            <div class="who">Tavern Keeper</div>
+            <div class="body">물론이죠. 밤은 길고, 술통은 가득하고, 이야기는<span class="dot" style="display:inline-block;margin-left:6px"></span></div>
+        </div>
+    </div>
+    <div class="composer">
+        <div class="field">메시지 입력... (Enter 전송 / Shift+Enter 줄바꿈)</div>
+        <button class="stop">■ 정지</button>
+        <button class="send">전송</button>
+    </div>
+</div>
+
+<h2>색상</h2>
+<div class="swatches" id="swatches"></div>
+
+<h2>타입 스케일</h2>
+<div class="typescale">
+    <div style="font-family:var(--font-display);font-size:var(--text-2xl)">디스플레이 세리프 — 캐릭터의 밤 2xl</div>
+    <div style="font-family:var(--font-display);font-size:var(--text-xl)">디스플레이 세리프 — 화면 제목 xl</div>
+    <div style="font-size:var(--text-md);line-height:var(--leading-body)">본문 md / 행간 1.7 — 긴 대화를 편안하게 읽기 위한 기준 크기. The quick brown fox.</div>
+    <div style="font-size:var(--text-sm);color:var(--text-secondary)">보조 sm — 메타데이터, 라벨</div>
+    <div class="muted" style="font-size:var(--text-xs)">캡션 xs — 타임스탬프, 힌트</div>
+    <div style="font-family:var(--font-mono);font-size:var(--text-sm)">mono — tokens: 1,284 / ctx: 16,000</div>
+</div>
+
+<h2>버튼</h2>
+<div class="btnrow">
+    <button class="btn primary">전송 (주요 액션)</button>
+    <button class="btn">일반 버튼</button>
+    <button class="btn danger-hover">삭제 (호버 시 danger)</button>
+    <button class="btn" disabled style="opacity:.45">비활성</button>
+</div>
+
+<p class="muted" style="margin-top:var(--space-6)">금지: 글래스모피즘 · 네온 글로우 · 그라데이션 · #000/#fff · 두 번째 액센트</p>
+
+<script>
+    const names = ['--bg-base','--bg-raised','--bg-surface','--bg-hover',
+        '--text-primary','--text-secondary','--text-muted',
+        '--accent','--accent-hover','--accent-press','--danger','--success']
+    const box = document.getElementById('swatches')
+    for (const n of names) {
+        const el = document.createElement('div')
+        el.className = 'swatch'
+        el.innerHTML = `<div class="chip" style="background:var(${n})"></div><div class="label">${n}</div>`
+        box.appendChild(el)
+    }
+</script>
+</body>
+</html>

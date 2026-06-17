@@ -258,7 +258,7 @@
                         if(!editMode){
                             changeChatTo(chatIdx)
                         }
-                    }} class="risu-chats flex items-center text-textcolor border-solid border-0 border-darkborderc p-2 cursor-pointer rounded-md"class:bg-selected={chatIdx === chara.chatPage && !$chatDeselected}>
+                    }} class="risu-chats rs-chat-item" class:active={chatIdx === chara.chatPage && !$chatDeselected}>
                         {#if editMode}
                             <TextInput bind:value={chat.name} className="grow min-w-0" padding={false}/>
                         {:else}
@@ -350,8 +350,8 @@
                     changeChatTo(i)
                 }
             }}
-            class="flex items-center text-textcolor border-solid border-0 border-darkborderc p-2 cursor-pointer rounded-md"
-            class:bg-selected={i === chara.chatPage && !$chatDeselected}>
+            class="rs-chat-item"
+            class:active={i === chara.chatPage && !$chatDeselected}>
                 {#if editMode}
                     <TextInput bind:value={chara.chats[i].name} className="grow min-w-0" padding={false}/>
                 {:else}
@@ -433,7 +433,7 @@
     </div>
     {/key}
 
-    <div class="border-t border-selected mt-2">
+    <div class="border-t border-darkborderc mt-2">
         <div class="flex mt-2 ml-2 items-center">
             <button class="text-textcolor2 hover:text-primary mr-2 cursor-pointer" onclick={() => {
                 exportAllChats()
@@ -504,3 +504,26 @@
         {/if}
     </div>
 </div>
+
+<style>
+    :global(.rs-chat-item) {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        color: var(--text-primary);
+        padding: 0.5rem 0.5rem 0.5rem calc(0.5rem - 2px);
+        border-radius: var(--radius-sm);
+        border-left: 2px solid transparent;
+        background-color: transparent;
+        cursor: pointer;
+        transition: background-color var(--dur-fast) var(--ease-out),
+                    border-color var(--dur-fast) var(--ease-out);
+    }
+    :global(.rs-chat-item:hover) {
+        background-color: var(--bg-hover);
+    }
+    :global(.rs-chat-item.active) {
+        background-color: var(--bg-hover);
+        border-left-color: var(--accent);
+    }
+</style>

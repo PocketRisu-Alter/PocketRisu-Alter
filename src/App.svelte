@@ -30,7 +30,6 @@
     import HypaV3Progress from './lib/Others/HypaV3Progress.svelte';
     import PluginAlertModal from './lib/Others/PluginAlertModal.svelte';
     import PopupEditor from './lib/Others/PopupEditor.svelte';
-    import UpdatePopup from './lib/Others/UpdatePopup.svelte';
     import BootBackupPrompt from './lib/Others/BootBackupPrompt.svelte';
     import PopupList from './lib/UI/PopupList.svelte';
     import LoadingOverlay from './lib/Others/LoadingOverlay.svelte';
@@ -46,7 +45,19 @@
 
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-<main class="flex bg-bg w-full h-full max-w-100vw text-textcolor" ondragover={(e) => {
+<main class="flex bg-bg w-full h-full max-w-100vw text-textcolor" ondragstart={(e) => {
+    const target = e.target as HTMLElement
+    if(target && (
+        target.tagName === 'IMG' ||
+        target.tagName === 'VIDEO' ||
+        target.tagName === 'AUDIO' ||
+        target.tagName === 'CANVAS' ||
+        target.tagName === 'SVG' ||
+        target.closest('a')
+    )){
+        e.preventDefault()
+    }
+}} ondragover={(e) => {
     e.preventDefault()
     e.dataTransfer.dropEffect = 'link'
 }} ondrop={async (e) => {
@@ -159,7 +170,7 @@
                             aprilFoolsPage = 0
                             aprilFools = false
                         }}>
-                            PocketRisu  
+                            PocketRisu-Alter  
                         </a>
                     </p>
 
@@ -240,7 +251,6 @@
     {/if}
     <PluginAlertModal />
     <LoadingOverlay />
-    <UpdatePopup />
     <BootBackupPrompt />
     {#if popupStore.children}
         <PopupList />

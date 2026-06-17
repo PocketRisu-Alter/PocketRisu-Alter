@@ -244,6 +244,6 @@
     "sourceUrls": [
       "https://platform.claude.com/docs/en/api/messages"
     ],
-    "notes": "Model-dependent provider. Context and output token limits vary by the upstream endpoint and selected model, so PocketRisu uses a number input instead of a fixed-limit slider."
+    "notes": "Model-dependent provider. Context and output token limits vary by the upstream endpoint and selected model, so PocketRisu-Alter uses a number input instead of a fixed-limit slider."
   }
 }

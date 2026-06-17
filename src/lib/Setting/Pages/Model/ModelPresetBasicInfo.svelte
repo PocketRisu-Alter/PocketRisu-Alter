@@ -8,8 +8,10 @@
     import { buildFragmentFromSnapshot, getProfileUpdateStatus, migrateUserValues } from "src/ts/preset/customProfiles";
     import { localizeDescription } from "src/ts/preset/registry/i18n";
     import type { ModelPreset } from "src/ts/preset/types";
+    import { getModelPresetBackendExecutionSupport } from "src/ts/preset/backendExecutionSupport";
     import TextInput from "src/lib/UI/GUI/TextInput.svelte";
     import ShButton from "src/lib/UI/GUI/ShButton.svelte";
+    import CapabilityTag from "src/lib/UI/GUI/CapabilityTag.svelte";
     import { v4 as uuidv4 } from "uuid";
 
     interface Props {
@@ -30,7 +32,6 @@
         copy.updatedAt = Date.now();
         DBState.db.modelPresets = [...DBState.db.modelPresets, copy];
         notifySuccess(language.presetDuplicated);
-        // Jump straight into the new copy's editor (parent watches this store).
         openModelPresetEditId.set(copy.id);
     }
 
@@ -46,9 +47,6 @@
         onAfterDelete();
     }
 
-    // Resolve the preset's source profile in its registry (official=bundled,
-    // else the persisted custom cache) — drives the update hint, updated-at
-    // date, and the one-click apply.
     const sourceLookup = $derived.by(() => {
         const sp = preset.sourceProfile;
         const cache = !sp?.registryId
@@ -60,14 +58,12 @@
         return { sp, cache, current };
     });
     const updateStatus = $derived(getProfileUpdateStatus(sourceLookup.current, preset.sourceProfile?.profileUpdatedAt));
-    // Installed = the snapshot this preset is pinned to; latest = the registry's
-    // current version (only meaningful when an update is available).
     const installedLabel = $derived(fmtDate(preset.sourceProfile?.profileUpdatedAt));
     const latestLabel = $derived(fmtDate(sourceLookup.current?.updatedAt));
     const description = $derived(sourceLookup.current ? localizeDescription(sourceLookup.current) : '');
+    const persistentSupport = $derived(getModelPresetBackendExecutionSupport(preset));
 
     function fmtDate(ms?: number): string {
-        // Strip the ko-locale trailing period ("2026. 6. 3." -> "2026. 6. 3").
         return ms ? new Date(ms).toLocaleDateString().replace(/\.\s*$/, '') : '';
     }
 
@@ -76,9 +72,6 @@
         openModelProfileBrowser.set(true);
     }
 
-    // One-click apply of the current source profile (the "update available"
-    // badge). Re-resolves the same profile, migrates matching userValues, and
-    // warns before dropping orphaned settings.
     async function applyUpdate() {
         const { sp, cache, current } = sourceLookup;
         if (!sp?.registryId || !cache || !current) return;
@@ -130,6 +123,11 @@
             <div class="text-xs text-textcolor2">{description}</div>
         {/if}
         <div class="text-xs text-textcolor2">Provider: {preset.profileSnapshot.providerBaseId}</div>
+        <div class="text-xs text-textcolor2">Request format: {preset.profileSnapshot.adapterKind}</div>
+        <div class="flex items-center justify-between gap-2 mt-1 mb-1">
+            <span class="text-xs text-textcolor2">Persistent generation</span>
+            <CapabilityTag active={persistentSupport.supported} />
+        </div>
         {#if preset.profileSnapshot.modelId}
             <div class="text-xs text-textcolor2">Default model: {preset.profileSnapshot.modelId}</div>
         {/if}

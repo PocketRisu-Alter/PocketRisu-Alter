@@ -4,7 +4,7 @@ import { tick } from "svelte";
 import { get } from "svelte/store";
 import streamSaver from 'streamsaver';
 import { setDatabase, type Database, defaultSdDataFunc, getDatabase, appVer, nodeOnlyVer, getCurrentCharacter, loadTogglesFromChat } from "./storage/database.svelte";
-import { checkRisuUpdate } from "./update";
+
 import { MobileGUI, botMakerMode, selectedCharID, loadedStore, DBState, LoadingStatusState, selIdState, ReloadGUIPointer, bodyIntercepterStore, loadingOverlayStore, chatDeselected } from "./stores.svelte";
 import { loadPlugins } from "./plugins/plugins.svelte";
 import { alertConfirm, alertError, alertMd, alertNormalWait, alertSelect, alertTOS, waitAlert, notifySuccess, notifyError } from "./alert";
@@ -27,6 +27,7 @@ import { initMobileGesture } from "./hotkey";
 import { moduleUpdate } from "./process/modules";
 import { isLocalNetworkUrl } from "./network/localNetwork";
 import { decodeProxyJobWsChunk, formatProxyStreamErrorMessage, parseProxyJobWsEvent } from "./network/proxyJobWs";
+import { applyPendingBackendChatResults } from "./process/request/backendJob";
 
 export const forageStorage = new AutoStorage()
 
@@ -2749,7 +2750,21 @@ export function changeChatTo(IdOrIndex: string | number) {
             }})
             void ensureChatHydrated(char.chats, capturedIndex, char.chaId).then((hydrated) => {
                 if(cancelled) return
-                if(hydrated && char.chatPage === capturedIndex) loadTogglesFromChat(hydrated)
+                if(hydrated && char.chatPage === capturedIndex) {
+                    loadTogglesFromChat(hydrated)
+                    if(getDatabase().useBackendChatJobs){
+                        // Use the reactive proxy at chats[chatPage], not the raw `hydrated` reference.
+                        // Direct mutations on the raw object bypass Svelte 5 signal tracking.
+                        const reactiveChat = char.chats[capturedIndex]
+                        if(reactiveChat) {
+                            void applyPendingBackendChatResults(char, reactiveChat).then((applied) => {
+                                if(applied > 0) {
+                                    ReloadGUIPointer.set(Math.random());
+                                }
+                            }).catch(console.error)
+                        }
+                    }
+                }
             }).catch((e) => {
                 console.error('[changeChatTo] hydration failed:', e)
             }).finally(() => {
@@ -2757,6 +2772,13 @@ export function changeChatTo(IdOrIndex: string | number) {
             })
         } else {
             loadTogglesFromChat(newChat)
+            if(getDatabase().useBackendChatJobs){
+                void applyPendingBackendChatResults(char, newChat).then((applied) => {
+                    if(applied > 0) {
+                        ReloadGUIPointer.set(Math.random());
+                    }
+                }).catch(console.error)
+            }
         }
     }
     ReloadGUIPointer.set(Math.random())

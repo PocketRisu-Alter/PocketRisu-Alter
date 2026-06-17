@@ -1,21 +1,40 @@
 @import "tailwindcss";
 
+/* AlterRisu design system tokens — semantic colors, typography, spacing, motion.
+   Keep this near the top so the legacy :root overrides below still win for
+   --risu-theme-* while AlterRisu tokens are available for new code. */
+@import "../AlterRisu-Design-System/tokens.css";
+
 @plugin '@tailwindcss/typography';
 
 @theme {
   --breakpoint-xs: 25rem;
 
-  --color-bgcolor: var(--risu-theme-bgcolor);
-  --color-darkbg: var(--risu-theme-darkbg);
-  --color-borderc: var(--risu-theme-borderc);
-  --color-selected: var(--risu-theme-selected);
-  --color-draculared: var(--risu-theme-draculared);
-  --color-textcolor: var(--risu-theme-textcolor);
-  --color-textcolor2: var(--risu-theme-textcolor2);
-  --color-darkborderc: var(--risu-theme-darkborderc);
-  --color-darkbutton: var(--risu-theme-darkbutton);
-  --color-success: var(--risu-theme-success);
-  --color-primary: var(--risu-theme-primary);
+  /* Map Tailwind utilities to AlterRisu semantic tokens. Legacy --risu-theme-*
+     remain for backward compatibility; new code should prefer these aliases. */
+  --color-bgcolor: var(--bg-base);
+  --color-darkbg: var(--bg-raised);
+  --color-borderc: var(--border-strong);
+  --color-selected: var(--bg-hover);
+  --color-draculared: var(--danger);
+  --color-textcolor: var(--text-primary);
+  --color-textcolor2: var(--text-secondary);
+  --color-darkborderc: var(--border-subtle);
+  --color-darkbutton: var(--bg-surface);
+  --color-success: var(--success);
+  --color-primary: var(--accent);
+
+  /* Keep legacy fallbacks as aliases so existing custom CSS continues to work. */
+  --color-risu-bgcolor: var(--risu-theme-bgcolor);
+  --color-risu-darkbg: var(--risu-theme-darkbg);
+  --color-risu-borderc: var(--risu-theme-borderc);
+  --color-risu-selected: var(--risu-theme-selected);
+  --color-risu-draculared: var(--risu-theme-draculared);
+  --color-risu-textcolor: var(--risu-theme-textcolor);
+  --color-risu-textcolor2: var(--risu-theme-textcolor2);
+  --color-risu-darkborderc: var(--risu-theme-darkborderc);
+  --color-risu-darkbutton: var(--risu-theme-darkbutton);
+  --color-risu-primary: var(--risu-theme-primary);
 
   --color-primary-50: var(--risu-theme-primary-50);
   --color-primary-100: var(--risu-theme-primary-100);
@@ -330,41 +349,48 @@ body {
   text-shadow: -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white;
 }
 
-::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+/* Global thin scrollbar — uses semantic tokens so it adapts per theme.
+   Firefox uses scrollbar-color (set on html); WebKit uses the pseudo-elements. */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--text-muted) 42%, transparent) transparent;
 }
 
-/* Track */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 
-/* Handle — global auto-hide. Transparent by default; fades in on hover.
-   The tint is a translucent form of the theme's secondary text color, so it
-   adapts to every theme. `visibility`/`opacity` are avoided: on a webkit thumb
-   they make Chrome fall back to the default system gray bar instead of hiding,
-   so we toggle the thumb's background-color instead. */
 ::-webkit-scrollbar-thumb {
-  background-color: transparent;
-  border-radius: 9999px;
-  transition: background-color 0.3s linear;
+  background: color-mix(in srgb, var(--text-muted) 42%, transparent);
+  border: 3px solid transparent;
+  border-radius: var(--radius-pill, 999px);
+  background-clip: padding-box;
 }
 
-/* Hovering any scrollable area (hover bubbles to ancestors) reveals the thumb. */
-*:hover::-webkit-scrollbar-thumb {
-  background-color: color-mix(in srgb, var(--color-textcolor2) 35%, transparent);
-}
-
-/* Stronger when pointing directly at the thumb. */
 ::-webkit-scrollbar-thumb:hover {
-  background-color: color-mix(in srgb, var(--color-textcolor2) 55%, transparent);
+  background: color-mix(in srgb, var(--text-secondary) 62%, transparent);
+  background-clip: padding-box;
 }
 
-/* Firefox: thin neutral scrollbar (inherits from root; no per-element auto-hide). */
-html {
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--color-textcolor2) 35%, transparent) transparent;
+.n-scroll::-webkit-scrollbar-thumb {
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0.5s, opacity 0.5s linear;
+}
+
+.n-scroll:hover::-webkit-scrollbar-thumb {
+  visibility: visible;
+  opacity: 1;
+}
+
+.n-scroll:focus::-webkit-scrollbar-thumb {
+  visibility: visible;
+  opacity: 1;
 }
 
 * {
@@ -373,6 +399,17 @@ html {
 
 .chattext p:first-child {
   margin-top: 0.3rem;
+}
+
+.chattext img {
+  display: block;
+  width: 100% !important;
+  height: auto !important;
+  max-width: min(100%, calc(100vw - 4rem)) !important;
+  max-height: min(88svh, 72rem) !important;
+  object-fit: contain;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 #app {
@@ -495,15 +532,25 @@ html {
 }
 
 .x-risu-risu-inlay-image {
-  @apply w-full flex justify-center;
+  @apply w-full max-w-full flex justify-center;
 }
 
 .x-risu-risu-inlay-image img {
-  @apply rounded-lg focus:outline-hidden max-w-80 w-full;
+  @apply rounded-lg focus:outline-hidden;
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100% !important;
+  max-height: min(88svh, 72rem) !important;
+  object-fit: contain;
 }
 
 .x-risu-risu-inlay-image video {
-  @apply rounded-lg focus:outline-hidden max-w-80 w-full;
+  @apply rounded-lg focus:outline-hidden;
+  width: 100% !important;
+  height: auto !important;
+  max-width: 100% !important;
+  max-height: min(88svh, 72rem) !important;
+  object-fit: contain;
 }
 
 .x-risu-risu-inlay-image audio {
@@ -577,29 +624,315 @@ html {
 }
 
 .root-loaded-image {
-  /* This class is used to indicate that the image has been with root-loaded method */
-  /* We need to style it to centered and pretty */
   display: block;
-  margin-left: auto;
-  margin-right: auto;
-  width: calc(100% - 1rem);
-  max-width: 20rem;
+  width: 100% !important;
   height: auto;
+  max-width: 100% !important;
+  max-height: min(88svh, 72rem) !important;
+  object-fit: contain;
   border-radius: 0.5rem;
   box-shadow: 0 2px 4px rgba(137, 137, 137, 0.1);
 }
 
 .root-loaded-image-dynamic {
-  max-height: 14rem;
+  max-height: min(88svh, 72rem) !important;
   transition: max-height 0.5s ease;
-  object-fit: cover;
-  object-position: top;
+  object-fit: contain;
+  object-position: center;
 }
 
 .root-loaded-image-dynamic:hover {
-  max-height: 30rem;
+  max-height: min(88svh, 72rem) !important;
 }
 
 annotation {
   display: none;
+}
+
+/* ---- AlterRisu motion & performance helpers ---- */
+
+/* Micro-interactions: color and transform transitions for common interactive
+   elements. Use transform/opacity where possible to stay on the compositor. */
+button,
+[role="button"],
+a,
+input,
+textarea,
+select,
+.chat-message-container,
+.sidebar-item,
+.menu-item {
+  transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+  transition-duration: var(--dur-fast);
+  transition-timing-function: var(--ease-out);
+}
+
+button:active,
+[role="button"]:active,
+a:active {
+  transform: scale(0.98);
+}
+
+/* Respect reduced motion system preference. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Prevent native image drag ghosting on mobile/touch browsers. Images and
+   media should not follow the finger during scroll or swipe gestures. */
+img,
+video,
+audio,
+canvas,
+svg {
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* mobile-drag-drop polyfill creates a drag image that follows the finger.
+   Keep the reorder behavior but hide the visual ghost so images don't appear
+   to stick to the touch point during scroll or accidental long-press. */
+.dnd-poly-drag-image,
+.dnd-poly-drag-image * {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* Allow selectable text in inputs and editable/chat areas while still
+   blocking native drag previews. */
+input,
+textarea,
+[contenteditable="true"],
+.chattext,
+.prose {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* Contain paint for scrollable lists and chat messages to reduce repaints. */
+.scroll-container,
+.chat-scroll,
+.chat-message-container {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 56px;
+}
+
+/* Lazy-loaded images should fade in instead of popping. */
+img[loading="lazy"] {
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+img[loading="lazy"].loaded,
+img[loading="lazy"]:not([src=""]) {
+  opacity: 1;
+}
+
+/* Sidebar slide transition. */
+.sidebar-enter {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.sidebar-enter-active {
+  transform: translateX(0);
+  opacity: 1;
+  transition: transform var(--dur-base) var(--ease-out), opacity var(--dur-base) var(--ease-out);
+}
+
+.sidebar-exit {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.sidebar-exit-active {
+  transform: translateX(-100%);
+  opacity: 0;
+  transition: transform var(--dur-base) var(--ease-out), opacity var(--dur-base) var(--ease-out);
+}
+
+/* Dialog/modal backdrop and panel transitions. */
+.modal-backdrop {
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+.modal-backdrop.open {
+  opacity: 1;
+}
+
+.modal-panel {
+  transform: scale(0.96);
+  opacity: 0;
+  transition: transform var(--dur-base) var(--ease-out), opacity var(--dur-base) var(--ease-out);
+}
+
+.modal-panel.open {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* Toast / notification slide-in. */
+.toast-enter {
+  transform: translateY(-8px);
+  opacity: 0;
+}
+
+.toast-enter-active {
+  transform: translateY(0);
+  opacity: 1;
+  transition: transform var(--dur-fast) var(--ease-out), opacity var(--dur-fast) var(--ease-out);
+}
+
+/* Composer expand / collapse micro motion. */
+.composer {
+  transition: max-height var(--dur-base) var(--ease-out), padding var(--dur-base) var(--ease-out);
+}
+
+/* Chat message appear animation. */
+@keyframes message-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chat-message-appear {
+  animation: message-enter var(--dur-base) var(--ease-out) forwards;
+}
+
+/* Chat bubble customization
+   ---------------------------------------------------------------------------
+   Activated by `data-chat-bubble-mode="bubble"` or `"glass"` on <html>.
+   Strips the default card background so the .chattext bubble stands alone.
+   Colors fall back to the active theme's `--msg-*` tokens when the user
+   hasn't overridden them. */
+:root[data-chat-bubble-mode="bubble"] .chat-message-container .bg-bgcolor.sm\:rounded-lg,
+:root[data-chat-bubble-mode="glass"]  .chat-message-container .bg-bgcolor.sm\:rounded-lg {
+  background-color: transparent !important;
+  padding: 0.5rem !important;
+  border-radius: 0 !important;
+}
+
+/* Shared bubble shape: inline-block with rounded padding */
+:root[data-chat-bubble-mode="bubble"] .chat-message-container .chattext,
+:root[data-chat-bubble-mode="glass"]  .chat-message-container .chattext {
+  display: inline-block;
+  vertical-align: top;
+  width: fit-content;
+  max-width: 100%;
+  border-radius: var(--radius-md, 10px);
+  padding: 0.5rem 0.75rem;
+}
+
+/* ── bubble mode ── */
+:root[data-chat-bubble-mode="bubble"] .chat-message-container[data-role="user"] .chattext {
+  background-color: var(--chat-user-bg, var(--msg-user-bg, var(--bg-surface)));
+  border: 1px solid var(--chat-user-border, var(--msg-user-border, var(--border-subtle)));
+}
+:root[data-chat-bubble-mode="bubble"] .chat-message-container[data-role="char"] .chattext {
+  background-color: var(--chat-char-bg, var(--msg-char-bg, var(--bg-raised)));
+  border: 1px solid var(--chat-char-border, var(--msg-char-border, var(--border-subtle)));
+}
+
+/* ── glass mode ── */
+:root[data-chat-bubble-mode="glass"] .chat-message-container[data-role="user"] .chattext {
+  background-color: color-mix(in srgb, var(--chat-user-bg, var(--msg-user-bg, var(--bg-surface))) 55%, transparent);
+  border: 1px solid var(--chat-user-border, var(--msg-user-border, var(--border-subtle)));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+:root[data-chat-bubble-mode="glass"] .chat-message-container[data-role="char"] .chattext {
+  background-color: color-mix(in srgb, var(--chat-char-bg, var(--msg-char-bg, var(--bg-raised))) 38%, transparent);
+  border: 1px solid var(--chat-char-border, var(--msg-char-border, var(--border-subtle)));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Em (italic emphasis) recolor — applied regardless of bubble mode when set */
+.chat-message-container .chattext em {
+  color: var(--chat-em-color, var(--msg-em-color, inherit));
+}
+
+/* Streaming border indicator (when chat marks itself streaming, downstream
+   themes may add the `.is-streaming` class — this is a forward-looking hook). */
+.chat-message-container.is-streaming .chattext {
+  box-shadow: inset 0 0 0 1px var(--chat-streaming-color, var(--msg-streaming-border, var(--accent-press)));
+}
+
+/* Panel-in: subtle fade-up for view/panel transitions. From AlterRisu.
+   Transform+opacity only (GPU-friendly). Honors prefers-reduced-motion via
+   --dur-base falling to 0ms. */
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rs-panel-in {
+  animation: panel-in var(--dur-base) var(--ease-out) backwards;
+}
+
+/* Streaming indicator pulse. */
+@keyframes streaming-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.streaming-dot {
+  animation: streaming-pulse 1.2s var(--ease-out) infinite;
+}
+
+/* Smooth scrolling for chat containers without forcing it everywhere. */
+.chat-scroll {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-scroll {
+    scroll-behavior: auto;
+  }
+}
+
+/* GPU hint for animated overlays. */
+.gpu-layer {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Avoid layout shift from lazy images by reserving space via aspect-ratio. */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Reduce paint cost for large static backgrounds. */
+body,
+#app {
+  contain: paint;
 }

@@ -42,6 +42,92 @@
     let lastCharArg:string|simpleCharacterArgument = null
     let lastChatId = -10
 
+    let committedChunks = $state<string[]>([])
+    let liveHtml = $state('')
+    let committedPrefix = ''
+    let previousFullHtml = ''
+    let parseSequence = 0
+    let appliedSequence = 0
+    let streamIdentity = ''
+
+    const resolvedAssetSrc = new Map<string, string>()
+    const resolvingAssetSrc = new Map<string, Promise<string>>()
+    let viewerSrc = $state('')
+    const safeBlockEndPattern = /<\/(?:p|div|blockquote|pre|ul|ol|table|figure|h[1-6])>|<hr\b[^>]*\/?\s*>/gi
+
+    const getCachedFileSrc = async (cacheKey: string, path: string) => {
+        const cached = resolvedAssetSrc.get(cacheKey)
+        if(cached){
+            return cached
+        }
+
+        let resolving = resolvingAssetSrc.get(cacheKey)
+        if(!resolving){
+            resolving = getFileSrc(path).then((src) => {
+                resolvedAssetSrc.set(cacheKey, src)
+                resolvingAssetSrc.delete(cacheKey)
+                return src
+            }).catch((error) => {
+                resolvingAssetSrc.delete(cacheKey)
+                throw error
+            })
+            resolvingAssetSrc.set(cacheKey, resolving)
+        }
+
+        return resolving
+    }
+
+    const resetIncrementalRender = () => {
+        committedChunks = []
+        liveHtml = ''
+        committedPrefix = ''
+        previousFullHtml = ''
+    }
+
+    const getCommonPrefixLength = (left: string, right: string) => {
+        const max = Math.min(left.length, right.length)
+        let index = 0
+        while(index < max && left.charCodeAt(index) === right.charCodeAt(index)){
+            index++
+        }
+        return index
+    }
+
+    const findSafeBlockBoundary = (html: string, limit: number) => {
+        safeBlockEndPattern.lastIndex = 0
+        let boundary = 0
+        let match: RegExpExecArray|null
+        const stablePart = html.slice(0, limit)
+
+        while((match = safeBlockEndPattern.exec(stablePart)) !== null){
+            boundary = match.index + match[0].length
+        }
+
+        return boundary
+    }
+
+    const applyIncrementalHtml = (html: string) => {
+        if(committedPrefix && !html.startsWith(committedPrefix)){
+            resetIncrementalRender()
+        }
+
+        const commonLength = previousFullHtml
+            ? getCommonPrefixLength(previousFullHtml, html)
+            : 0
+        const stableBoundary = findSafeBlockBoundary(html, commonLength)
+
+        if(stableBoundary > committedPrefix.length){
+            const newChunk = html.slice(committedPrefix.length, stableBoundary)
+            if(newChunk){
+                committedChunks = [...committedChunks, newChunk]
+                committedPrefix += newChunk
+            }
+        }
+
+        liveHtml = html.slice(committedPrefix.length)
+        previousFullHtml = html
+    }
+
     function getCbsCondition(){
         try{
             const cbsConditions:CbsConditions = {
@@ -59,7 +145,6 @@
     }
 
     const markParsing = async (data: string, charArg: string | simpleCharacterArgument, chatID: number, tries?:number) => {
-        // track 'translated' and 'retranslate' state
         translated;
         retranslate;
         let lastParsedQueue = ''
@@ -78,7 +163,7 @@
                             : !DBState.db.legacyTranslation
                             ? await getLLMCache(await ParseMarkdown(data, charArg, 'pretranslate', chatID, getCbsCondition()))
                             : await getLLMCache(await ParseMarkdown(data, charArg, mode, chatID, getCbsCondition()))
-                  
+
                             translateText = cache !== null
                         }
                         else{
@@ -89,11 +174,9 @@
                     const lastTranslated = translated
 
                     setTimeout(() => {
-                            translated = translateText
+                        translated = translateText
                     }, 10)
 
-                    // State change of `translated` triggers markParsing again,
-                    // causing redundant translation attempts
                     if (lastTranslated !== translateText) {
                         return;
                     }
@@ -107,7 +190,7 @@
                 }
 
                 let transResult
-                
+
                 if(DBState.db.translatorType === 'llm' && DBState.db.translateBeforeHTMLFormatting){
                     await sleep(100)
                     translating = true
@@ -148,18 +231,15 @@
                 lastParsedQueue = marked
                 lastCharArg = charArg
                 return marked
-            }   
+            }
         } catch (error) {
-            //retry
             if(tries > 2){
-
                 alertError(`Error while parsing chat message: ${translated}, ${error.message}, ${error.stack}`)
                 return data
             }
             return await markParsing(data, charArg, chatID, (tries ?? 0) + 1)
         }
         finally{
-            //since trimMarkdown is fast, we don't need to cache it
             lastParsed = lastParsedQueue
         }
     }
@@ -169,7 +249,7 @@
             return
         }
         const imgs = bodyRoot.querySelectorAll('img:not([src^="data:"]):not([src^="http:"]):not([src^="https:"]):not([src^="blob:"]):not([src^="file:"]):not([src^="tauri:"]):not([src^="/"]):not([noimage])') as NodeListOf<HTMLImageElement>
-        
+
         if (imgs.length > 0) {
             const currentCharacter = getCurrentCharacter()
             const styl = currentCharacter.prebuiltAssetStyle
@@ -184,22 +264,33 @@
 
             imgs.forEach(async (img) => {
                 const name = img.getAttribute('src')?.toLocaleLowerCase() || ''
-                console.log(name)
 
-                if(
-                    name.length > 200 ||
-                    name.includes(':')
-                ){
+                if(name.length > 200 || name.includes(':')){
                     img.setAttribute('noimage', 'true')
                     return
                 }
-                
+
                 const foundAsset = exactAssets.get(name)
-                console.log('Checking image:', name, 'Assets:', assets)
                 if(foundAsset){
+                    img.dataset.risuAssetName = name
                     img.classList.add('root-loaded-image')
                     img.classList.add('root-loaded-image-' + styl)
-                    img.src = await getFileSrc(foundAsset)
+                    img.setAttribute('loading', 'eager')
+                    img.decoding = 'async'
+                    img.style.cursor = 'pointer'
+                    img.onclick = () => { viewerSrc = img.src }
+
+                    const cached = resolvedAssetSrc.get(name)
+                    if(cached){
+                        img.src = cached
+                        return
+                    }
+
+                    const originalName = name
+                    const resolved = await getCachedFileSrc(name, foundAsset)
+                    if(img.isConnected && img.getAttribute('src')?.toLocaleLowerCase() === originalName){
+                        img.src = resolved
+                    }
                     return
                 }
 
@@ -222,17 +313,27 @@
                     }
                 }
                 if(currentFound){
-                    const got = await getFileSrc(currentFound)
-                    const name2 = img.getAttribute('src')?.toLocaleLowerCase() || ''
-                    if(name === name2){
-                        img.setAttribute('src', got)
+                    img.dataset.risuAssetName = name
+                    img.classList.add('root-loaded-image')
+                    img.classList.add('root-loaded-image-' + styl)
+                    img.setAttribute('loading', 'eager')
+                    img.decoding = 'async'
+                    img.style.cursor = 'pointer'
+                    img.onclick = () => { viewerSrc = img.src }
+
+                    const cached = resolvedAssetSrc.get(name)
+                    if(cached){
+                        img.src = cached
+                        img.removeAttribute('noimage')
+                        return
                     }
 
-                    if(img.classList.length === 0){
-                        img.classList.add('root-loaded-image')
-                        img.classList.add('root-loaded-image-' + styl)
+                    const originalName = name
+                    const got = await getCachedFileSrc(name, currentFound)
+                    if(img.isConnected && img.getAttribute('src')?.toLocaleLowerCase() === originalName){
+                        img.setAttribute('src', got)
+                        img.removeAttribute('noimage')
                     }
-                    img.removeAttribute('noimage')
                 }
                 else{
                     img.setAttribute('noimage', 'true')
@@ -244,18 +345,40 @@
     let markParsingResult = $derived.by(() => markParsing(msgDisplay, character, idx))
 
     $effect(() => {
-        markParsingResult
-        checkImg()
-        markParsingResult.then(async () => {
+        const identity = `${idx}:${typeof character === 'string' ? character : JSON.stringify(character ?? null)}`
+        if(identity !== streamIdentity){
+            streamIdentity = identity
+            resetIncrementalRender()
+        }
+
+        const currentResult = markParsingResult
+        const sequence = ++parseSequence
+
+        currentResult.then(async (md) => {
+            if(sequence < appliedSequence || typeof md !== 'string'){
+                return
+            }
+            appliedSequence = sequence
+
+            const html = addMetadataToElement(trimMarkdown(md), modelShortName)
+            applyIncrementalHtml(html)
+
+            await tick()
             checkImg()
-            await tick() // Wait for Svelte to re-render the {:then} block into DOM
             if (bodyRoot) resolveInlayPlaceholders(bodyRoot)
         })
     })
 </script>
 
-{#await markParsingResult}
-    {@html addMetadataToElement(trimMarkdown(lastParsed), modelShortName)}
-{:then md}
-    {@html addMetadataToElement(trimMarkdown(md), modelShortName)}
-{/await}
+{#each committedChunks as chunk, chunkIndex (chunkIndex)}
+    {@html chunk}
+{/each}
+{@html liveHtml}
+
+{#if viewerSrc}
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80" onclick={() => { viewerSrc = '' }}>
+    <img src={viewerSrc} alt="" class="max-w-[90vw] max-h-[90vh] object-contain rounded-md shadow-2xl" onclick={(e) => e.stopPropagation()} />
+</div>
+{/if}

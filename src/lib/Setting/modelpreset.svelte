@@ -75,8 +75,10 @@
     }
 </script>
 
-<div class="absolute w-full h-full z-40 bg-black/50 flex justify-center items-center">
-    <div class="bg-darkbg p-4 break-any rounded-md flex flex-col max-w-3xl w-124 max-h-full overflow-y-auto">
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div class="absolute w-full h-full z-40 bg-black/50 flex justify-center items-center" data-risu-modal="" onkeydown={(e) => { if (e.key === 'Escape') { e.stopPropagation(); close(); }}} onclick={close}>
+    <div class="risu-modal-panel bg-darkbg p-4 break-any rounded-md flex flex-col max-w-3xl w-124 max-h-full overflow-y-auto" onclick={(e) => e.stopPropagation()}>
         <div class="flex items-center text-textcolor mb-4">
             <h2 class="mt-0 mb-0">{language.modelPresets}</h2>
             <div class="grow flex justify-end">
@@ -250,4 +252,11 @@
         min-height: 4px;
         height: 4px;
     }
+@keyframes risu-modal-in {
+    from { opacity: 0; transform: scale(0.96) translateY(4px); }
+    to   { opacity: 1; transform: none; }
+}
+.risu-modal-panel {
+    animation: risu-modal-in var(--dur-base, 200ms) cubic-bezier(0.2, 0, 0, 1) both;
+}
 </style>

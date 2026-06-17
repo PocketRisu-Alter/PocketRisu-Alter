@@ -1,0 +1,36 @@
+.rs-setting-cont-4,
+.rs-setting-cont-4 > div {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.rs-setting-cont-4 select:not(.sr-only) {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    text-overflow: ellipsis;
+}
+
+[data-select-content] {
+    box-sizing: border-box;
+    width: var(--bits-select-anchor-width) !important;
+    min-width: 0 !important;
+    max-width: calc(100vw - 24px) !important;
+    overflow-x: hidden !important;
+}
+
+[data-select-viewport] {
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: hidden !important;
+}
+
+[data-select-item] {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

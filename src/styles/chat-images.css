@@ -1,0 +1,24 @@
+/* Responsive chat asset images.
+ *
+ * Chat assets keep their intrinsic ratio and stay within bounded width/height,
+ * preventing portrait assets from taking over the whole screen.
+ */
+.chat-message-container .chattext img:not([noimage]),
+.chat-message-container .chattext img.root-loaded-image:not([noimage]),
+.chat-message-container .chattext .x-risu-risu-inlay-image img:not([noimage]),
+.chat-message-container .chattext .x-risu-risu-inlay-image video {
+  display: block;
+  box-sizing: border-box;
+  width: 100% !important;
+  height: auto;
+  max-width: 100% !important;
+  max-height: min(88svh, 72rem) !important;
+  object-fit: contain;
+  object-position: center;
+  margin-inline: auto;
+}
+
+.chat-message-container .chattext .x-risu-risu-inlay-image {
+  width: 100%;
+  max-width: 100%;
+}

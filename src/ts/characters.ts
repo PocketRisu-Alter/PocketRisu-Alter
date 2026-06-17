@@ -2,13 +2,14 @@ import { get, writable } from "svelte/store";
 import { saveImage, setDatabase, type character, type Chat, defaultSdDataFunc, type loreBook, getDatabase, getCharacterByIndex, setCharacterByIndex, getCurrentChat, loadTogglesFromChat, normalizeChat, newChatModelDefaults } from "./storage/database.svelte";
 import { ensureChatHydrated } from "./storage/chatStorage";
 import { alertAddCharacter, alertConfirm, alertError, alertSelect, alertStore, alertWait, notifySuccess, notifyInfo } from "./alert";
-import { loadingOverlayStore, chatDeselected } from "./stores.svelte";
+import { loadingOverlayStore, chatDeselected, ReloadGUIPointer, DBState } from "./stores.svelte";
 import { language } from "../lang";
 import { checkNullish, findCharacterbyId, getUserName, selectMultipleFile, selectSingleFile } from "./util";
 import { v4 as uuidv4, v4 } from 'uuid';
 import { getImageType } from "./media";
 import { MobileGUIStack, OpenRealmStore, selectedCharID } from "./stores.svelte";
 import { AppendableBuffer, changeChatTo, checkCharOrder, downloadFile, getFileSrc, requiresFullEncoderReload } from "./globalApi.svelte";
+import { applyPendingBackendChatResults } from "./process/request/backendJob";
 import { updateInlayScreen } from "./process/inlayScreen";
 import { parseMarkdownSafe } from "./parser/parser.svelte";
 import { translateHTML } from "./translator/translator";
@@ -309,7 +310,7 @@ export async function exportChat(page:number){
                     </tr>
                     ${chatContentHTML}
                 </table>
-                <p>Chat from PocketRisu</p>
+                <p>Chat from PocketRisu-Alter</p>
             `
 
             //copy to clipboard
@@ -791,6 +792,18 @@ export function changeChar(index: number, arg:{
                     const activeChatId = currentChar?.chats?.[currentChar.chatPage]?.id
                     if(hydrated && get(selectedCharID) === capturedIndex && activeChatId === capturedChatId) {
                         loadTogglesFromChat(hydrated)
+                        if(getDatabase().useBackendChatJobs) {
+                            const reactiveChar = DBState.db.characters[capturedIndex]
+                            // Use the reactive proxy stored at chats[chatPage], not the raw `hydrated`
+                            // reference returned from ensureChatHydrated. Mutations on the raw object
+                            // bypass Svelte 5's signal tracking and won't trigger UI updates.
+                            const reactiveChat = reactiveChar?.chats?.[reactiveChar.chatPage]
+                            if(reactiveChat) {
+                                void applyPendingBackendChatResults(reactiveChar, reactiveChat).then((applied) => {
+                                    if(applied > 0) ReloadGUIPointer.set(Math.random())
+                                }).catch(console.error)
+                            }
+                        }
                     }
                 }).catch((e) => {
                     console.error('[selectCharacter] hydration failed:', e)
@@ -800,6 +813,15 @@ export function changeChar(index: number, arg:{
             }
         } else {
             loadTogglesFromChat(chat)
+            if(getDatabase().useBackendChatJobs) {
+                const reactiveChar = DBState.db.characters[index]
+                const reactiveChat = reactiveChar?.chats?.[reactiveChar.chatPage]
+                if(reactiveChat) {
+                    void applyPendingBackendChatResults(reactiveChar, reactiveChat).then((applied) => {
+                        if(applied > 0) ReloadGUIPointer.set(Math.random())
+                    }).catch(console.error)
+                }
+            }
         }
     }
 }

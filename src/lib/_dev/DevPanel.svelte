@@ -27,13 +27,6 @@
     import { alertStore } from "src/ts/stores.svelte";
     import { sleep } from "src/ts/util";
     import { resetAllPluginPermissions } from "src/ts/plugins/apiV3/v3.svelte";
-    import {
-        updatePopupStore,
-        selfUpdateProgressStore,
-        dismissUpdatePopup,
-        type UpdateInfo,
-        type SelfUpdateProgress,
-    } from "src/ts/update";
     import ShDialog from "src/lib/UI/GUI/ShDialog.svelte";
     import ShButton from "src/lib/UI/GUI/ShButton.svelte";
     import ShBadge from "src/lib/UI/GUI/ShBadge.svelte";
@@ -355,40 +348,6 @@ function hello(): string {
 
     // ─── Section 5: Reset utilities ──────────────────────────────────────────
 
-    // ─── Section 6: UpdatePopup simulation ───────────────────────────────────
-    // Drives updatePopupStore + selfUpdateProgressStore directly so the real
-    // <UpdatePopup /> mounted in App.svelte renders. dismissUpdatePopup()
-    // does NOT touch the per-version dismissed key (only showUpdatePopupOnce
-    // does), so triggering demos here is safe — real updates are not lost.
-    const SAMPLE_UPDATE_BASE: UpdateInfo = {
-        currentVersion: '1.3.0',
-        latestVersion: '99.99.99-demo',
-        hasUpdate: true,
-        severity: 'optional',
-        releaseUrl: 'https://github.com/PocketRisu/PocketRisu/releases',
-        releaseName: 'v99.99.99-demo (Dev Panel sample)',
-        publishedAt: new Date().toISOString(),
-        canSelfUpdate: true,
-        deploymentType: 'portable',
-    };
-    const SAMPLE_POPUP_MESSAGE = '- 채팅 로딩 속도 개선\n- 백업 안정성 향상\n- shadcn 기반 다이얼로그 도입';
-
-    function showUpdate(overrides: Partial<UpdateInfo> = {}) {
-        selfUpdateProgressStore.set(null);
-        updatePopupStore.set({ ...SAMPLE_UPDATE_BASE, ...overrides });
-    }
-
-    function showProgress(progress: SelfUpdateProgress, infoOverrides: Partial<UpdateInfo> = {}) {
-        updatePopupStore.set({ ...SAMPLE_UPDATE_BASE, ...infoOverrides });
-        selfUpdateProgressStore.set(progress);
-    }
-
-    function forceCloseUpdate() {
-        selfUpdateProgressStore.set(null);
-        dismissUpdatePopup();
-        setResult('UpdatePopup: 강제 닫힘');
-    }
-
     // ─── Section 7: Component gallery ────────────────────────────────────────
     // Live preview of the Sh* components in their current vega-derived spec.
     // Buttons are no-ops; widgets bind to local state for interaction feel.
@@ -508,47 +467,6 @@ function hello(): string {
         </p>
         <div class="flex flex-wrap gap-2">
             <ShButton variant="destructive" onclick={resetPluginPermissions}>플러그인 권한 리셋</ShButton>
-        </div>
-    </div>
-
-    <!-- Section 6 -->
-    <div class="mt-4 flex flex-col gap-2">
-        <h3 class="text-sm font-semibold text-textcolor">6. UpdatePopup 시뮬레이션</h3>
-        <p class="text-xs text-textcolor2">
-            실제 <code class="bg-bgcolor px-1 py-0.5 rounded">&lt;UpdatePopup /&gt;</code>
-            (App.svelte에 항상 마운트)을 직접 띄웁니다. <strong class="text-textcolor">"Reload" 버튼은 진짜 페이지 reload</strong>를
-            일으키니 데모 중에는 누르지 마세요. 끝나면 "강제 닫기"로 정리.
-        </p>
-
-        <div class="mt-1 flex flex-col gap-1.5">
-            <span class="text-xs text-textcolor2">Idle 상태</span>
-            <div class="flex flex-wrap gap-2">
-                <ShButton size="sm" onclick={() => showUpdate()}>Optional + Self-update</ShButton>
-                <ShButton size="sm" onclick={() => showUpdate({ severity: 'required' })}>Required + Self-update</ShButton>
-                <ShButton size="sm" onclick={() => showUpdate({ canSelfUpdate: false })}>Optional + View Release only</ShButton>
-                <ShButton size="sm" onclick={() => showUpdate({ severity: 'required', canSelfUpdate: false })}>Required + View Release only</ShButton>
-                <ShButton size="sm" onclick={() => showUpdate({ popupMessage: SAMPLE_POPUP_MESSAGE })}>+ popupMessage</ShButton>
-            </div>
-        </div>
-
-        <div class="mt-1 flex flex-col gap-1.5">
-            <span class="text-xs text-textcolor2">진행 단계 (X 숨김 / 블로킹)</span>
-            <div class="flex flex-wrap gap-2">
-                <ShButton size="sm" onclick={() => showProgress({ step: 'checking', progress: 0, message: '업데이트 정보 확인 중...' })}>checking</ShButton>
-                <ShButton size="sm" onclick={() => showProgress({ step: 'downloading', progress: 50, message: 'v99.99.99-demo 다운로드 중... (3.2 MB / 6.4 MB)' })}>downloading 50%</ShButton>
-                <ShButton size="sm" onclick={() => showProgress({ step: 'extracting', progress: null, message: '아카이브 추출 중...' })}>extracting</ShButton>
-                <ShButton size="sm" onclick={() => showProgress({ step: 'replacing', progress: null, message: '실행 파일 교체 중...' })}>replacing</ShButton>
-                <ShButton size="sm" onclick={() => showProgress({ step: 'restarting', progress: null, message: '서버 재시작 대기 중...' })}>restarting</ShButton>
-            </div>
-        </div>
-
-        <div class="mt-1 flex flex-col gap-1.5">
-            <span class="text-xs text-textcolor2">종료 단계 (X 노출 / 닫기 가능)</span>
-            <div class="flex flex-wrap gap-2">
-                <ShButton size="sm" variant="success" onclick={() => showProgress({ step: 'done', progress: 100, message: '업데이트 완료.' })}>done (Reload 주의)</ShButton>
-                <ShButton size="sm" variant="destructive" onclick={() => showProgress({ step: 'error', progress: null, message: '업데이트 실패: 서버 응답 없음 (HTTP 502)' })}>error</ShButton>
-                <ShButton size="sm" variant="ghost" onclick={forceCloseUpdate}>강제 닫기</ShButton>
-            </div>
         </div>
     </div>
 

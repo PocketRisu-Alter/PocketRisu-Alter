@@ -6,14 +6,13 @@
     import ShDropdownMenuTrigger from 'src/lib/UI/GUI/ShDropdownMenuTrigger.svelte';
     import ShDropdownMenuContent from 'src/lib/UI/GUI/ShDropdownMenuContent.svelte';
     import ShDropdownMenuItem from 'src/lib/UI/GUI/ShDropdownMenuItem.svelte';
-    import { selectedCharID, PlaygroundStore, createSimpleCharacter, hypaV3ModalOpen, ScrollToMessageStore, additionalChatMenu, additionalFloatingActionButtons, chatDeselected, chatPanelStore } from "../../ts/stores.svelte";
-    import { tick, untrack } from 'svelte';
+    import { selectedCharID, PlaygroundStore, createSimpleCharacter, hypaV3ModalOpen, ScrollToMessageStore, additionalChatMenu, additionalFloatingActionButtons, chatDeselected } from "../../ts/stores.svelte";
+    import { tick } from 'svelte';
     import Chat from "./Chat.svelte";
-    import { getAdditionalChatLoadPages, getInitialChatLoadPages } from 'src/ts/chatLoadPages';
     import { type Chat as ChatData, type Message } from "../../ts/storage/database.svelte";
     import { DBState } from 'src/ts/stores.svelte';
     import { getCharImage } from "../../ts/characters";
-    import { chatProcessStage, doingChat, sendChat } from "../../ts/process/index.svelte";
+    import { chatProcessStage, doingChat, sendChat, recoveryAbortController } from "../../ts/process/index.svelte";
     import { ensureCurrentChatReady } from "../../ts/storage/chatStorage";
     import { sleep } from "../../ts/util";
     import { language } from "../../lang";
@@ -34,7 +33,6 @@ import { isMobile } from 'src/ts/platform'
     import { postChatFile } from 'src/ts/process/files/multisend';
     import { getInlayAsset } from 'src/ts/process/files/inlays';
     import { quickMenu } from 'src/ts/hotkey';
-    import { loadChatDraft, scheduleSaveChatDraft, flushChatDraft, removeChatDraft } from 'src/ts/storage/chatDraft';
 
     import Chats from './Chats.svelte';
     import Button from '../UI/GUI/Button.svelte';
@@ -65,7 +63,7 @@ import { isMobile } from 'src/ts/platform'
     let messageInput:string = $state('')
     let messageInputTranslate:string = $state('')
     let openMenu = $state(false)
-    let loadPages = $state(getInitialChatLoadPages(DBState.db))
+    let loadPages = $state(30)
     let doingChatInputTranslate = false
     let toggleStickers:boolean = $state(false)
     let fileInput:string[] = $state([])
@@ -74,81 +72,13 @@ import { isMobile } from 'src/ts/platform'
     let scrollNavTimer: ReturnType<typeof setTimeout> | null = null
     let chatsInstance: any = $state()
     let isScrollingToMessage = $state(false)
+    let composerOverlayHeight = $state(0)
     let { openModuleList = $bindable(false), openChatList = $bindable(false), customStyle = '' }: Props = $props();
     let currentCharacter = $derived(DBState.db.characters[$selectedCharID])
     let currentChatSlot = $derived(currentCharacter?.chats[currentCharacter.chatPage])
     let currentChatReady = $derived(!!currentChatSlot && !currentChatSlot._placeholder)
     let currentChat = $derived(currentChatReady ? currentChatSlot.message : [])
     let currentChatFmIndex = $derived(currentChatReady ? (currentChatSlot.fmIndex ?? -1) : -1)
-
-    // ─── Per-chat composer draft ────────────────────────────────────────────
-    // The message input is kept per chat, stored outside the chat body, so it
-    // survives unmounting the chat view (e.g. accidentally opening Settings while
-    // composing a long message). Keyed by character + chat id.
-    let draftChaId = $derived(currentCharacter?.chaId ?? '')
-    let draftChatId = $derived(currentChatSlot?.id ?? '')
-    let draftLoading = $state(false)
-
-    function persistDraftNow() {
-        flushChatDraft(draftChaId, draftChatId, { m: messageInput, t: messageInputTranslate })
-    }
-
-    // Load on chat enter (keyed by id, so no wait for hydration); flush the
-    // latest text for the chat being left on switch / unmount.
-    $effect(() => {
-        const chaId = draftChaId
-        const chatId = draftChatId
-        if (!chaId || !chatId) return
-        untrack(() => { messageInput = ''; messageInputTranslate = ''; draftLoading = true })
-        let active = true
-        ;(async () => {
-            const draft = await loadChatDraft(chaId, chatId)
-            if (!active) return
-            untrack(() => {
-                // Don't clobber text the user began typing during the load.
-                if (draft && messageInput === '' && messageInputTranslate === '') {
-                    messageInput = draft.m
-                    messageInputTranslate = draft.t
-                }
-                draftLoading = false
-            })
-            // Resize the textarea to fit the cleared/loaded text (height is
-            // updated imperatively, not reactively to messageInput).
-            await tick()
-            if (active) updateInputSizeAll()
-        })()
-        return () => {
-            active = false
-            flushChatDraft(chaId, chatId, {
-                m: untrack(() => messageInput),
-                t: untrack(() => messageInputTranslate),
-            })
-        }
-    })
-
-    // Debounced save while typing (each write is a network round-trip, so it is
-    // coalesced). Suppressed during the initial load to avoid racing it.
-    $effect(() => {
-        const chaId = draftChaId
-        const chatId = draftChatId
-        const m = messageInput
-        const t = messageInputTranslate
-        if (!chaId || !chatId || draftLoading) return
-        scheduleSaveChatDraft(chaId, chatId, { m, t })
-    })
-
-    // Best-effort persist on tab hide / unload (refresh, app switch): the
-    // unmount cleanup above does not fire on a hard page teardown.
-    $effect(() => {
-        const onHide = () => { if (document.visibilityState === 'hidden') persistDraftNow() }
-        const onPageHide = () => persistDraftNow()
-        document.addEventListener('visibilitychange', onHide)
-        window.addEventListener('pagehide', onPageHide)
-        return () => {
-            document.removeEventListener('visibilitychange', onHide)
-            window.removeEventListener('pagehide', onPageHide)
-        }
-    })
 
     /** Await hydration of active chat. Returns full Chat or null on failure. */
     async function ensureActiveChatReady(selectedChar = $selectedCharID): Promise<ChatData | null> {
@@ -271,20 +201,18 @@ import { isMobile } from 'src/ts/platform'
                 await sleep(100)
             }
 
-            const chatContainer = document.querySelector('.default-chat-screen') as HTMLElement | null;
             const preIndex = Math.max(0, index - 3)
             const preElement = document.querySelector(`[data-chat-index="${preIndex}"]`)
-            // Scroll within the chat container only — raw scrollIntoView climbs to
-            // documentElement and, if the root is inflated, shoves the whole page up.
-            if(chatContainer && preElement){
-                scrollWithinContainer(preElement as HTMLElement, chatContainer, { block: 'start', behavior: 'instant' })
-            } else if(chatContainer && element){
-                scrollWithinContainer(element as HTMLElement, chatContainer, { block: 'start', behavior: 'instant' })
+            if(preElement){
+                preElement.scrollIntoView({behavior: "instant", block: "start"})
+            } else {
+                element?.scrollIntoView({behavior: "instant", block: "start"})
             }
             await sleep(50)
 
             if(element){
                 // Wait for images to load to prevent layout shift
+                const chatContainer = document.querySelector('.default-chat-screen');
                 if(chatContainer) {
                     const images = Array.from(chatContainer.querySelectorAll('img'));
                     const promises = images.map(img => {
@@ -301,12 +229,11 @@ import { isMobile } from 'src/ts/platform'
                     ]);
                 }
 
-                if(chatContainer){
-                    scrollWithinContainer(element as HTMLElement, chatContainer, { block: 'start', behavior: 'instant' })
-                    // Small delay and scroll again to ensure position is correct after any final layout adjustments
-                    await sleep(50)
-                    scrollWithinContainer(element as HTMLElement, chatContainer, { block: 'start', behavior: 'instant' })
-                }
+                element.scrollIntoView({behavior: "instant", block: "start"})
+                
+                // Small delay and scroll again to ensure position is correct after any final layout adjustments
+                await sleep(50)
+                element.scrollIntoView({behavior: "instant", block: "start"})
 
                 element.classList.add('ring-2', 'ring-blue-500')
                 setTimeout(() => {
@@ -340,8 +267,6 @@ import { isMobile } from 'src/ts/platform'
             const commandProcessed = await processMultiCommand(messageInput)
             if(commandProcessed !== false){
                 messageInput = ''
-                messageInputTranslate = ''
-                removeChatDraft(draftChaId, draftChatId)
                 return
             }
         }
@@ -390,7 +315,6 @@ import { isMobile } from 'src/ts/platform'
         }
         messageInput = ''
         messageInputTranslate = ''
-        removeChatDraft(draftChaId, draftChatId)
         DBState.db.characters[selectedChar].chats[DBState.db.characters[selectedChar].chatPage].message = cha
 
         await sleep(10)
@@ -414,7 +338,6 @@ import { isMobile } from 'src/ts/platform'
     })
     async function exitFullscreen(){
         composerFullscreen = false
-        persistDraftNow()   // checkpoint the draft on return from the expanded composer
         await tick()   // let the inline composer re-measure with the latest text
         updateInputSizeAll()
         updateInputTransateMessage(false)
@@ -566,6 +489,7 @@ import { isMobile } from 'src/ts/platform'
         if(abortController){
             abortController.abort()
         }
+        $recoveryAbortController?.abort()
     }
 
     let { userIconPortrait, currentUsername, userIcon } = $derived.by(() => {
@@ -596,22 +520,6 @@ import { isMobile } from 'src/ts/platform'
     let inputEle:HTMLTextAreaElement = $state()
     let inputTranslateHeight = $state("44px")
     let inputTranslateEle:HTMLTextAreaElement = $state()
-
-    // Standard theme: composer width follows the configured chat width (matches message cards).
-    // Other themes: no width limit (original full-width behavior).
-    let isStandardTheme = $derived(DBState.db.theme === '')
-    let composerWidthClass = $derived(
-        !isStandardTheme ? '' :
-        DBState.db.nodeOnlyStandardChatWidth === 'full' ? 'max-w-full' :
-        DBState.db.nodeOnlyStandardChatWidth === 'wide' ? 'max-w-6xl' :
-        'max-w-3xl'
-    )
-    // Effective persona name for the input placeholder (chat-bound persona overrides the selected one).
-    let activePersonaName = $derived.by(() => {
-        const chat = DBState.db.characters[$selectedCharID]?.chats?.[DBState.db.characters[$selectedCharID]?.chatPage]
-        const bound = chat?.bindedPersona ? DBState.db.personas.find(p => p.id === chat.bindedPersona) : null
-        return (bound ?? DBState.db.personas[DBState.db.selectedPersona])?.name || 'User'
-    })
 
     function updateInputSizeAll() {
         updateInputSize()
@@ -777,7 +685,7 @@ import { isMobile } from 'src/ts/platform'
                 mergedCanvas.remove();
             }
             notifySuccess(language.screenshotSaved)
-            loadPages = getInitialChatLoadPages(DBState.db)
+            loadPages = 10
         } catch (error) {
             console.error(error)
             notifyError("Error while taking screenshot")
@@ -789,7 +697,11 @@ import { isMobile } from 'src/ts/platform'
 
 
 
-<div class="w-full h-full relative" style={customStyle}>
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div class="w-full h-full relative" style={customStyle} onclick={() => {
+    openMenu = false
+}}>
     
     {#if DBState.db.nodeOnlyScrollButtonType !== 'off' && currentChat.length > 0}
         <div
@@ -833,21 +745,21 @@ import { isMobile } from 'src/ts/platform'
 
     {#if showNewMessageButton}
         {#if (DBState.db.newMessageButtonStyle === 'bottom-center' || !DBState.db.newMessageButtonStyle)}
-            <button class="absolute bottom-16 left-1/2 -translate-x-1/2 bg-primary text-white px-4 py-2 rounded-full shadow-lg z-50 flex items-center gap-2 hover:bg-primary/90 transition-colors" onclick={scrollToBottom}>
+            <button class="absolute bottom-16 left-1/2 -translate-x-1/2 bg-bgcolor border border-borderc text-textcolor px-4 py-2 rounded-full z-50 flex items-center gap-2 hover:bg-selected/40 hover:border-textcolor2 transition-colors duration-150 ease-out" onclick={scrollToBottom}>
                 <ArrowDown size={16} />
                 <span>{language.newMessage}</span>
             </button>
         {/if}
 
         {#if DBState.db.newMessageButtonStyle === 'bottom-right'}
-            <button class="absolute bottom-20 right-4 bg-primary text-white px-4 py-2 rounded-full shadow-lg z-50 flex items-center gap-2 hover:bg-primary/90 transition-colors" onclick={scrollToBottom}>
+            <button class="absolute bottom-20 right-4 bg-bgcolor border border-borderc text-textcolor px-4 py-2 rounded-full z-50 flex items-center gap-2 hover:bg-selected/40 hover:border-textcolor2 transition-colors duration-150 ease-out" onclick={scrollToBottom}>
                 <ArrowDown size={16} />
                 <span>{language.newMessage}</span>
             </button>
         {/if}
 
         {#if DBState.db.newMessageButtonStyle === 'bottom-left'}
-            <button class="absolute bottom-20 left-4 bg-primary text-white px-4 py-2 rounded-full shadow-lg z-50 flex items-center gap-2 hover:bg-primary/90 transition-colors" onclick={scrollToBottom}>
+            <button class="absolute bottom-20 left-4 bg-bgcolor border border-borderc text-textcolor px-4 py-2 rounded-full z-50 flex items-center gap-2 hover:bg-selected/40 hover:border-textcolor2 transition-colors duration-150 ease-out" onclick={scrollToBottom}>
                 <ArrowDown size={16} />
                 <span>{language.newMessage}</span>
             </button>
@@ -867,7 +779,7 @@ import { isMobile } from 'src/ts/platform'
         {/if}
 
         {#if DBState.db.newMessageButtonStyle === 'top-bar'}
-            <button class="absolute top-2 left-1/2 -translate-x-1/2 bg-primary text-white px-6 py-1.5 rounded-full shadow-lg z-50 flex items-center gap-2 hover:bg-primary/90 transition-colors text-sm" onclick={scrollToBottom}>
+            <button class="absolute top-2 left-1/2 -translate-x-1/2 bg-bgcolor border border-borderc text-textcolor px-6 py-1.5 rounded-full z-50 flex items-center gap-2 hover:bg-selected/40 hover:border-textcolor2 transition-colors duration-150 ease-out text-sm" onclick={scrollToBottom}>
                 <ArrowDown size={14} />
                 <span>{language.newMessage}</span>
             </button>
@@ -891,17 +803,36 @@ import { isMobile } from 'src/ts/platform'
             <span>{language.selectChatToView}</span>
         </div>
     {:else}
-        {#snippet composerCluster()}
+        <div class="h-full w-full flex flex-col-reverse overflow-y-auto relative default-chat-screen"
+            class:nodeonly-standard={DBState.db.theme === ''}
+            class:no-chat-width-wide={DBState.db.theme === '' && DBState.db.nodeOnlyStandardChatWidth === 'wide'}
+            class:no-chat-width-full={DBState.db.theme === '' && DBState.db.nodeOnlyStandardChatWidth === 'full'}
+            onscroll={(e) => {
+            if (DBState.db.nodeOnlyScrollButtonType !== 'off') {
+                bumpScrollNav()
+            }
+            //@ts-expect-error scrollHeight/clientHeight/scrollTop don't exist on EventTarget, but target is HTMLElement here
+            const scrolled = (e.target.scrollHeight - e.target.clientHeight + e.target.scrollTop)
+            if(scrolled < 100 && currentChat.length > loadPages){
+                loadPages += 15
+            }
+            const chatTarget = e.target as HTMLElement;
+            const chatsContainer = chatTarget.children[1] ?? chatTarget.children[0];
+            const lastEl = chatsContainer?.firstElementChild;
+            const isAtBottom = lastEl ? lastEl.getBoundingClientRect().top <= chatTarget.getBoundingClientRect().bottom + 100 : true;
+            if(isAtBottom){
+                showNewMessageButton = false;
+            }
+        }}>
             <div
-                    class="{DBState.db.fixedChatTextarea ? 'sticky pt-2 pb-2 right-0 bottom-0 bg-bgcolor' : 'mt-2 mb-2'} w-full"
-                    style="{DBState.db.fixedChatTextarea ? 'z-index:29;' : ''}"
+                    class="sticky right-0 bottom-0 z-[29] h-0 w-full overflow-visible pointer-events-none"
             >
-              <div class="mx-auto w-full {composerWidthClass} px-2">
+              <div bind:clientHeight={composerOverlayHeight} class="pointer-events-auto mx-auto w-full max-w-3xl px-2 pb-4 -translate-y-full">
                 <!-- "plugin-compat-items-stretch" is a compat hook (not a Tailwind class):
                      plugins that locate the composer via div[class*="items-stretch"] (e.g. gemini-cache-keeper)
                      relied on the pre-redesign container class. Keep it so they can still find/anchor their UI,
                      and it scopes the timer re-flow rules in <style> below. -->
-                <div class="flex flex-wrap items-center gap-1 rounded-3xl border border-darkborderc bg-bgcolor px-2 py-1.5 transition-colors focus-within:border-textcolor plugin-compat-items-stretch">
+                <div class="rs-composer flex flex-wrap items-center gap-1 rounded-xl border border-darkborderc bg-bgcolor/80 px-2 py-1.5 shadow-lg backdrop-blur-md plugin-compat-items-stretch">
                 {#if DBState.db.characters[$selectedCharID]?.chaId !== '§playground'}
                     <ShDropdownMenu bind:open={openMenu}>
                         <ShDropdownMenuTrigger>
@@ -1008,7 +939,7 @@ import { isMobile } from 'src/ts/platform'
                           class:order-first={multiline}
                           class:overflow-y-auto={inputOverflow}
                           class:overflow-y-hidden={!inputOverflow}
-                          placeholder={willResend ? language.resendLastMessage : language.enterMessageToPersona(activePersonaName)}
+                          placeholder={willResend ? language.resendLastMessage : language.enterMessagePlaceholder}
                           bind:value={messageInput}
                           bind:this={inputEle}
                           onkeydown={(e) => {
@@ -1063,7 +994,6 @@ import { isMobile } from 'src/ts/platform'
                         }
                     }}
                           oninput={()=>{updateInputSizeAll();updateInputTransateMessage(false)}}
-                          onblur={persistDraftNow}
                           style:height={inputHeight}
                 ></textarea>
 
@@ -1087,7 +1017,7 @@ import { isMobile } from 'src/ts/platform'
                     <button
                             onclick={send}
                             aria-label={willResend ? language.reroll : language.send}
-                            class="order-2 shrink-0 flex justify-center items-center w-9 h-9 rounded-full bg-primary text-white hover:bg-primary/80 transition-colors button-icon-send"
+                            class="order-2 shrink-0 flex justify-center items-center w-9 h-9 rounded-lg bg-primary text-white hover:bg-primary/85 active:scale-[0.97] transition-[background-color,transform] duration-150 ease-out button-icon-send"
                     >
                         {#if willResend}
                             <RefreshCcwIcon size={18} />
@@ -1097,8 +1027,6 @@ import { isMobile } from 'src/ts/platform'
                     </button>
                 {/if}
                 </div>
-              </div>
-            </div>
             {#if DBState.db.useAutoTranslateInput && DBState.db.characters[$selectedCharID]?.chaId !== '§playground'}
                 <div class="flex items-center mt-2 mb-2">
                     <label for='messageInputTranslate' class="text-textcolor ml-4">
@@ -1132,7 +1060,7 @@ import { isMobile } from 'src/ts/platform'
                         {#await getInlayAsset(file) then inlayAsset}
                             <div class="relative">
                                 {#if inlayAsset.type === 'image'}
-                                    <img src={inlayAsset.data} alt="Inlay" class="max-w-48 max-h-48 border border-darkborderc">
+                                    <img src={inlayAsset.data} alt="Inlay" loading="lazy" decoding="async" class="max-w-48 max-h-48 border border-darkborderc">
                                 {:else if inlayAsset.type === 'video'}
                                     <video controls class="max-w-48 max-h-48 border border-darkborderc">
                                         <source src={inlayAsset.data} type="video/mp4" />
@@ -1184,40 +1112,9 @@ import { isMobile } from 'src/ts/platform'
                     : msg
                 )} {send}/>
             {/if}
-        {/snippet}
-
-        <div class="h-full w-full flex flex-col-reverse overflow-y-auto relative default-chat-screen"
-            class:nodeonly-standard={DBState.db.theme === ''}
-            class:no-chat-width-wide={DBState.db.theme === '' && DBState.db.nodeOnlyStandardChatWidth === 'wide'}
-            class:no-chat-width-full={DBState.db.theme === '' && DBState.db.nodeOnlyStandardChatWidth === 'full'}
-            onscroll={(e) => {
-            if (DBState.db.nodeOnlyScrollButtonType !== 'off') {
-                bumpScrollNav()
-            }
-            //@ts-expect-error scrollHeight/clientHeight/scrollTop don't exist on EventTarget, but target is HTMLElement here
-            const scrolled = (e.target.scrollHeight - e.target.clientHeight + e.target.scrollTop)
-            if(scrolled < 100 && currentChat.length > loadPages){
-                loadPages += getAdditionalChatLoadPages(DBState.db)
-            }
-            const chatTarget = e.target as HTMLElement;
-            const chatsContainer = (DBState.db.fixedChatTextarea && chatTarget.children[1]) ? chatTarget.children[1] : chatTarget.children[0];
-            const lastEl = chatsContainer?.firstElementChild;
-            const isAtBottom = lastEl ? lastEl.getBoundingClientRect().top <= chatTarget.getBoundingClientRect().bottom + 100 : true;
-            if(isAtBottom){
-                showNewMessageButton = false;
-            }
-        }}>
-            {@render composerCluster()}
-
-            {#if chatPanelStore.length > 0}
-                <div class="mx-4 my-2 flex flex-col gap-2">
-                    {#each chatPanelStore as panel (panel.id)}
-                        <section class={`rounded-md border border-darkborderc bg-darkbg/80 p-3 text-textcolor ${panel.className ?? ''}`} data-plugin-chat-panel={panel.id}>
-                            {@html panel.html}
-                        </section>
-                    {/each}
-                </div>
-            {/if}
+              </div>
+            </div>
+            <div class="w-full shrink-0 pointer-events-none" style:height={`calc(${composerOverlayHeight}px + 0.75rem)`}></div>
 
             {#if !currentChatReady}
                 <div class="w-full flex justify-center text-textcolor2 italic mb-12">
@@ -1331,8 +1228,7 @@ import { isMobile } from 'src/ts/platform'
             <textarea
                     bind:value={messageInput}
                     bind:this={fullscreenEle}
-                    onblur={persistDraftNow}
-                    placeholder={language.enterMessageToPersona(activePersonaName)}
+                    placeholder={language.enterMessagePlaceholder}
                     class="flex-1 min-h-0 w-full resize-none rounded-md border border-darkborderc bg-transparent p-3 text-textcolor text-base outline-hidden overflow-y-auto focus:border-textcolor transition-colors"
             ></textarea>
             <div class="flex justify-end mt-3">
@@ -1346,6 +1242,14 @@ import { isMobile } from 'src/ts/platform'
     </div>
 {/if}
 <style>
+    .rs-composer {
+        transition: border-color var(--dur-base) var(--ease-out),
+                    box-shadow var(--dur-base) var(--ease-out);
+    }
+    .rs-composer:focus-within {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 18%, transparent);
+    }
 
     .chat-process-stage-1{
         border-top: 0.4rem solid #60a5fa;

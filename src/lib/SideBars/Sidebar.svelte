@@ -98,6 +98,7 @@
   let { openGrid = () => {}, hidden = false }: Props = $props();
 
   sideBarClosing.set(false)
+  let sidebarAnimating = $state(false)
 
   $effect(() => {
     let newCharImages: sortType[] = [];
@@ -503,20 +504,17 @@
 </script>
 {#if DBState.db.menuSideBar}
 <div
-  class="h-full w-20 min-w-20 flex-col items-center bg-bgcolor text-textcolor shadow-lg relative rs-sidebar"
+  class="h-full w-20 min-w-20 flex-col items-center bg-bgcolor text-textcolor relative rs-sidebar rs-sidebar-rail"
   class:editMode
   class:risu-sub-sidebar={$sideBarClosing}
   class:risu-sub-sidebar-close={$sideBarClosing}
+  class:sidebar-animating={sidebarAnimating}
   class:hidden={hidden}
   class:flex={!hidden}
 >
 <button
-  class="flex items-center justify-center py-2 flex-col gap-1 w-full mt-4"
-  class:text-textcolor2={!(
-    $selectedCharID < 0 &&
-    $PlaygroundStore === 0 &&
-    !$settingsOpen
-  )}
+  class="rs-nav-btn mt-4"
+  class:active={$selectedCharID < 0 && $PlaygroundStore === 0 && !$settingsOpen}
   onclick={() => {
     reseter();
     selectedCharID.set(-1)
@@ -524,12 +522,12 @@
     OpenRealmStore.set(false)
   }}
 >
-  <HomeIcon />
-  <span class="text-xs">{language.home}</span>
+  <HomeIcon size={20} strokeWidth={1.5} />
+  <span class="text-[11px] tracking-tight">{language.home}</span>
 </button>
 <button
-  class="flex items-center justify-center py-2 flex-col gap-1 w-full"
-  class:text-textcolor2={!$settingsOpen}
+  class="rs-nav-btn"
+  class:active={$settingsOpen}
   onclick={() => {
     if ($settingsOpen) {
       reseter();
@@ -540,69 +538,65 @@
     }
   }}
 >
-  <Settings />
-  <span class="text-xs">{language.settings}</span>
+  <Settings size={20} strokeWidth={1.5} />
+  <span class="text-[11px] tracking-tight">{language.settings}</span>
 </button>
 <button
-  class="flex items-center justify-center py-2 flex-col gap-1 w-full"
-  class:text-textcolor2={!(
-    $selectedCharID >= 0
-  )}
+  class="rs-nav-btn"
+  class:active={$selectedCharID >= 0}
   onclick={() => {
     reseter();
     openGrid();
 
   }}
 >
-  <User2Icon />
-  <span class="text-xs">{language.character}</span>
+  <User2Icon size={20} strokeWidth={1.5} />
+  <span class="text-[11px] tracking-tight">{language.character}</span>
 </button>
 <button
-  class="flex items-center justify-center py-2 flex-col gap-1 w-full"
-  class:text-textcolor2={!(
-    $selectedCharID < 0 &&
-    $PlaygroundStore !== 0
-  )}
+  class="rs-nav-btn"
+  class:active={$selectedCharID < 0 && $PlaygroundStore !== 0}
   onclick={() => {
     reseter();
     selectedCharID.set(-1)
     PlaygroundStore.set(1)
   }}
 >
-  <ShellIcon />
-  <span class="text-xs">{language.playground.playground}</span>
+  <ShellIcon size={20} strokeWidth={1.5} />
+  <span class="text-[11px] tracking-tight">{language.playground.playground}</span>
 </button>
 </div>
 {:else}
 <div
-  class="h-full w-20 min-w-20 flex-col items-center bg-bgcolor text-textcolor shadow-lg relative rs-sidebar"
+  class="h-full w-20 min-w-20 flex-col items-center bg-bgcolor text-textcolor relative rs-sidebar rs-sidebar-rail"
   class:max-xs:hidden={$leftBarCollapsed}
   class:editMode
   class:risu-sub-sidebar={$sideBarClosing}
   class:risu-sub-sidebar-close={$sideBarClosing}
+  class:sidebar-animating={sidebarAnimating}
   class:hidden={hidden}
   class:flex={!hidden}
 >
   {#if !DBState.db.hamburgerButtonBottom}
   <button
-    class="flex h-8 min-h-8 w-14 min-w-14 cursor-pointer text-white mt-2 items-center justify-center rounded-md bg-textcolor2 transition-colors hover:bg-primary"
+    class="rs-toggle-btn flex mt-2"
     class:max-xs:hidden={$leftBarCollapsed}
     onclick={() => {
       menuMode = 1 - menuMode;
-    }}><ListIcon />
+    }}><ListIcon size={18} strokeWidth={1.75} />
   </button>
   {#if !DBState.db.hideLeftBarCollapseButton}
   <button
-    class="hidden max-xs:flex h-8 min-h-8 w-14 min-w-14 cursor-pointer mt-2 items-center justify-center rounded-md border border-borderc text-textcolor transition-colors hover:border-primary hover:text-primary"
+    class="rs-toggle-btn rs-collapse-btn mt-2 hidden max-xs:flex"
     aria-label="Collapse sidebar"
     onclick={() => leftBarCollapsed.set(true)}
   >
-    <ChevronsLeft size={20} />
+    <ChevronsLeft size={18} strokeWidth={1.75} />
   </button>
   {/if}
-  <div class="mt-2 border-b border-b-selected w-full relative text-white" class:max-xs:hidden={$leftBarCollapsed}>
+  <div class="mt-2 border-b border-darkborderc w-full relative text-white" class:max-xs:hidden={$leftBarCollapsed}>
     {#if menuMode === 1}
-      <div class="absolute w-20 min-w-20 flex border-b-selected border-b bg-bgcolor flex-col items-center pt-2 rounded-b-md z-20 pb-2 max-h-[calc(100dvh-4rem)] overflow-x-hidden overflow-y-auto hamburger-menu">
+      <div class="absolute w-20 min-w-20 flex border-darkborderc border-b bg-bgcolor flex-col items-center pt-2 rounded-b-md z-20 pb-2 max-h-[calc(100dvh-4rem)] overflow-x-hidden overflow-y-auto hamburger-menu rs-menu-pop">
         <BarIcon
         onClick={() => {
           if ($settingsOpen) {
@@ -642,7 +636,7 @@
         }}><LayoutGridIcon /></BarIcon
       >
       {#if additionalHamburgerMenu.length > 0}
-        <div class="mt-2 h-px w-10 bg-selected shrink-0"></div>
+        <div class="mt-2 h-px w-10 bg-borderc shrink-0"></div>
         {#each additionalHamburgerMenu as menu}
           <div class="mt-2"></div>
           <BarIcon
@@ -925,9 +919,9 @@
     </div>
   </div>
   {#if DBState.db.hamburgerButtonBottom}
-  <div class="border-t border-t-selected w-full relative text-white" class:max-xs:hidden={$leftBarCollapsed}>
+  <div class="border-t border-darkborderc w-full relative text-white" class:max-xs:hidden={$leftBarCollapsed}>
     {#if menuMode === 1}
-      <div class="absolute bottom-full w-20 min-w-20 flex border-t-selected border-t bg-bgcolor flex-col items-center pt-2 rounded-t-md z-20 pb-2 max-h-[calc(100dvh-4rem)] overflow-x-hidden overflow-y-auto hamburger-menu">
+      <div class="absolute bottom-full w-20 min-w-20 flex border-darkborderc border-t bg-bgcolor flex-col items-center pt-2 rounded-t-md z-20 pb-2 max-h-[calc(100dvh-4rem)] overflow-x-hidden overflow-y-auto hamburger-menu rs-menu-pop">
         <BarIcon
         onClick={() => {
           if ($settingsOpen) {
@@ -967,7 +961,7 @@
         }}><LayoutGridIcon /></BarIcon
       >
       {#if additionalHamburgerMenu.length > 0}
-        <div class="mt-2 h-px w-10 bg-selected shrink-0"></div>
+        <div class="mt-2 h-px w-10 bg-borderc shrink-0"></div>
         {#each additionalHamburgerMenu as menu}
           <div class="mt-2"></div>
           <BarIcon
@@ -985,25 +979,25 @@
   </div>
   {#if !DBState.db.hideLeftBarCollapseButton}
   <button
-    class="hidden max-xs:flex h-8 min-h-8 w-14 min-w-14 cursor-pointer mt-2 items-center justify-center rounded-md border border-borderc text-textcolor transition-colors hover:border-primary hover:text-primary"
+    class="rs-toggle-btn rs-collapse-btn mt-2 hidden max-xs:flex"
     aria-label="Collapse sidebar"
     onclick={() => leftBarCollapsed.set(true)}
   >
-    <ChevronsLeft size={20} />
+    <ChevronsLeft size={18} strokeWidth={1.75} />
   </button>
   {/if}
   <button
-    class="flex h-8 min-h-8 w-14 min-w-14 cursor-pointer text-white mb-2 mt-2 items-center justify-center rounded-md bg-textcolor2 transition-colors hover:bg-primary"
+    class="rs-toggle-btn flex mb-2 mt-2"
     class:max-xs:hidden={$leftBarCollapsed}
     onclick={() => {
       menuMode = 1 - menuMode;
-    }}><ListIcon />
+    }}><ListIcon size={18} strokeWidth={1.75} />
   </button>
   {/if}
 </div>
 {/if}
 <div
-  class="setting-area h-full max-xs:relative flex-col overflow-y-auto overflow-x-hidden bg-darkbg py-6 text-textcolor max-h-full"
+  class="setting-area h-full max-xs:relative flex-col overflow-y-auto overflow-x-hidden bg-darkbg py-6 text-textcolor max-h-full border-l border-darkborderc"
   class:risu-sidebar={!$sideBarClosing}
   class:w-96={$sideBarSize === 0}
   class:w-110={$sideBarSize === 1}
@@ -1019,7 +1013,10 @@
   class:dynamic-sidebar={$DynamicGUI}
   class:hidden={hidden}
   class:flex={!hidden}
+  class:sidebar-animating={sidebarAnimating}
+  onanimationstart={() => { sidebarAnimating = true }}
   onanimationend={() => {
+    sidebarAnimating = false
     if($sideBarClosing){
       $sideBarClosing = false
       sideBarStore.set(false)
@@ -1055,6 +1052,61 @@
           checked={!!DBState.db.nodeOnlyHideRecentChats}
           onCheckedChange={(v) => (DBState.db.nodeOnlyHideRecentChats = v)}
         />
+      </div>
+      <span class="block text-sm text-textcolor2 mt-2">{language.selectBotHint}</span>
+      <div class="flex flex-col gap-1.5 mt-2">
+        <button
+          type="button"
+          class="group flex items-center gap-2.5 rounded-md border border-darkborderc bg-transparent p-2.5 text-left transition-colors duration-150 ease-out hover:border-borderc hover:bg-selected/40"
+          onclick={() => openURL("https://github.com/PocketRisu/PocketRisu")}
+        >
+          <div class="shrink-0 flex items-center justify-center w-8 h-8 rounded-md bg-selected/30 text-textcolor2 group-hover:text-textcolor transition-colors duration-150 ease-out">
+            <GithubIcon size={18} />
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="text-sm font-semibold text-textcolor leading-tight truncate">{language.relatedGithub}</div>
+            <div class="text-xs text-textcolor2 leading-tight truncate">{language.relatedGithubDesc}</div>
+          </div>
+        </button>
+        <button
+          type="button"
+          class="group flex items-center gap-2.5 rounded-md border border-darkborderc bg-transparent p-2.5 text-left transition-colors duration-150 ease-out hover:border-borderc hover:bg-selected/40"
+          onclick={() => openURL("https://forms.gle/5ms5XntMrfaxmHTSA")}
+        >
+          <div class="shrink-0 flex items-center justify-center w-8 h-8 rounded-md bg-selected/30 text-textcolor2 group-hover:text-textcolor transition-colors duration-150 ease-out">
+            <SendIcon size={16} strokeWidth={1.5} />
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="text-sm font-semibold text-textcolor leading-tight truncate">{language.relatedFeedbackForm}</div>
+            <div class="text-xs text-textcolor2 leading-tight truncate">{language.relatedFeedbackFormDesc}</div>
+          </div>
+        </button>
+        <button
+          type="button"
+          class="group flex items-center gap-2.5 rounded-md border border-darkborderc bg-transparent p-2.5 text-left transition-colors duration-150 ease-out hover:border-borderc hover:bg-selected/40"
+          onclick={() => openURL("mailto:contact@pocketrisu.com")}
+        >
+          <div class="shrink-0 flex items-center justify-center w-8 h-8 rounded-md bg-selected/30 text-textcolor2 group-hover:text-textcolor transition-colors duration-150 ease-out">
+            <MailIcon size={16} strokeWidth={1.5} />
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="text-sm font-semibold text-textcolor leading-tight truncate">{language.relatedContactEmail}</div>
+            <div class="text-xs text-textcolor2 leading-tight truncate">{language.relatedContactEmailDesc}</div>
+          </div>
+        </button>
+        <button
+          type="button"
+          class="group flex items-center gap-2.5 rounded-md border border-darkborderc bg-transparent p-2.5 text-left transition-colors duration-150 ease-out hover:border-borderc hover:bg-selected/40"
+          onclick={() => openURL("https://arca.live/b/characterai")}
+        >
+          <div class="shrink-0 flex items-center justify-center w-8 h-8 rounded-md bg-selected/30 text-textcolor2 group-hover:text-textcolor transition-colors duration-150 ease-out">
+            <UsersIcon size={16} strokeWidth={1.5} />
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="text-sm font-semibold text-textcolor leading-tight truncate">{language.relatedArcaLive}</div>
+            <div class="text-xs text-textcolor2 leading-tight truncate">{language.relatedArcaLiveDesc}</div>
+          </div>
+        </button>
       </div>
       {#if DBState.db.nodeOnlyHideRecentChats}
         <!-- list hidden by user preference -->
@@ -1097,20 +1149,20 @@
     {:else if DBState.db.characters[$selectedCharID]?.chaId === '§playground'}
       <SideChatList bind:chara={ DBState.db.characters[$selectedCharID]} />
     {:else}
-      <div class="w-full h-8 min-h-8 border-l border-b border-r border-selected relative bottom-6 rounded-b-md flex">
+      <div class="w-full border-b border-darkborderc relative bottom-3 flex items-stretch text-sm">
         <button onclick={() => {
           devTool = false
           botMakerMode.set(false)
-        }} class="grow border-r border-r-selected rounded-bl-md" class:text-textcolor2={$botMakerMode || devTool}>{language.Chat}</button>
+        }} class="rs-tab" class:active={!($botMakerMode || devTool)}>{language.Chat}</button>
         <button onclick={() => {
           devTool = false
           botMakerMode.set(true)
-        }} class="grow rounded-br-md" class:text-textcolor2={!$botMakerMode || devTool}>{language.character}</button>
+        }} class="rs-tab" class:active={$botMakerMode && !devTool}>{language.character}</button>
         {#if DBState.db.enableDevTools}
           <button onclick={() => {
             devTool = true
-          }} class="border-l border-l-selected rounded-br-md px-1" class:text-textcolor2={!devTool}>
-            <WrenchIcon size={18} />
+          }} class="rs-tab rs-tab-icon" class:active={devTool} aria-label="Dev Tools">
+            <WrenchIcon size={16} />
           </button>
         {/if}
       </div>
@@ -1152,6 +1204,92 @@
 <style>
   .editMode {
     min-width: 6rem;
+  }
+  .sidebar-animating,
+  .sidebar-animating * {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+  }
+  :global(.rs-sidebar-rail) {
+    border-right: 1px solid var(--border-subtle);
+  }
+  :global(.rs-nav-btn) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 10px 6px;
+    width: 100%;
+    color: var(--text-muted);
+    border-left: 2px solid transparent;
+    transition: color var(--dur-fast) var(--ease-out),
+                background-color var(--dur-fast) var(--ease-out),
+                border-color var(--dur-fast) var(--ease-out);
+  }
+  :global(.rs-nav-btn:hover) {
+    color: var(--text-secondary);
+    background-color: var(--bg-hover);
+  }
+  :global(.rs-nav-btn.active) {
+    color: var(--text-primary);
+    border-left-color: var(--accent);
+  }
+  :global(.rs-toggle-btn) {
+    height: 2rem;
+    min-height: 2rem;
+    width: 2.5rem;
+    min-width: 2.5rem;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    background-color: transparent;
+    border: 1px solid var(--border-subtle);
+    transition: color var(--dur-fast) var(--ease-out),
+                background-color var(--dur-fast) var(--ease-out),
+                border-color var(--dur-fast) var(--ease-out);
+  }
+  :global(.rs-toggle-btn:hover) {
+    color: var(--text-primary);
+    background-color: var(--bg-hover);
+    border-color: var(--border-strong);
+  }
+  :global(.rs-collapse-btn) {
+    /* same as toggle, kept for selectors that target collapse specifically */
+  }
+  :global(.rs-tab) {
+    flex: 1 1 0;
+    padding: 8px 4px;
+    color: var(--text-muted);
+    font-weight: 500;
+    border-bottom: 1px solid transparent;
+    margin-bottom: -1px;
+    transition: color var(--dur-fast) var(--ease-out),
+                border-color var(--dur-fast) var(--ease-out);
+  }
+  :global(.rs-tab:hover) {
+    color: var(--text-secondary);
+  }
+  :global(.rs-tab.active) {
+    color: var(--text-primary);
+    border-bottom-color: var(--accent);
+  }
+  :global(.rs-tab-icon) {
+    flex: 0 0 auto;
+    padding: 8px 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  :global(.rs-menu-pop) {
+    animation: rs-menu-pop-in var(--dur-base) var(--ease-out);
+    transform-origin: top center;
+  }
+  @keyframes rs-menu-pop-in {
+    from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
   }
   @keyframes sidebar-transition {
     from {

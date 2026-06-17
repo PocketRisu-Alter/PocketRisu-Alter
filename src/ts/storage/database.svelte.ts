@@ -560,6 +560,15 @@ export function setDatabase(data:Database){
     data.falModel ??= 'fal-ai/flux/dev'
     data.falLoraScale ??= 1
     data.customCSS ??= ''
+    data.chatBubble ??= {
+        mode: 'none',
+        userBg: '',
+        userBorder: '',
+        charBg: '',
+        charBorder: '',
+        emColor: '',
+        streamingColor: '',
+    }
     data.strictJsonSchema ??= true
     data.statics ??= {
         messages: 0,
@@ -724,6 +733,10 @@ export function setDatabase(data:Database){
     if (typeof data.localNetworkMode !== 'boolean') data.localNetworkMode = false
     data.localNetworkTimeoutSec ??= 600
     if (typeof data.localNetworkTimeoutSec !== 'number' || Number.isNaN(data.localNetworkTimeoutSec)) data.localNetworkTimeoutSec = 600
+    data.useBackendChatJobs ??= false
+    if (typeof data.useBackendChatJobs !== 'boolean') data.useBackendChatJobs = false
+    data.useBackendMultiagent ??= false
+    if (typeof data.useBackendMultiagent !== 'boolean') data.useBackendMultiagent = false
     data.pluginCustomStorage ??= {}
     data.longPressToPopupEditor ??= false
     data.showInputActionBar ??= true
@@ -1056,6 +1069,15 @@ export interface Database{
         FontColorQuote1 : string,
         FontColorQuote2 : string
     }
+    chatBubble?: {
+        mode: 'none'|'bubble'|'glass',
+        userBg: string,
+        userBorder: string,
+        charBg: string,
+        charBorder: string,
+        emColor: string,
+        streamingColor: string,
+    }
     requestRetrys:number
     emotionPrompt2:string
     useSayNothing:boolean
@@ -1121,6 +1143,8 @@ export interface Database{
     useChatSticker:boolean,
     useAdditionalAssetsPreview:boolean,
     usePlainFetch:boolean
+    useBackendChatJobs:boolean
+    useBackendMultiagent:boolean
     localNetworkMode:boolean
     localNetworkTimeoutSec:number
     memoryAlgorithmType:string // To enable new memory module/algorithms

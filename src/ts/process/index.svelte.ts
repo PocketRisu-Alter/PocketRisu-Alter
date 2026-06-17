@@ -9,6 +9,7 @@ import { parseChatML } from "../parser/chatML";
 import { loadLoreBookV3Prompt } from "./lorebook.svelte";
 import { findCharacterbyId, getAuthorNoteDefaultText, getPersonaPrompt, getUserName, isLastCharPunctuation, trimUntilPunctuation, parseToggleSyntax, prebuiltAssetCommand } from "../util";
 import { requestChatData } from "./request/request";
+import { requestChatDataBackend } from "./request/backendJob";
 import { stableDiff } from "./stableDiff";
 import { processScript, processScriptFull, risuChatParser } from "./scripts";
 import { exampleMessage } from "./exampleMessages";
@@ -55,6 +56,7 @@ export interface requestTokenPart{
 export const doingChat = writable(false)
 export const chatProcessStage = writable(0)
 export const abortChat = writable(false)
+export const recoveryAbortController = writable<AbortController | null>(null)
 export let requestTokenParts:{[key:string]:requestTokenPart[]} = {}
 export let previewFormated:OpenAIChat[] = []
 export let previewBody:string = ''
@@ -1391,7 +1393,8 @@ export async function sendChat(chatProcessIndex = -1,arg:{
         return true
     }
 
-    const req = await requestChatData({
+    const requestFn = DBState.db.useBackendChatJobs ? requestChatDataBackend : requestChatData
+    const req = await requestFn({
         formated: formated,
         biasString: biases,
         currentChar: currentChar,

@@ -10,8 +10,7 @@
     import { DBState, ReloadChatPointer, CurrentTriggerIdStore, popupStore } from 'src/ts/stores.svelte'
 
     import { capitalize, getUserIcon, getUserName, sleep } from "src/ts/util"
-    import { onDestroy, onMount } from "svelte"
-    import { type Unsubscriber } from "svelte/store"
+
     import { v4 as uuidv4, v4 } from 'uuid'
     import { language } from "../../lang"
     import { alertClear, alertConfirm, alertConfirmMulti, alertInput, alertRequestData, alertWait, notifyInfo, notifySuccess, type AlertAction } from "../../ts/alert"
@@ -80,9 +79,22 @@
         disabled = false,
     }: Props = $props();
 
-    let msgDisplay = $state('')
     let translated = $state(false)
     let partialEditEnabled = $state(true)
+
+    // Derived display text: risuChatParser is expensive on long messages, so let
+    // Svelte memoize it across unchanged dependencies. Include ReloadGUIPointer so
+    // external "refresh GUI" signals still re-render.
+    let msgDisplay = $derived.by(() => {
+        void $ReloadGUIPointer;
+        return risuChatParser(message, {
+            chara: name,
+            chatID: idx,
+            rmVar: true,
+            visualize: true,
+            cbsConditions: getCbsCondition()
+        })
+    })
 
     async function rm(){
         const messages = DBState.db.characters[selIdState.selId].chats[DBState.db.characters[selIdState.selId].chatPage].message
@@ -127,7 +139,8 @@
             if (msg.swipes && msg.swipeId !== undefined) {
                 msg.swipes[msg.swipeId] = e.detail.newData
             }
-            displaya(e.detail.newData)
+            // msgDisplay is now derived from `message`, so the assignment above
+            // already triggers a re-parse automatically.
         }
     }
 
@@ -170,10 +183,6 @@
         editTranslationMode = false
     }
 
-    function displaya(message:string){
-        msgDisplay = risuChatParser(message, {chara: name, chatID: idx, rmVar: true, visualize: true, cbsConditions: getCbsCondition()})
-    }
-
     const setStatusMessage = (message:string, timeout:number = 0)=>{
         statusMessage = message
         if(timeout === 0) return
@@ -184,22 +193,6 @@
 
 
     let blankMessage = $derived((message === '{{none}}' || message === '{{blank}}' || message === '') && idx === -1 && !altGreeting || isComment)
-
-    $effect.pre(() => {
-        displaya(message)
-    });
-
-    const unsubscribers:Unsubscriber[] = []
-
-    onMount(()=>{
-        unsubscribers.push(ReloadGUIPointer.subscribe((v) => {
-            displaya(message)
-        }))
-    })
-
-    onDestroy(()=>{
-        unsubscribers.forEach(u => u())
-    })
 
     function RenderGUIHtml(html:string){
         try {
@@ -316,10 +309,9 @@
 {#snippet genInfo()}
     <div class="flex flex-col items-end">
         {#if messageGenerationInfo && (DBState.db.requestInfoInsideChat || aiLawApplies())}
-            <button class="text-sm p-1 text-textcolor2 border-darkborderc float-end mr-2 my-1
-                    hover:ring-darkbutton hover:ring-3 rounded-md hover:text-textcolor transition-all flex justify-center items-center" 
+            <button class="rs-meta-chip text-xs px-2 py-1 text-textcolor2 border border-darkborderc float-end mr-2 my-1 rounded-md hover:text-textcolor hover:border-borderc hover:bg-selected/30 transition-colors duration-150 ease-out flex justify-center items-center"
                     onclick={() => {
-                        const currentGenerationInfo = idx >= 0 ? 
+                        const currentGenerationInfo = idx >= 0 ?
                             DBState.db.characters[$selectedCharID].chats[DBState.db.characters[$selectedCharID].chatPage].message[idx].generationInfo :
                             messageGenerationInfo
 
@@ -329,25 +321,24 @@
                         })
                     }}
             >
-                <BotIcon size={20} />
+                <BotIcon size={14} />
                 <span class="ml-1 max-w-[288px] truncate">
                     {capitalize(getModelInfo(messageGenerationInfo.model).shortName.replace(/^pluginmodel:::/, ''))}
                 </span>
             </button>
         {/if}
         {#if DBState.db.translatorType === 'llm' && translated}
-            <button class="text-sm p-1 text-textcolor2 border-darkborderc float-end mr-2 my-1
-                            hover:ring-darkbutton hover:ring-3 rounded-md hover:text-textcolor transition-all flex justify-center items-center"
+            <button class="rs-meta-chip text-xs px-2 py-1 text-textcolor2 border border-darkborderc float-end mr-2 my-1 rounded-md hover:text-textcolor hover:border-borderc hover:bg-selected/30 transition-colors duration-150 ease-out flex justify-center items-center"
                     onclick={() => {
                         retranslate = true
                     }}
             >
-                <RefreshCcwIcon size={20} />
+                <RefreshCcwIcon size={14} />
                 <span class="ml-1">
                     {language.retranslate}
                 </span>
             </button>
-            <button class={"text-sm p-1 border-darkborderc float-end mr-2 my-1 hover:ring-darkbutton hover:ring-3 rounded-md hover:text-textcolor transition-all flex justify-center items-center " + (editTranslationMode ? 'text-blue-400' : 'text-textcolor2')}
+            <button class={"rs-meta-chip text-xs px-2 py-1 border border-darkborderc float-end mr-2 my-1 rounded-md hover:text-textcolor hover:border-borderc hover:bg-selected/30 transition-colors duration-150 ease-out flex justify-center items-center " + (editTranslationMode ? 'text-blue-400' : 'text-textcolor2')}
                     onclick={() => {
                         if(editTranslationMode){
                             saveTranslationEdit()
@@ -357,7 +348,7 @@
                         }
                     }}
             >
-                <PencilIcon size={20} />
+                <PencilIcon size={14} />
                 <span class="ml-1">
                     {editTranslationMode ? language.editTranslationSave : language.editTranslation}
                 </span>
@@ -546,7 +537,7 @@
                 
                 const imgs = doc.querySelectorAll('img')
                 for(const img of imgs){
-                    img.setAttribute('alt', 'from PocketRisu')
+                    img.setAttribute('alt', 'from PocketRisu-Alter')
                     const url = img.getAttribute('src')
                     
                     img.setAttribute('style', `
@@ -703,7 +694,7 @@
     ${doc.body.innerHTML}
 </div>
 <div style="text-align: center; margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid ${root.style.getPropertyValue('--risu-theme-darkborderc')};">
-    <span style="font-size: 0.75rem; color: ${root.style.getPropertyValue('--risu-theme-textcolor2')}; opacity: 0.7;">From PocketRisu</span>
+    <span style="font-size: 0.75rem; color: ${root.style.getPropertyValue('--risu-theme-textcolor2')}; opacity: 0.7;">From PocketRisu-Alter</span>
 </div>
 </div>
 </div>`
@@ -949,7 +940,7 @@
 
 {#snippet renderGuiHtmlPart(dom:HTMLElement)}
     {#if dom.tagName === 'IMG'}
-        <img class={dom.getAttribute('class') ?? ''} alt="" style={dom.getAttribute('style') ?? ''} />
+        <img class={dom.getAttribute('class') ?? ''} alt="" loading="lazy" decoding="async" src={dom.getAttribute('src') ?? ''} style={dom.getAttribute('style') ?? ''} />
     {:else if dom.tagName === 'A'}
         <a target="_blank" rel="noreferrer" href={
             (dom.getAttribute('href') && dom.getAttribute('href').startsWith('https')) ? dom.getAttribute('href') : ''
@@ -1148,85 +1139,8 @@
      style={isLastMemory ? `border-top:${DBState.db.memoryLimitThickness}px solid rgba(98, 114, 164, 0.7);` : ''}
      onclickcapture={handleButtonTriggerWithin}>
     <div class="text-textcolor mt-1 ml-4 mr-4 mb-1 p-2 bg-transparent grow border-t-gray-900 border-opacity/30 border-transparent flexium items-start max-w-full" >
-        {#if DBState.db.theme === 'mobilechat' && !blankMessage}
-            <div class={role === 'user' ? "flex items-start w-full justify-end" : "flex items-start"}>
-                {#if role !== 'user'}
-                    {@render senderIcon({rounded: true})}
-                {/if}
-                <div
-                    class="bg-gray-100 rounded-lg p-3 max-w-[70%] mx-2"
-                    class:rounded-tl-none={role !== 'user'}
-                    class:rounded-tr-none={role === 'user'}
-                >
-                    <p class="text-gray-800">{@render textBox()}</p>
-                    {#if DBState.db.characters?.[selIdState.selId]?.chats?.[DBState.db.characters?.[selIdState.selId]?.chatPage]?.message?.[idx]?.time}
-                        <span class="text-xs text-textcolor2 mt-1 block">
-                            {new Intl.DateTimeFormat(undefined, {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                                second: '2-digit',
-                                month: '2-digit',
-                                day: '2-digit',
-                                hour12: false
-                            }).format(DBState.db.characters[selIdState.selId].chats[DBState.db.characters[selIdState.selId].chatPage].message[idx].time)}
-                        </span>
-                    {/if}
-                </div>
-                {#if role === 'user'}
-                    {@render senderIcon({rounded: true})}
-                {/if}
-            </div>
-        {:else if DBState.db.theme === 'cardboard' && !blankMessage}
-            <div class="w-full flex flex-col px-0 sm:px-4 py-4 relative">
-                <div class="bg-linear-to-b from-gray-100 to-gray-200 rounded-lg shadow-lg border-gray-400 border p-4 flex flex-col">
-                    <div class="flex gap-4 mt-2 flex-col sm:flex-row">
-                        <div class="flex flex-col items-center">
-                            <div class="sm:h-96 sm:w-72 sm:min-w-72 w-48 h-64">
-                                {@render senderIcon({rounded: false, styleFix:'height:100%;width:100%;'})}
-                            </div>
-                            <h2 class="text-base font-bold text-gray-500 text-center mt-2 max-w-full text-ellipsis">{name}</h2>
-
-                        </div>
-                        {#if editMode}
-                            <textarea class="grow h-138 sm:h-96 overflow-y-auto bg-transparent text-black p-2 mb-2 resize-none message-edit-area" bind:value={message}></textarea>
-                        {:else}
-                            <div class="grow h-138 sm:h-96 overflow-y-auto p-2 mb-2 sm:mb-0">
-                                {@render textBox()}
-                            </div>
-                        {/if}
-                    </div>
-                </div>
-                <div class="absolute bottom-0 right-0 bg-linear-to-b from-gray-200 to-gray-300 p-2 rounded-md border border-gray-400 text-gray-400">
-                    {@render iconButtons({applyTextColors: false})}
-                </div>
-            </div>
-        {:else if DBState.db.theme === 'customHTML' && !blankMessage}
+        {#if DBState.db.theme === 'customHTML' && !blankMessage}
             {@render renderGuiHtmlPart(RenderGUIHtml(DBState.db.guiHTML))}
-        {:else if DBState.db.theme === 'standardRisu' && !blankMessage}
-            {@render senderIcon({rounded: DBState.db.roundIcons})}
-            <span class="flex flex-col ml-4 w-full max-w-full min-w-0 text-black">
-                <div class="flexium items-center chat-width">
-                    {#if DBState.db.characters[selIdState.selId]?.chaId === "§playground" && !blankMessage && DBState.db.characters[selIdState.selId]?.chats?.[DBState.db.characters[selIdState.selId]?.chatPage]?.message?.[idx]}
-                        <span class="chat-width text-xl border-darkborderc flex items-center text-textcolor">
-                            <span>{DBState.db.characters[selIdState.selId].chats[DBState.db.characters[selIdState.selId].chatPage].message[idx].role === 'char' ? 'Assistant' : 'User'}</span>
-                            <button class="ml-2 text-textcolor2 hover:text-textcolor" onclick={() => {
-                                DBState.db.characters[selIdState.selId].chats[DBState.db.characters[selIdState.selId].chatPage].message[idx].role = DBState.db.characters[selIdState.selId].chats[DBState.db.characters[selIdState.selId].chatPage].message[idx].role === 'char' ? 'user' : 'char'
-                                ReloadChatPointer.update((v) => {
-                                    v[idx] = (v[idx] ?? 0) + 1
-                                    return v
-                                })
-                            }}><ArrowLeftRightIcon size="18" /></button>
-                        </span>
-                    {:else if !blankMessage && !$HideIconStore}
-                        <div class="chat-width text-xl unmargin text-textcolor flex items-center">
-                            <span>{name}</span>
-                        </div>
-                    {/if}
-                    {@render iconButtons()}
-                </div>
-                {@render genInfo()}
-                {@render textBox()}
-            </span>
         {:else}
             {@render senderIcon({rounded: DBState.db.roundIcons})}
             <span class="flex flex-col ml-4 w-full max-w-full min-w-0 text-black">

@@ -1,5 +1,5 @@
 /**
- * PocketRisu NodeOnly — Korean help texts (`language.help`).
+ * PocketRisu-Alter NodeOnly — Korean help texts (`language.help`).
  *
  * Extracted from `src/lang/ko.ts` for maintainability. Entries override the
  * English defaults in `help.en.ts` via `lodash/merge` (see `src/lang/index.ts`).
@@ -72,6 +72,8 @@ export const helpKo = {
         "localNetworkModeDesc": "사설망/LAN 모델 URL을 브라우저 직접 요청 대신 로컬 서버를 통해 라우팅합니다.\n\n**목적**\n- 브라우저 사설망/CORS 제한 우회\n- 로컬 모델의 느린 첫 토큰 응답에 대한 타임아웃 위험 완화\n\n**동작 방식**\n- 스트리밍: Job+WebSocket 릴레이 우선 (실패 시 /proxy2 폴백)\n- 비스트리밍: /proxy2 릴레이\n\n**제약사항**\n- OpenAI 호환 요청 경로에만 적용",
         "keepSessionAlive": "브라우저에서 비활동 시 탭이 만료되지 않도록 세션을 유지합니다. 적용에 새로고침이 필요할 수 있습니다.\n\n- **Via Sound**: 일정 간격으로 무음 오디오를 재생해 세션을 유지합니다. 대부분의 브라우저에서 가장 호환성이 높고 효과적인 방식입니다.",
         "forcePlainFetch": "활성화되면 네이티브 HTTP 요청 대신 브라우저 Fetch API를 사용합니다. 이로 인해 CORS 오류가 발생할 수 있습니다.",
+        "useBackendMultiagent": "활성화되면 서버 채팅 실행 모드에서 MultiAgent RP 파이프라인을 브라우저 대신 서버가 실행합니다. 멀티에이전트 플러그인에 API 키가 설정되어 있어야 합니다. 파이프라인 실패 시 원본 메시지로 진행합니다.",
+        "useBackendChatJobs": "활성화되면 실제 AI 요청을 PocketRisu-Alter 서버가 실행합니다. 화면을 끄거나 브라우저를 닫아도 생성은 계속되며, 다시 실행하면 완성된 메시지를 불러옵니다. 현재 OpenAI 호환 제공자만 지원됩니다.",
         "autoFillRequestURL": "활성화되면 요청 URL을 현재 모델과 일치하도록 자동으로 채웁니다.",
         "chainOfThought": "활성화되면 생각의 사슬 프롬프트를 프롬프트에 추가합니다.",
         "gptVisionQuality": "이 옵션은 이미지 감지 모델의 품질을 설정하는 데 사용됩니다. 품질이 높을수록 감지가 더 정확하지만 토큰이 더 많이 사용됩니다.",
@@ -81,7 +83,7 @@ export const helpKo = {
         "chatLoadAdditionalPages": "위로 스크롤할 때마다 추가로 렌더링할 이전 채팅 메시지 개수입니다. 값이 높을수록 반복 로딩은 줄지만 한 번의 로딩이 무거워질 수 있습니다.",
         "emotionPrompt": "이 옵션은 감정을 감지하는 데 사용되는 프롬프트를 설정하는 데 사용됩니다. 비어 있으면 기본 프롬프트를 사용합니다.",
         "additionalParams": "요청 본문에 추가될 파라미터입니다. 일부 파라미터를 제외하려면 `{{none}}`을 값으로 입력하세요. 본문 대신 헤더에 추가하려면 키 앞에 `header::Authorization`처럼 `header::`를 붙이세요. 값을 JSON으로 보내려면 값 앞에 `json::{\"key\":\"value\"}`처럼 `json::`을 붙이세요. 그렇지 않으면 값의 타입은 자동으로 결정됩니다.",
-        "antiClaudeOverload": "Claude 과부하가 발생하면, PocketRisu는 동일한 프롬프트로 계속 진행하여 과부하 발생 가능성을 줄이려고 시도합니다. 스트리밍 응답에서만 작동합니다. 공식 API 엔드포인트가 아닌 경우 작동하지 않을 수 있습니다.",
+        "antiClaudeOverload": "Claude 과부하가 발생하면, PocketRisu-Alter는 동일한 프롬프트로 계속 진행하여 과부하 발생 가능성을 줄이려고 시도합니다. 스트리밍 응답에서만 작동합니다. 공식 API 엔드포인트가 아닌 경우 작동하지 않을 수 있습니다.",
         "triggerScript": "트리거 스크립트는 조건이 충족될 때 실행되는 커스텀 스크립트입니다. 채팅 데이터를 수정하거나, 명령어를 실행하거나, 변수를 변경하는 등의 작업에 사용할 수 있습니다. 실행 시점은 타입에 따라 다릅니다. {{button::Display::TriggerName}}을 사용하여 버튼으로 실행하거나, `risu-trigger=\"<TriggerName>\"` 속성이 있는 HTML 버튼으로도 실행할 수 있습니다.",
         "autoContinueChat": "활성화되면 문장 부호로 끝나지 않을 경우 채팅을 계속 이어가려고 시도합니다. 문장 부호를 사용하지 않는 언어에서는 사용하지 마세요.",
         "combineTranslation": "활성화된 경우, 한 문장이지만 HTML 태그로 분리된 텍스트를 모두 합쳐서 번역한 후, 번역된 결과에 다시 디스플레이 수정 스크립트를 적용합니다.\n이를 통해 번역기가 올바른 번역을 하도록 도와줍니다.\n이 옵션을 활성화하고 UI가 이상해지면 옵션을 끄고 제보해 주세요.",
@@ -91,7 +93,7 @@ export const helpKo = {
         "useRegexLorebook": "활성화되면 로어북 검색에 문자열 일치 대신 정규식을 사용합니다. /regex/flags 형식을 사용합니다.",
         "customChainOfThought": "경고: 생각의 사슬 토글 사용은 더 이상 권장되지 않습니다. 대신 다른 프롬프트 항목에 생각의 사슬 프롬프트를 입력하세요.",
         "customPromptTemplateToggle": "여기서 고유한 프롬프트 토글을 정의할 수 있습니다. 개행으로 구분하여 `<토글 변수>=<토글 이름>` 형식을 사용하세요. 예: `cot=COT 토글`. 프롬프트에서 `{{getglobalvar::toggle_<토글 변수>}}`를 사용하여 이 토글을 사용할 수 있습니다. 예: `{{getglobalvar::toggle_cot}}`.",
-        "defaultVariables": "여기에서는 기본 변수를 정의할 수 있습니다. `<변수 이름>=<변수 값>` 형식으로 작성하고 개행으로 구분합니다. 예를 들어, `name=PocketRisu`는 트리거 스크립트 및 변수 CBS와 함께 `{{getvar::A}}`, `{{setvar::A::B}}` 또는 `{{? $A + 1}}`과 같이 사용할 수 있습니다. 프롬프트 템플릿의 기본 변수와 캐릭터의 기본 변수가 동일한 이름을 가진 경우 캐릭터의 기본 변수가 사용됩니다.",
+        "defaultVariables": "여기에서는 기본 변수를 정의할 수 있습니다. `<변수 이름>=<변수 값>` 형식으로 작성하고 개행으로 구분합니다. 예를 들어, `name=PocketRisu-Alter`는 트리거 스크립트 및 변수 CBS와 함께 `{{getvar::A}}`, `{{setvar::A::B}}` 또는 `{{? $A + 1}}`과 같이 사용할 수 있습니다. 프롬프트 템플릿의 기본 변수와 캐릭터의 기본 변수가 동일한 이름을 가진 경우 캐릭터의 기본 변수가 사용됩니다.",
         "lowLevelAccess": "활성화되면 높은 컴퓨팅 파워가 필요한 기능과 캐릭터 트리거를 통한 AI 모델 실행에 대한 접근이 허용됩니다. 꼭 필요한 경우가 아니면 활성화하지 마세요.",
         "triggerLLMPrompt": "모델에 전송될 프롬프트입니다. `@@role user`, `@@role system`, `@@role assistant`를 사용하여 멀티 턴과 역할을 사용할 수 있습니다. 예:\n```\n@@role system\nrespond as hello\n@@role assistant\nhello\n@@role user\nhi\n```",
         "legacyTranslation": "활성화되면 번역 후 후처리 대신 번역 전 마크다운과 따옴표를 전처리하는 이전 번역 방식을 사용합니다.",
@@ -107,7 +109,7 @@ export const helpKo = {
         "betaMobileGUI": "활성화되면 작은 화면(800px 미만)에서 베타 모바일 GUI를 사용합니다. 새로고침이 필요합니다.",
         "enableScrollToActiveChar": "활성화되면 단축키를 누르거나 캐릭터를 드래그하는 동안 Ctrl을 누르면 현재 활성 캐릭터로 스크롤합니다. 폴더가 닫혀있으면 자동으로 열립니다.",
         "unrecommended": "비권장 설정입니다. 이 설정을 사용하는 것은 권장되지 않습니다.",
-        "jsonSchema": "AI 모델이 JSON 스키마를 지원하는 경우 AI 모델로 전송될 JSON 스키마입니다.\n\n하지만 JSON 스키마는 배우기 어렵기 때문에, PocketRisu에서는 JSON 스키마 대신 TypeScript 인터페이스의 하위 집합을 사용할 수 있습니다. PocketRisu가 런타임에 이를 변환합니다. 예를 들어 다음과 같은 JSON을 보내고 싶다면:\n\n```js\n{\n  \"name\": \"PocketRisu\", //이름은 PocketRisu여야 함,\n  \"age\": 1, //나이는 숫자여야 함,\n  \"icon\": \"slim\", //아이콘은 'slim' 또는 'rounded'여야 함\n  \"thoughts\": [\"Good View!\", \"Lorem\"] //생각은 문자열 배열이어야 함\n}\n```\n\n다음과 같이 TypeScript 인터페이스를 입력할 수 있습니다:\n\n```typescript\ninterface Schema {\n  name: string;\n  age: number;\n  icon: 'slim'|'rounded'\n  thoughts: string[]\n}\n```\n\n인터페이스의 이름은 중요하지 않습니다. 자세한 내용은 TypeScript 문서를 참조하세요. (https://www.typescriptlang.org/docs/handbook/interfaces.html), 지원되는 TypeScript 하위 집합을 확인하려면 아래를 참조하세요.<details><summary>지원되는 TypeScript 하위 집합</summary>\n\n지원되는 타입은 `boolean`, `number`, `string`, `Array`입니다. 유닛 타입, 교차 타입, 유니온 타입, 옵셔널, 리터럴 타입 등 고급 타이핑은 다음 경우를 제외하고 지원되지 않습니다:\n\n        - 원시 타입의 배열: (예: `string[]`, `Array<boolean>)`\n        - 문자열 간의 유닛 타입: (예: `'slim'|'rounded'`).\n\n        속성은 한 줄에 하나씩 있어야 합니다. 한 줄에 여러 속성이 있으면 오류가 발생합니다. 속성 이름과 인터페이스 이름은 ASCII 범위 내의 라틴 문자만 사용해야 합니다. 속성 이름은 따옴표나 큰따옴표로 감싸지 않아야 합니다. 인터페이스 내부 중첩은 지원되지 않습니다. 속성이 정의된 줄에 `{` 또는 `}`를 넣을 수 없습니다. 더 고급 타입을 사용하려면 대신 JSON 스키마를 사용하세요.\n        </details>",
+        "jsonSchema": "AI 모델이 JSON 스키마를 지원하는 경우 AI 모델로 전송될 JSON 스키마입니다.\n\n하지만 JSON 스키마는 배우기 어렵기 때문에, PocketRisu-Alter에서는 JSON 스키마 대신 TypeScript 인터페이스의 하위 집합을 사용할 수 있습니다. PocketRisu-Alter가 런타임에 이를 변환합니다. 예를 들어 다음과 같은 JSON을 보내고 싶다면:\n\n```js\n{\n  \"name\": \"PocketRisu-Alter\", //이름은 PocketRisu-Alter여야 함,\n  \"age\": 1, //나이는 숫자여야 함,\n  \"icon\": \"slim\", //아이콘은 'slim' 또는 'rounded'여야 함\n  \"thoughts\": [\"Good View!\", \"Lorem\"] //생각은 문자열 배열이어야 함\n}\n```\n\n다음과 같이 TypeScript 인터페이스를 입력할 수 있습니다:\n\n```typescript\ninterface Schema {\n  name: string;\n  age: number;\n  icon: 'slim'|'rounded'\n  thoughts: string[]\n}\n```\n\n인터페이스의 이름은 중요하지 않습니다. 자세한 내용은 TypeScript 문서를 참조하세요. (https://www.typescriptlang.org/docs/handbook/interfaces.html), 지원되는 TypeScript 하위 집합을 확인하려면 아래를 참조하세요.<details><summary>지원되는 TypeScript 하위 집합</summary>\n\n지원되는 타입은 `boolean`, `number`, `string`, `Array`입니다. 유닛 타입, 교차 타입, 유니온 타입, 옵셔널, 리터럴 타입 등 고급 타이핑은 다음 경우를 제외하고 지원되지 않습니다:\n\n        - 원시 타입의 배열: (예: `string[]`, `Array<boolean>)`\n        - 문자열 간의 유닛 타입: (예: `'slim'|'rounded'`).\n\n        속성은 한 줄에 하나씩 있어야 합니다. 한 줄에 여러 속성이 있으면 오류가 발생합니다. 속성 이름과 인터페이스 이름은 ASCII 범위 내의 라틴 문자만 사용해야 합니다. 속성 이름은 따옴표나 큰따옴표로 감싸지 않아야 합니다. 인터페이스 내부 중첩은 지원되지 않습니다. 속성이 정의된 줄에 `{` 또는 `}`를 넣을 수 없습니다. 더 고급 타입을 사용하려면 대신 JSON 스키마를 사용하세요.\n        </details>",
         "strictJsonSchema": "활성화되면 일부 모델에서 제공된 JSON 스키마를 엄격하게 따릅니다. 비활성화되면 JSON 스키마를 무시할 수도 있습니다.",
         "extractJson": "비워두지 않으면 응답에서 특정 JSON 데이터를 추출합니다. 예를 들어 `{\"response\": {\"text\": [\"hello\"]}}` 응답에서 `response.text[0]`을 추출하려면 `response.text.0`을 입력하세요.",
         "translatorNote": "여기에서 캐릭터마다 별도의 번역 프롬프트를 넣을 수 있습니다. 해당 옵션은  Ax. model 번역을 사용할 때만 적용됩니다. 언어 설정에서 `{{slot::tnote}}`를 넣으세요. 그룹챗에서는 작동하지 않습니다.",
@@ -225,7 +227,7 @@ export const helpKo = {
         "theme": "전체 채팅 화면 레이아웃 테마입니다.",
         "waifuWidth": "Waifulike 테마에서 캐릭터 일러스트의 너비입니다.",
         "waifuWidth2": "Waifulike 테마의 두 번째 캐릭터(또는 보조 요소)의 너비입니다.",
-        "nodeOnlyStandardChatWidth": "PocketRisu Standard 테마에서 메시지 카드의 최대 가로폭입니다.",
+        "nodeOnlyStandardChatWidth": "PocketRisu-Alter Standard 테마에서 메시지 카드의 최대 가로폭입니다.",
         "colorScheme": "Risu UI 전체에 적용되는 색상 팔레트입니다.",
         "textColor": "메시지 본문 텍스트 색 테마입니다.",
         "font": "메시지 폰트입니다.",
@@ -311,7 +313,7 @@ export const helpKo = {
         "proxyRequestModel": "프록시에 보낼 모델 이름. 일부 OpenAI 호환 프록시는 자체 모델 이름 규칙을 쓰므로 여기에 그 이름을 정확히 입력합니다 (예: `gpt-4o`, `claude-3-5-sonnet-20241022`).",
         "proxyFormat": "프록시에 보낼 요청 본문 형식.\n\n- **OpenAI Compatible**: 가장 일반적, OpenAI Chat Completions 형식\n- **OpenAI Response API**: 새 Response API (지원 모델 전용)\n- **Anthropic**: Claude API 형식\n- **Mistral**: Mistral 자체 형식\n- **Google Cloud**: Vertex/Gemini\n- **Cohere**: Cohere 자체 형식\n\n프록시가 어느 형식을 받는지에 맞춰 선택. 모르면 OpenAI Compatible로 시작.",
         "cohereKey": "Cohere API 키 (`https://dashboard.cohere.com/api-keys`). Cohere 자체 모델(`command-r` 등) 사용 시 필요.",
-        "ollamaURL": "로컬 또는 원격 Ollama 서버의 URL (예: `http://localhost:11434`). PocketRisu의 \"로컬 네트워크 모드\"와 함께 쓰면 사설망 LLM도 안정적으로 호출됩니다.",
+        "ollamaURL": "로컬 또는 원격 Ollama 서버의 URL (예: `http://localhost:11434`). PocketRisu-Alter의 \"로컬 네트워크 모드\"와 함께 쓰면 사설망 LLM도 안정적으로 호출됩니다.",
         "ollamaModel": "Ollama 서버에서 호출할 모델 이름. `ollama list` 명령으로 설치된 모델 이름을 확인 후 그대로 입력하세요 (예: `llama3:8b`).",
         "nanogptKey": "NanoGPT API 키 (https://nano-gpt.com). Pay-per-message 또는 구독 방식 두 가지가 있으며, 구독 사용 시 아래 토글을 함께 켜세요.",
         "nanoGPTUseSubscriptionEndpoint": "NanoGPT 구독 플랜 사용자가 켭니다. Pay-per-message 엔드포인트 대신 구독 엔드포인트로 요청이 전송되어 별도 충전 차감 없이 사용 가능. 구독 미사용자가 켜면 요청이 거부될 수 있습니다.",
@@ -357,7 +359,7 @@ export const helpKo = {
         "botIcon": "봇 자체에 사용할 기본 아이콘. 캐릭터 카드의 아이콘과 별개로, 어시스턴트 메시지의 기본 표시에 사용됩니다.",
         "botPromptTemplate": "프롬프트 템플릿 선택. 템플릿은 메인/탈옥/노트보다 정교한 프롬프트 구성을 가능하게 합니다. \"프롬프트 템플릿 사용\" 토글이 켜졌을 때만 동작합니다.",
 
-        "memType": "장기 메모리 방식 선택.\n\n- **None**: 사용 안 함 (max context 한도까지 채팅 그대로 사용)\n- **HypaV3**: 오래된 채팅을 자동으로 요약·검색해 컨텍스트에 주입하는 PocketRisu의 장기 메모리. 비용/지연이 약간 늘지만 긴 채팅에서 일관성이 크게 향상됩니다.",
+        "memType": "장기 메모리 방식 선택.\n\n- **None**: 사용 안 함 (max context 한도까지 채팅 그대로 사용)\n- **HypaV3**: 오래된 채팅을 자동으로 요약·검색해 컨텍스트에 주입하는 PocketRisu-Alter의 장기 메모리. 비용/지연이 약간 늘지만 긴 채팅에서 일관성이 크게 향상됩니다.",
         "hypaV3SummaryModel": "채팅을 요약하는 데 사용할 모델.\n\n- **subModel**: 보조 모델 사용 (가장 흔한 선택)\n- **Qwen3 4B/14B**: 무료 로컬 요약 (브라우저 또는 Node 인스턴스에서 직접 실행, 첫 사용 시 다운로드)\n\n메인 모델보다 가벼운 모델로 두면 비용 절감.",
         "hypaV3Preset": "HypaV3 설정 프리셋. 자주 쓰는 설정 묶음을 저장/불러올 수 있고, 프리셋을 바꾸면 위 모든 비율·모델 옵션이 함께 바뀝니다.",
         "embeddingOpenAIKey": "임베딩 모델로 OpenAI를 선택했을 때 사용할 API 키. 메인 모델용 키와 분리해서 관리하고 싶을 때 입력. 비워두면 메인 모델용 OpenAI 키를 사용합니다.",

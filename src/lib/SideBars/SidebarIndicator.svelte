@@ -7,15 +7,28 @@
 </script>
 
 <div
-  class="
-      group-hover:bg-white
-      absolute
-      left-[-4px]
-      h-[8px]
-      w-[8px]
-      rounded-full
-      transition-all
-      duration-300
-      {isActive ? 'bg-white h-[20px]!' : 'group-hover:h-[10px]'}
-    "
+  class="indicator"
+  class:active={isActive}
 ></div>
+
+<style>
+  .indicator {
+    position: absolute;
+    left: -6px;
+    width: 2px;
+    height: 0px;
+    border-radius: 1px;
+    background-color: var(--accent);
+    opacity: 0;
+    transition: height var(--dur-fast) var(--ease-out),
+                opacity var(--dur-fast) var(--ease-out);
+  }
+  :global(.group:hover) > .indicator:not(.active) {
+    height: 12px;
+    opacity: 0.5;
+  }
+  .indicator.active {
+    height: 24px;
+    opacity: 1;
+  }
+</style>

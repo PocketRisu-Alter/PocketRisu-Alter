@@ -212,6 +212,15 @@ export const advancedSettingsItems: SettingItem[] = [
 
     // Unrecommended Extra (Condition: showUnrecommended)
     {
+        id: 'adv.backendChatJobs', type: 'check', labelKey: 'useBackendChatJobs', bindKey: 'useBackendChatJobs',
+        helpKey: 'useBackendChatJobs', showExperimental: true, classes: 'mt-4'
+    },
+    {
+        id: 'adv.backendMultiagent', type: 'check', labelKey: 'useBackendMultiagent', bindKey: 'useBackendMultiagent',
+        helpKey: 'useBackendMultiagent', showExperimental: true,
+        condition: (ctx) => ctx.db.useBackendChatJobs,
+    },
+    {
         id: 'adv.plainFetch', type: 'check', labelKey: 'forcePlainFetch', bindKey: 'usePlainFetch',
         condition: (ctx) => ctx.db.showUnrecommended, helpKey: 'forcePlainFetch', helpUnrecommended: true, classes: 'mt-4'
     },

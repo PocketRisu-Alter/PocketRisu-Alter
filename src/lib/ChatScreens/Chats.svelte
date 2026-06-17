@@ -44,7 +44,8 @@
 
     let chatBody: HTMLDivElement;
     let hashes: Set<number> = new Set();
-    let mountInstances: Map<number, {}> = new Map();
+    let mountInstances: Map<number, any> = new Map();
+    let mountProps: Map<number, any> = new Map();
 
     //Non-cryptographic hash function to generate a unique hash for each message
     function hashCode(str:string):number {
@@ -70,6 +71,7 @@
         const charImage = getCharImage(currentCharacter.image, 'css')
         const userImage = getCharImage(userIcon, 'css')
         const simpleChar = createSimpleCharacter(currentCharacter);
+        const currentChatRoomId = getCurrentChatRoomId() ?? '';
         let loadStart = messages.length - 1
         let loadEnd = messages.length - loadPages
 
@@ -100,49 +102,60 @@
             const messageLargePortrait = message.role === 'user' ? (userIconPortrait ?? false) : ((currentCharacter as character).largePortrait ?? false);
             const reloadPointer = reloadPointerMap[i] ?? 0;
             const isRerollTarget = i === lastRealCharIdx;
-            let hashd = message.data + (message.chatId ?? '') + i.toString() + messageLargePortrait.toString() + message.disabled?.toString() + reloadPointer.toString() + (message.swipeId ?? 0).toString() + (message.swipes?.length ?? 0).toString() + isRerollTarget.toString();
+            const stableMessageId = message.chatId ?? `${message.role ?? ''}:${message.time ?? ''}:${i}`;
+            const hashd = currentChatRoomId + stableMessageId + i.toString() + messageLargePortrait.toString() + message.disabled?.toString() + reloadPointer.toString() + (message.swipeId ?? 0).toString() + (message.swipes?.length ?? 0).toString() + isRerollTarget.toString();
             const currentHash = hashCode(hashd);
             currentHashes.add(currentHash);
+
+            const swipes = message.swipes;
+            const swipeId = message.swipeId ?? 0;
+            const nextProps: any = {
+                message: message.data ?? '',
+                isLastMemory: false,
+                idx: i,
+                totalLength: messages.length,
+                img: message.role === 'user' ? userImage : charImage,
+                onReroll: onReroll,
+                onNextSwipe: i === lastRealCharIdx ? onNextSwipe : () => {},
+                unReroll: unReroll,
+                onDeleteSwipe: i === lastRealCharIdx ? onDeleteSwipe : () => {},
+                rerollIcon: i === lastRealCharIdx ? 'force' : false,
+                character: simpleChar,
+                largePortrait: messageLargePortrait,
+                messageGenerationInfo: message.generationInfo,
+                role: message.role,
+                name: message.role === 'user' ? currentUsername : currentCharacter.name,
+                isComment: message.isComment ?? false,
+                disabled: message.disabled ?? false,
+                currentPage: i === lastRealCharIdx ? (swipeId ?? 0) + 1 : 1,
+                totalPages: i === lastRealCharIdx ? (swipes?.length ?? 1) : 1,
+            };
+
             if(!hashes.has(currentHash)){
                 const b = document.createElement('div');
                 b.setAttribute('x-hashed', currentHash.toString());
+                b.setAttribute('data-role', message.role ?? 'char');
                 b.classList.add('chat-message-container');
-                const swipes = message.swipes;
-                const swipeId = message.swipeId ?? 0;
+                b.classList.add('chat-message-appear');
+                const reactiveProps = $state(nextProps);
                 const inst = mount(Chat, {
                     target: b,
-                    props: {
-                        message: message.data,
-                        isLastMemory: false,
-                        idx: i,
-                        totalLength: messages.length,
-                        img: message.role === 'user' ? userImage : charImage,
-                        onReroll: onReroll,
-                        onNextSwipe: i === lastRealCharIdx ? onNextSwipe : () => {},
-                        unReroll: unReroll,
-                        onDeleteSwipe: i === lastRealCharIdx ? onDeleteSwipe : () => {},
-                        rerollIcon: i === lastRealCharIdx ? 'force' : false,
-                        character: simpleChar,
-                        largePortrait: message.role === 'user' ? (userIconPortrait ?? false) : ((currentCharacter as character).largePortrait ?? false),
-                        messageGenerationInfo: message.generationInfo,
-                        role: message.role,
-                        name: message.role === 'user' ? currentUsername : currentCharacter.name,
-                        isComment: message.isComment ?? false,
-                        disabled: message.disabled ?? false,
-                        ...(i === lastRealCharIdx ? {
-                            currentPage: (swipeId ?? 0) + 1,
-                            totalPages: swipes?.length ?? 1,
-                        } : {}),
-                    },
-
+                    props: reactiveProps,
                 })
                 mountInstances.set(currentHash, inst);
+                mountProps.set(currentHash, reactiveProps);
                 const nextElement = nextHash === 0 ? null : chatBody.querySelector(`[x-hashed="${nextHash}"]`);
                 if(nextElement){
                     chatBody.insertBefore(b, nextElement?.nextSibling);
                 }
                 else{
                     chatBody.prepend(b);
+                }
+            }
+            else{
+                const reactiveProps = mountProps.get(currentHash);
+                if(reactiveProps){
+                    Object.assign(reactiveProps, nextProps);
                 }
             }
             nextHash = currentHash;
@@ -156,6 +169,7 @@
             if(inst){
                 unmount(inst);
                 mountInstances.delete(hash);
+                mountProps.delete(hash);
             }
             const element = chatBody.querySelector(`[x-hashed="${hash}"]`);
             if(element){
@@ -173,6 +187,7 @@
             unmount(inst);
         });
         mountInstances.clear();
+        mountProps.clear();
     })
 
     function checkIfAtBottom() {
@@ -185,17 +200,124 @@
         return rect.top <= scRect.bottom + 100;
     }
 
+    // How close (in px) the latest message's bottom may sit from the viewport
+    // bottom and still count as "stuck to the bottom".
+    const STICK_THRESHOLD = 80;
+
+    // The chat container is `flex-col-reverse`, so the latest message is the
+    // first DOM child and sits at the visual bottom. Streaming grows that
+    // message every tick; we only want to follow it down while the user is
+    // already pinned to the bottom — otherwise their scroll position must stay
+    // put. We can't rely on native `column-reverse` stickiness because the
+    // streamed markdown re-renders each tick, which discards the browser's
+    // scroll anchor and drags the viewport down regardless of position.
+    function measurePinnedToBottom() {
+        if (!chatBody || !chatBody.parentElement) return true;
+        const lastEl = chatBody.firstElementChild;
+        if (!lastEl) return true;
+        const rect = lastEl.getBoundingClientRect();
+        const scRect = chatBody.parentElement.getBoundingClientRect();
+        return rect.bottom <= scRect.bottom + STICK_THRESHOLD;
+    }
+
+    let pinnedToBottom = true;
+    // A non-growing message currently visible near the top of the viewport,
+    // used to restore the scroll position after the latest message grows while
+    // the user is scrolled up. Offsets are read from getBoundingClientRect so
+    // the math is independent of the browser-specific `scrollTop` sign that
+    // `column-reverse` introduces.
+    let anchorEl: Element | null = null;
+    let anchorOffset = 0;
+    let suppressScrollHandling = false;
+
+    function captureAnchor() {
+        anchorEl = null;
+        if (!chatBody || !chatBody.parentElement) return;
+        const scRect = chatBody.parentElement.getBoundingClientRect();
+        // Anchor on the element at the top of the viewport: it's the oldest
+        // message in view and won't change height while the latest message
+        // streams in at the bottom. Pick the visible child with the smallest
+        // top edge (DOM order is latest-first, so the streaming message sits at
+        // the bottom and is never chosen).
+        let best: Element | null = null;
+        let bestTop = Infinity;
+        for (const child of Array.from(chatBody.children)) {
+            const rect = child.getBoundingClientRect();
+            const visible = rect.bottom > scRect.top && rect.top < scRect.bottom;
+            if (visible && rect.top < bestTop) {
+                best = child;
+                bestTop = rect.top;
+            }
+        }
+        if (best) {
+            anchorEl = best;
+            anchorOffset = bestTop - scRect.top;
+        }
+    }
+
+    function handleContainerScroll() {
+        if (suppressScrollHandling) return;
+        pinnedToBottom = measurePinnedToBottom();
+        if (!pinnedToBottom) captureAnchor();
+    }
+
+    function withSuppressedScroll(fn: () => void) {
+        suppressScrollHandling = true;
+        fn();
+        // Release after the programmatic scroll event has been dispatched.
+        requestAnimationFrame(() => { suppressScrollHandling = false; });
+    }
+
+    $effect(() => {
+        const container = chatBody?.parentElement;
+        if (!container) return;
+
+        pinnedToBottom = measurePinnedToBottom();
+        container.addEventListener('scroll', handleContainerScroll, { passive: true });
+
+        const observer = new ResizeObserver(() => {
+            if (pinnedToBottom) {
+                // Follow the growing reply down so the newest text stays in view.
+                const lastEl = chatBody?.firstElementChild as HTMLElement | null;
+                if (lastEl) {
+                    withSuppressedScroll(() => {
+                        scrollWithinContainer(lastEl, container, { block: 'end', behavior: 'instant' });
+                    });
+                }
+            } else if (anchorEl && chatBody?.contains(anchorEl)) {
+                // Counteract the layout shift so the user stays where they were.
+                const scRect = container.getBoundingClientRect();
+                const current = anchorEl.getBoundingClientRect().top - scRect.top;
+                const drift = current - anchorOffset;
+                if (drift !== 0) {
+                    withSuppressedScroll(() => {
+                        container.scrollTop += drift;
+                    });
+                }
+            }
+        });
+        observer.observe(chatBody);
+
+        return () => {
+            container.removeEventListener('scroll', handleContainerScroll);
+            observer.disconnect();
+        };
+    });
+
     function scrollLatestIntoChatScreen() {
         if(!chatBody) return;
         const element = chatBody.firstElementChild as HTMLElement | null;
         const chatScreen = chatBody.parentElement;
         if(!element || !chatScreen) return;
-        scrollWithinContainer(element, chatScreen, { block: 'start', behavior: 'instant' });
+        scrollWithinContainer(element, chatScreen, { block: 'end', behavior: 'instant' });
     }
 
     export const scrollToLatestMessage = () => {
         if(!chatBody) return;
         hasNewUnreadMessage = false;
+        // The user explicitly asked to jump to the newest message, so re-pin to
+        // the bottom and let streaming follow along from here.
+        pinnedToBottom = true;
         scrollLatestIntoChatScreen();
     }
 
@@ -210,17 +332,13 @@
         const currentChatRoomId = getCurrentChatRoomId();
         const isSameChat = currentChatRoomId === previousChatRoomId;
 
-        // Only auto-scroll if it's the same chat and new messages were added
+        // Never force the viewport to the latest message during generation.
+        // Keep the user's current scroll position and expose the manual new-message
+        // button only when the reply arrived outside the visible bottom area.
         if(isSameChat && messages.length > previousLength){
             const lastMsg = messages[messages.length - 1];
-            if(lastMsg && lastMsg.role === 'char' && DBState.db.autoScrollToNewMessage){
-                if(wasAtBottom || DBState.db.alwaysScrollToNewMessage){
-                    setTimeout(() => {
-                        scrollLatestIntoChatScreen();
-                    }, 700);
-                } else {
-                    hasNewUnreadMessage = true;
-                }
+            if(lastMsg && lastMsg.role === 'char' && !wasAtBottom){
+                hasNewUnreadMessage = true;
             }
         }
         previousLength = messages.length;

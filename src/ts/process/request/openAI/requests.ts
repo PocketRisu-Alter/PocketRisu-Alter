@@ -565,6 +565,17 @@ export async function requestOpenAI(arg:RequestDataArgumentExtended):Promise<req
                 })
             }
         }
+        if(arg.backendJob){
+            return {
+                type: 'success',
+                result: JSON.stringify({
+                    url: replacerURL,
+                    body: body,
+                    headers: headers
+                })
+            }
+        }
+
         const da = await fetchNative(replacerURL, {
             body: JSON.stringify(body),
             method: "POST",
@@ -612,6 +623,17 @@ export async function requestOpenAI(arg:RequestDataArgumentExtended):Promise<req
     }
 
     if(arg.previewBody){
+        return {
+            type: 'success',
+            result: JSON.stringify({
+                url: replacerURL,
+                body: body,
+                headers: headers
+            })
+        }
+    }
+
+    if(arg.backendJob){
         return {
             type: 'success',
             result: JSON.stringify({

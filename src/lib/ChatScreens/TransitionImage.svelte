@@ -121,6 +121,8 @@
                     <img
                         src={img}
                         alt="img"
+                        draggable="false"
+                        decoding="async"
                         style:width={`${100 / currentSrc.length}%`}
                         style:left={`${100 / currentSrc.length * i}%`}
                     />
@@ -142,6 +144,8 @@
                     <img
                         src={oldSrc[i]}
                         alt="img"
+                        draggable="false"
+                        decoding="async"
                         class="old-image"
                         onanimationend={handleTransitionEnd}
                         style:width={`${100 / oldSrc.length}%`}
@@ -169,6 +173,8 @@
                     <img
                         src={currentSrc[i]}
                         alt="img"
+                        draggable="false"
+                        decoding="async"
                         class="new-image"
                         style:width={`${100 / currentSrc.length}%`}
                         style:left={`${100 / currentSrc.length * i}%`}

@@ -1,0 +1,205 @@
+/* AlterRisu-inspired settings shell.
+ * Uses PocketRisu-Alter theme variables so existing themes and user color choices remain active.
+ */
+
+.rs-setting-cont {
+    --alter-settings-base: color-mix(in srgb, var(--risu-theme-darkbg) 90%, #101010);
+    --alter-settings-raised: color-mix(in srgb, var(--risu-theme-darkbg) 78%, var(--risu-theme-bgcolor));
+    --alter-settings-surface: color-mix(in srgb, var(--risu-theme-bgcolor) 84%, var(--risu-theme-darkbg));
+    --alter-settings-hover: color-mix(in srgb, var(--risu-theme-bgcolor) 66%, var(--risu-theme-primary) 7%);
+    --alter-settings-border: color-mix(in srgb, var(--risu-theme-textcolor2) 16%, transparent);
+    padding: clamp(0px, 2vw, 20px);
+    background:
+        radial-gradient(circle at 74% 0%, color-mix(in srgb, var(--risu-theme-primary) 8%, transparent), transparent 34%),
+        var(--alter-settings-base) !important;
+}
+
+.rs-setting-cont-2 {
+    max-width: 1180px !important;
+    overflow: hidden;
+    border: 1px solid var(--alter-settings-border);
+    border-radius: clamp(0px, 1vw, 14px);
+    background: var(--alter-settings-surface);
+    box-shadow: 0 18px 60px rgb(0 0 0 / 28%);
+}
+
+.rs-setting-cont-3 {
+    width: 268px;
+    gap: 3px !important;
+    padding: 62px 9px 24px !important;
+    border-right: 1px solid var(--alter-settings-border);
+    background: var(--alter-settings-raised) !important;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--risu-theme-textcolor2) 35%, transparent) transparent;
+}
+
+.rs-setting-cont-3::before {
+    content: 'PocketRisu-Alter  /  Settings';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    min-height: 52px;
+    align-items: center;
+    padding: 0 46px 0 16px;
+    border-bottom: 1px solid var(--alter-settings-border);
+    color: var(--risu-theme-textcolor2);
+    font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: .02em;
+}
+
+.rs-setting-cont-3 > button:not(.absolute) {
+    position: relative;
+    width: 100%;
+    min-height: 38px;
+    gap: 10px !important;
+    padding: 7px 11px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--risu-theme-textcolor2) !important;
+    font-size: 13px;
+    text-align: left;
+    transition:
+        background-color 120ms cubic-bezier(.2, 0, 0, 1),
+        color 120ms cubic-bezier(.2, 0, 0, 1),
+        transform 120ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.rs-setting-cont-3 > button:not(.absolute):hover {
+    background: var(--alter-settings-hover);
+    color: var(--risu-theme-textcolor) !important;
+}
+
+.rs-setting-cont-3 > button:not(.absolute):active {
+    transform: translateY(1px);
+}
+
+.rs-setting-cont-3 > button.text-textcolor:not(.absolute) {
+    background: color-mix(in srgb, var(--risu-theme-primary) 11%, var(--alter-settings-hover));
+    color: var(--risu-theme-textcolor) !important;
+}
+
+.rs-setting-cont-3 > button.text-textcolor:not(.absolute)::before {
+    content: '';
+    position: absolute;
+    top: 7px;
+    bottom: 7px;
+    left: -9px;
+    width: 2px;
+    border-radius: 0 2px 2px 0;
+    background: var(--risu-theme-primary);
+}
+
+.rs-setting-cont-4 {
+    background: var(--alter-settings-surface) !important;
+    padding: clamp(22px, 4vw, 42px) clamp(18px, 4vw, 48px) !important;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--risu-theme-textcolor2) 35%, transparent) transparent;
+    animation: alter-settings-panel-in 180ms cubic-bezier(.2, 0, 0, 1) both;
+}
+
+.rs-setting-cont-4 > div {
+    max-width: 760px !important;
+}
+
+.rs-setting-cont-4 h2 {
+    margin-top: 0 !important;
+    font-family: Georgia, 'Times New Roman', 'Noto Serif KR', serif;
+    font-weight: 600 !important;
+    letter-spacing: -.015em;
+}
+
+.rs-setting-cont-4 .setting-tabs {
+    min-height: 39px;
+    overflow: hidden;
+    border: 1px solid var(--alter-settings-border) !important;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--risu-theme-darkbg) 76%, var(--risu-theme-bgcolor));
+}
+
+.rs-setting-cont-4 .setting-tabs > button {
+    flex: 1 0 auto;
+    border-right: 1px solid color-mix(in srgb, var(--risu-theme-textcolor2) 11%, transparent);
+    transition: background-color 120ms ease, color 120ms ease;
+}
+
+.rs-setting-cont-4 .setting-tabs > button:last-child {
+    border-right: 0;
+}
+
+.rs-setting-cont-4 .setting-tabs > button:hover {
+    background: var(--alter-settings-hover);
+}
+
+.rs-setting-cont-4 input,
+.rs-setting-cont-4 textarea,
+.rs-setting-cont-4 select {
+    border-color: var(--alter-settings-border) !important;
+    transition: border-color 120ms ease, background-color 120ms ease, box-shadow 120ms ease;
+}
+
+.rs-setting-cont-4 input:focus,
+.rs-setting-cont-4 textarea:focus,
+.rs-setting-cont-4 select:focus {
+    border-color: color-mix(in srgb, var(--risu-theme-primary) 70%, transparent) !important;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--risu-theme-primary) 18%, transparent);
+}
+
+.rs-setting-cont-4 button {
+    transition:
+        background-color 120ms cubic-bezier(.2, 0, 0, 1),
+        border-color 120ms cubic-bezier(.2, 0, 0, 1),
+        color 120ms cubic-bezier(.2, 0, 0, 1),
+        transform 120ms cubic-bezier(.2, 0, 0, 1),
+        opacity 120ms cubic-bezier(.2, 0, 0, 1);
+}
+
+.rs-setting-cont-4 button:active {
+    transform: translateY(1px);
+}
+
+.rs-setting-cont-4 .border-darkborderc {
+    border-color: var(--alter-settings-border) !important;
+}
+
+.rs-setting-cont-4 .rounded-md.border {
+    background: color-mix(in srgb, var(--risu-theme-bgcolor) 82%, var(--risu-theme-darkbg));
+}
+
+@keyframes alter-settings-panel-in {
+    /* Only fade opacity. Animating transform would leave a non-none
+       transform on the panel after the animation ends, which turns the
+       panel into a containing block for fixed-positioned descendants
+       (e.g. ShSelect dropdowns) and pushes them off-screen to the right. */
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@media (max-width: 699px) {
+    .rs-setting-cont { padding: 0; }
+    .rs-setting-cont-2 { border: 0; border-radius: 0; }
+    .rs-setting-cont-3 {
+        width: 100% !important;
+        padding: 64px 12px 28px !important;
+        border-right: 0;
+    }
+    .rs-setting-cont-3 > button:not(.absolute) {
+        min-height: 45px;
+        font-size: 14px;
+    }
+    .rs-setting-cont-4 {
+        padding: 22px 16px 48px !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rs-setting-cont-4 { animation: none; }
+    .rs-setting-cont-3 > button,
+    .rs-setting-cont-4 button,
+    .rs-setting-cont-4 input,
+    .rs-setting-cont-4 textarea,
+    .rs-setting-cont-4 select { transition: none !important; }
+}

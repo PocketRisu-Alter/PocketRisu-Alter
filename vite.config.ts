@@ -6,9 +6,16 @@ import tailwindcss from '@tailwindcss/vite'
 import { readFileSync } from 'fs';
 
 const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'));
+const nodeDevServer = process.env.RISU_NODE_DEV_SERVER ?? 'http://127.0.0.1:6001';
 
 // https://vitejs.dev/config/
 export default defineConfig(({command, mode}) => {
+  const nodeDevProxy = {
+    target: nodeDevServer,
+    changeOrigin: true,
+    ws: true,
+  };
+
   return {
     define: {
       '__APP_VERSION__': JSON.stringify(pkg.version),
@@ -24,6 +31,15 @@ export default defineConfig(({command, mode}) => {
       }),
       tailwindcss(),
       wasm(),
+      command === 'serve' ? {
+        name: 'pocketrisu-node-dev-flags',
+        transformIndexHtml(html) {
+          return html.replace(
+            '<head>',
+            '<head><script>globalThis.__NODE__ = true; globalThis.__PATCH_SYNC__ = true</script>'
+          );
+        },
+      } : null,
       command === 'build' ? strip({
         include: '**/*.(mjs|js|svelte|ts)',
         functions: ['console.log', 'console.debug', 'console.table', 'assert.*'],
@@ -38,6 +54,13 @@ export default defineConfig(({command, mode}) => {
       host: '0.0.0.0', // listen on all addresses
       port: 5174,
       strictPort: true,
+      proxy: {
+        '/api': nodeDevProxy,
+        '/proxy': nodeDevProxy,
+        '/proxy2': nodeDevProxy,
+        '/hub-proxy': nodeDevProxy,
+        '/proxy-stream-jobs': nodeDevProxy,
+      },
       // hmr: false,
     },
     // to make use of `TAURI_ENV_DEBUG` and other env variables

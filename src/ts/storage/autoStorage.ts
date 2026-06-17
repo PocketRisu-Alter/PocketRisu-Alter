@@ -38,6 +38,13 @@ export class AutoStorage{
         return this.realStorage.createAuth()
     }
 
+    async authenticatedFetch(input: RequestInfo | URL, init: RequestInit = {}): Promise<Response> {
+        await this.Init()
+        const headers = new Headers(init.headers)
+        headers.set('risu-auth', await this.realStorage.createAuth())
+        return fetch(input, { ...init, headers })
+    }
+
     async exportBackup(opts?: { target?: 'upstream' }) {
         await this.Init()
         return this.realStorage.exportBackup(opts)

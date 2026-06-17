@@ -9,8 +9,6 @@
     import { getRisuHub, hubAdditionalHTML } from "src/ts/characterCards";
     import RisuHubIcon from "./Realm/RealmHubIcon.svelte";
     import Title from "./Title.svelte";
-    import { updateInfoStore, updatePopupStore } from "src/ts/update";
-    import { publicStatsStore } from "src/ts/publicStats";
     import { isSecureContext } from "src/ts/secureContext";
     import { openSettings, SettingsRoute } from "src/ts/routing";
     import ShButton from "./GUI/ShButton.svelte";
@@ -24,34 +22,6 @@
     {#if !$OpenRealmStore}
       <Title />
       <h3 class="text-textcolor2 mt-1">v{getVersionString()}</h3>
-      {#if $updateInfoStore?.hasUpdate}
-        <button
-          class="mt-1.5 px-3 py-1 rounded-full text-sm font-medium transition-colors
-            {$updateInfoStore.severity === 'optional'
-              ? 'bg-green-900/30 text-green-400 border border-green-800/50 hover:bg-green-900/50'
-              : 'bg-red-900/30 text-red-400 border border-red-800/50 hover:bg-red-900/50'}"
-          onclick={() => updatePopupStore.set($updateInfoStore)}
-        >
-          {#if $updateInfoStore.severity === 'outdated'}
-            ⚠ {language.updateOutdated.replace('{{version}}', $updateInfoStore.latestVersion)}
-          {:else if $updateInfoStore.severity === 'required'}
-            ⚠ {language.updateRequired.replace('{{version}}', $updateInfoStore.latestVersion)}
-          {:else}
-            {language.updateAvailable.replace('{{version}}', $updateInfoStore.latestVersion)}
-          {/if}
-        </button>
-      {/if}
-      {#if $publicStatsStore}
-      <div class="mt-3 flex gap-2 flex-wrap justify-center">
-        <span class="px-3 py-1 rounded-full text-xs bg-darkbg border border-selected text-textcolor2">
-          👥 {language.statsUsersToday.replace('{{count}}', $publicStatsStore.dau.toLocaleString())}
-          <span class="text-textcolor2/60">({language.statsYesterday.replace('{{count}}', $publicStatsStore.yesterdayDau.toLocaleString())})</span>
-        </span>
-        <span class="px-3 py-1 rounded-full text-xs bg-darkbg border border-selected text-textcolor2">
-          📊 {language.statsVisitsToday.replace('{{count}}', $publicStatsStore.visits.toLocaleString())}
-        </span>
-      </div>
-      {/if}
     {/if}
     <div class="w-full flex p-4 flex-col text-textcolor max-w-4xl">
       {#if !$OpenRealmStore}

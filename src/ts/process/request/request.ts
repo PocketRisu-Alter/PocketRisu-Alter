@@ -46,7 +46,7 @@ export type ToolCall = {
     arguments: string;
 }
 
-interface requestDataArgument{
+export interface requestDataArgument{
     formated: OpenAIChat[]
     bias: {[key:number]:number}
     biasString?: [string,number][]
@@ -72,6 +72,8 @@ interface requestDataArgument{
     forceStreaming?: boolean
     blockPlugins?: boolean
     forceLocalNetwork?: boolean
+    backendJob?: boolean
+    skipBeforeRequestHooks?: boolean
 }
 
 export interface RequestDataArgumentExtended extends requestDataArgument{
@@ -84,6 +86,7 @@ export interface RequestDataArgumentExtended extends requestDataArgument{
     key?:string
     additionalOutput?:string
     saveSignatures?:boolean
+    backendJob?: boolean
 }
 
 export type requestDataResponse = {
@@ -151,7 +154,7 @@ export async function requestChatData(arg:requestDataArgument, model:ModelModeEx
                 }
             }
     
-            if(pluginV2.replacerbeforeRequest.size > 0){
+            if(!arg.skipBeforeRequestHooks && pluginV2.replacerbeforeRequest.size > 0){
                 for(const replacer of pluginV2.replacerbeforeRequest){
                     arg.formated = await replacer(arg.formated, model)
                 }

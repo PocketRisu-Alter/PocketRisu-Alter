@@ -32,6 +32,10 @@ const {
 } = require('./logs.cjs');
 const { applyPatch } = require('fast-json-patch');
 const { decodeRisuSave, encodeRisuSaveLegacy, calculateHash, normalizeJSON, hasRemoteBlocks } = require('./utils.cjs');
+const {
+    startChatJob, getChatJob, subscribeToJob, cancelChatJob,
+    getPersistedResult, listPersistedResults, acknowledgeResult,
+} = require('./chatJob.cjs');
 const { spawn, execSync } = require('child_process');
 const os = require('os');
 const { Readable, Transform } = require('stream');
@@ -2945,6 +2949,166 @@ app.delete('/proxy-stream-jobs/:jobId', async (req, res) => {
     markJobDone(job);
     cleanupJob(job.id);
     res.send({ success: true });
+});
+
+// --- Backend Chat Job endpoints ---
+app.post('/api/chat-job/start', async (req, res, next) => {
+    if (!await checkAuth(req, res)) { return; }
+    try {
+        const descriptor = req.body?.descriptor;
+        const target = req.body?.target;
+        if (!descriptor || !descriptor.url || !descriptor.body) {
+            res.status(400).json({ error: 'descriptor.url and descriptor.body required' });
+            return;
+        }
+        if (!target || !target.chaId || target.chatIndex == null || target.messageIndex == null) {
+            res.status(400).json({ error: 'target chaId, chatIndex, messageIndex required' });
+            return;
+        }
+        const jobId = startChatJob(descriptor, target);
+        res.json({ jobId });
+    } catch (error) {
+        next(error);
+    }
+});
+
+// Static result routes must be registered before the parameterized /:jobId routes.
+app.get('/api/chat-job/result', async (req, res, next) => {
+    if (!await checkAuth(req, res)) { return; }
+    try {
+        const chaId = req.query.chaId;
+        const chatId = req.query.chatId;
+        const messageIndex = req.query.messageIndex;
+        if (!chaId || !chatId || messageIndex == null) {
+            res.status(400).json({ error: 'chaId, chatId, messageIndex required' });
+            return;
+        }
+        const result = getPersistedResult({ chaId, chatId, messageIndex: Number(messageIndex) });
+        if (!result) {
+            res.status(404).json({ error: 'No result found' });
+            return;
+        }
+        res.json(result);
+    } catch (error) {
+        next(error);
+    }
+});
+
+app.get('/api/chat-job/results', async (req, res, next) => {
+    if (!await checkAuth(req, res)) { return; }
+    try {
+        const chaId = req.query.chaId;
+        const chatId = req.query.chatId;
+        if (!chaId || !chatId) {
+            res.status(400).json({ error: 'chaId, chatId required' });
+            return;
+        }
+        const results = listPersistedResults(chaId, chatId);
+        res.json(results);
+    } catch (error) {
+        next(error);
+    }
+});
+
+app.post('/api/chat-job/result/ack', async (req, res, next) => {
+    if (!await checkAuth(req, res)) { return; }
+    try {
+        const { chaId, chatId, messageIndex } = req.body || {};
+        if (!chaId || !chatId || messageIndex == null) {
+            res.status(400).json({ error: 'chaId, chatId, messageIndex required' });
+            return;
+        }
+        acknowledgeResult({ chaId, chatId, messageIndex });
+        res.json({ success: true });
+    } catch (error) {
+        next(error);
+    }
+});
+
+app.get('/api/chat-job/:jobId', async (req, res, next) => {
+    if (!await checkAuth(req, res)) { return; }
+    try {
+        const job = getChatJob(req.params.jobId);
+        if (!job) {
+            res.status(404).json({ error: 'Job not found' });
+            return;
+        }
+        res.json(job);
+    } catch (error) {
+        next(error);
+    }
+});
+
+app.get('/api/chat-job/:jobId/stream', async (req, res, next) => {
+    if (!await checkAuth(req, res)) { return; }
+    try {
+        const jobId = req.params.jobId;
+        const job = getChatJob(jobId);
+        if (!job) {
+            res.status(404).json({ error: 'Job not found' });
+            return;
+        }
+
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.flushHeaders();
+
+        const sendEvent = (text) => {
+            res.write(`data: ${text}\n\n`);
+        };
+
+        // If already finished, send current state and close. Emit the final text
+        // as a `chunk` first (mirroring the reconnect snapshot in subscribeToJob)
+        // so clients that only apply text from chunk events still receive it.
+        if (job.status !== 'pending' && job.status !== 'running') {
+            sendEvent(JSON.stringify({ type: 'chunk', text: job.text, finishReason: job.finishReason }));
+            sendEvent(JSON.stringify({ type: 'status', status: job.status, text: job.text, error: job.error, finishReason: job.finishReason }));
+            res.end();
+            return;
+        }
+
+        const unsubscribe = subscribeToJob(jobId, sendEvent);
+        const heartbeat = setInterval(() => {
+            res.write(':heartbeat\n\n');
+        }, 15000);
+
+        const cleanup = () => {
+            clearInterval(heartbeat);
+            if (unsubscribe) unsubscribe();
+        };
+
+        // Close the SSE when the job reaches a terminal state.
+        const checkDone = setInterval(() => {
+            const current = getChatJob(jobId);
+            if (!current || (current.status !== 'pending' && current.status !== 'running')) {
+                clearInterval(checkDone);
+                cleanup();
+                res.end();
+            }
+        }, 500);
+
+        req.on('close', () => {
+            clearInterval(checkDone);
+            cleanup();
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+app.post('/api/chat-job/:jobId/cancel', async (req, res, next) => {
+    if (!await checkAuth(req, res)) { return; }
+    try {
+        const ok = cancelChatJob(req.params.jobId);
+        if (!ok) {
+            res.status(404).json({ error: 'Job not found' });
+            return;
+        }
+        res.json({ success: true });
+    } catch (error) {
+        next(error);
+    }
 });
 
 // app.get('/api/password', async(req, res)=> {
@@ -6139,6 +6303,96 @@ app.post('/api/tunnel/stop', async (req, res) => {
     res.json({ status: 'off' });
 });
 
+// Development Mock OpenAI API
+app.post('/api/dev/openai/v1/chat/completions', (req, res) => {
+    let body = req.body;
+    if (Buffer.isBuffer(req.body)) {
+        try {
+            body = JSON.parse(req.body.toString('utf-8'));
+        } catch (e) {
+            body = {};
+        }
+    } else if (typeof req.body === 'string') {
+        try {
+            body = JSON.parse(req.body);
+        } catch (e) {
+            body = {};
+        }
+    }
+
+    const isStream = body.stream === true;
+    let mockMessage = "이것은 가상의 대화입니다. 개발용 API가 정상적으로 호출되었습니다.";
+    try {
+        const responses = require('./mock_responses.json');
+        mockMessage = responses[Math.floor(Math.random() * responses.length)];
+    } catch (e) {
+        console.error("Failed to load mock_responses.json", e);
+    }
+    
+    if (isStream) {
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        
+        const chunksArray = mockMessage.split('');
+        let i = 0;
+        
+        const interval = setInterval(() => {
+            if (i >= chunksArray.length) {
+                const finishChunk = {
+                    id: 'chatcmpl-mock',
+                    object: 'chat.completion.chunk',
+                    created: Math.floor(Date.now() / 1000),
+                    model: body.model || 'mock-model',
+                    choices: [{
+                        index: 0,
+                        delta: {},
+                        finish_reason: 'stop'
+                    }]
+                };
+                res.write(`data: ${JSON.stringify(finishChunk)}\n\n`);
+                res.write(`data: [DONE]\n\n`);
+                res.end();
+                clearInterval(interval);
+                return;
+            }
+            const chunk = {
+                id: 'chatcmpl-mock',
+                object: 'chat.completion.chunk',
+                created: Math.floor(Date.now() / 1000),
+                model: body.model || 'mock-model',
+                choices: [{
+                    index: 0,
+                    delta: { content: chunksArray[i] },
+                    finish_reason: null
+                }]
+            };
+            res.write(`data: ${JSON.stringify(chunk)}\n\n`);
+            i++;
+        }, 20);
+    } else {
+        res.json({
+            id: 'chatcmpl-mock',
+            object: 'chat.completion',
+            created: Math.floor(Date.now() / 1000),
+            model: body.model || 'mock-model',
+            choices: [{
+                index: 0,
+                message: {
+                    role: 'assistant',
+                    content: mockMessage
+                },
+                finish_reason: 'stop'
+            }],
+            usage: {
+                prompt_tokens: 10,
+                completion_tokens: mockMessage.length,
+                total_tokens: 10 + mockMessage.length
+            }
+        });
+    }
+});
+
 // ─── Express error middleware — must be registered after all routes ─────────
 app.use(expressErrorMiddleware);
 app.use((err, req, res, next) => {
@@ -6175,6 +6429,8 @@ async function getHttpsOptions() {
         return null;
     }
 }
+
+
 
 async function startServer() {
     try {

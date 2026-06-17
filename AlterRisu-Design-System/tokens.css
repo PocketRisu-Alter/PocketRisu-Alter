@@ -1,0 +1,342 @@
+/* AlterRisu design tokens — single source of truth for all UI values.
+   :root carries structural tokens (spacing, typography, motion) and the default
+   palette (alter-dark). Color palettes swap via [data-theme="…"].
+   Rationale and component rules: design/SYSTEM.md */
+
+:root {
+    /* ---- default palette: Alter Dark (warm slate + amber) ---- */
+    --bg-base:    #1a1612;
+    --bg-raised:  #221d18;
+    --bg-surface: #2a241e;
+    --bg-hover:   #342c24;
+    --bg-overlay: rgba(10, 8, 6, 0.72);
+
+    --text-primary:   #f0e6d6;
+    --text-secondary: #c4b9a5;
+    --text-muted:     #968878;
+    --text-on-accent: #1a1207;
+
+    --border-subtle: rgba(240, 230, 212, 0.08);
+    --border-strong: rgba(240, 230, 212, 0.18);
+    --accent:        #e6a55c;
+    --accent-hover:  #f0b674;
+    --accent-press:  #b8843f;
+    --danger:        #e07a5c;
+    --success:       #92ab6f;
+    --focus-ring:    0 0 0 2px var(--bg-base), 0 0 0 4px var(--accent-hover);
+
+    --msg-char-bg:          transparent;
+    --msg-char-border:      transparent;
+    --msg-user-bg:          var(--bg-surface);
+    --msg-user-border:      var(--border-subtle);
+    --msg-streaming-border: var(--accent-press);
+    --msg-em-color:         #f5c87e;
+    --msg-quote-color:      var(--text-primary);
+
+    /* ---- typography ---- */
+    --font-display: 'Georgia', 'Times New Roman', 'Apple SD Gothic Neo',
+                    'Noto Serif KR', serif;
+    --font-body: system-ui, -apple-system, 'Segoe UI', 'Apple SD Gothic Neo',
+                 'Noto Sans KR', sans-serif;
+    --font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', Consolas, monospace;
+
+    --text-xs: 12px;
+    --text-sm: 13.5px;
+    --text-md: 15.5px;
+    --text-lg: 18px;
+    --text-xl: 22px;
+    --text-2xl: 28px;
+
+    --leading-tight: 1.3;
+    --leading-body: 1.7;
+    --leading-ui: 1.45;
+
+    --weight-body: 420;
+    --weight-medium: 540;
+    --weight-bold: 680;
+
+    --measure-chat: 72ch;
+
+    /* ---- spacing (4px base) ---- */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    --space-7: 48px;
+
+    /* ---- radius ---- */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-pill: 999px;
+
+    /* ---- elevation ---- */
+    --shadow-overlay: 0 12px 40px rgba(0, 0, 0, 0.45);
+
+    /* ---- motion ---- */
+    --ease-out: cubic-bezier(0.2, 0, 0, 1);
+    --dur-fast: 120ms;
+    --dur-base: 200ms;
+    --dur-slow: 320ms;
+
+    /* ---- layout ---- */
+    --sidebar-width: 288px;
+    --composer-max: 760px;
+    --touch-target: 44px;
+}
+
+/* Alter Light — warm cream paper with amber */
+[data-theme='alter-light'] {
+    --bg-base:    #faf6ee;
+    --bg-raised:  #f4eee0;
+    --bg-surface: #ebe2cf;
+    --bg-hover:   #ddd0b7;
+    --bg-overlay: rgba(42, 36, 30, 0.4);
+
+    --text-primary:   #2a241e;
+    --text-secondary: #5a4e3c;
+    --text-muted:     #847458;
+    --text-on-accent: #fffaf0;
+
+    --border-subtle: rgba(42, 36, 30, 0.1);
+    --border-strong: rgba(42, 36, 30, 0.22);
+    --accent:        #b87833;
+    --accent-hover:  #a86824;
+    --accent-press:  #8a5119;
+    --danger:        #b25240;
+    --success:       #6a8054;
+    --focus-ring:    0 0 0 2px var(--bg-base), 0 0 0 4px var(--accent);
+
+    --msg-user-bg:          #ebe2cf;
+    --msg-em-color:         #8a5119;
+    --msg-streaming-border: #b87833;
+
+    --weight-body: 400;
+    --shadow-overlay: 0 12px 40px rgba(42, 36, 30, 0.25);
+}
+
+/* Purple Dark — original AlterRisu palette (violet charcoal) */
+[data-theme='purple-dark'] {
+    --bg-base:    #14111d;
+    --bg-raised:  #1b1726;
+    --bg-surface: #241f33;
+    --bg-hover:   #302943;
+    --bg-overlay: rgba(10, 8, 18, 0.72);
+
+    --text-primary:   #eee9f7;
+    --text-secondary: #c3bad3;
+    --text-muted:     #8d829e;
+    --text-on-accent: #171021;
+
+    --border-subtle: rgba(238, 233, 247, 0.08);
+    --border-strong: rgba(238, 233, 247, 0.18);
+    --accent:        #a78bfa;
+    --accent-hover:  #c4b5fd;
+    --accent-press:  #6d55b8;
+    --danger:        #e06c5f;
+    --success:       #8fae7a;
+    --focus-ring:    0 0 0 2px var(--bg-base), 0 0 0 4px #c4b5fd;
+
+    --msg-user-bg:          #241f33;
+    --msg-streaming-border: #6d55b8;
+    --msg-em-color:         #d8ccff;
+}
+
+/* Purple Light */
+[data-theme='purple-light'] {
+    --bg-base:    #f4f0fb;
+    --bg-raised:  #ece6f6;
+    --bg-surface: #e2d9ef;
+    --bg-hover:   #d7cae8;
+    --bg-overlay: rgba(38, 31, 50, 0.4);
+
+    --text-primary:   #282331;
+    --text-secondary: #5d536b;
+    --text-muted:     #81748f;
+    --text-on-accent: #fbf8ff;
+
+    --border-subtle: rgba(40, 35, 49, 0.1);
+    --border-strong: rgba(40, 35, 49, 0.22);
+    --accent:        #7c3aed;
+    --accent-hover:  #6d28d9;
+    --accent-press:  #5b21b6;
+    --danger:        #b8443a;
+    --success:       #5e7a4a;
+    --focus-ring:    0 0 0 2px var(--bg-base), 0 0 0 4px #7c3aed;
+
+    --msg-user-bg:          #e9e1f4;
+    --msg-streaming-border: #9f7aea;
+    --msg-em-color:         #6f4bb5;
+
+    --weight-body: 400;
+    --shadow-overlay: 0 12px 40px rgba(38, 31, 50, 0.25);
+}
+
+/* Tokyo Night — cool blue dark */
+[data-theme='tokyo-night'] {
+    --bg-base:    #1a1b26;
+    --bg-raised:  #1f2335;
+    --bg-surface: #24283b;
+    --bg-hover:   #2f334d;
+    --bg-overlay: rgba(10, 11, 18, 0.72);
+
+    --text-primary:   #c0caf5;
+    --text-secondary: #a9b1d6;
+    --text-muted:     #7982a9;
+    --text-on-accent: #1a1b26;
+
+    --border-subtle: rgba(192, 202, 245, 0.09);
+    --border-strong: rgba(192, 202, 245, 0.2);
+    --accent:        #7aa2f7;
+    --accent-hover:  #9ab8ff;
+    --accent-press:  #5a82e0;
+    --danger:        #f7768e;
+    --success:       #9ece6a;
+    --focus-ring:    0 0 0 2px var(--bg-base), 0 0 0 4px #9ab8ff;
+
+    --msg-user-bg:          #24283b;
+    --msg-streaming-border: #5a82e0;
+    --msg-em-color:         #bb9af7;
+}
+
+/* Obsidian — neutral charcoal with violet accent */
+[data-theme='obsidian'] {
+    --bg-base:    #1e1e1e;
+    --bg-raised:  #262626;
+    --bg-surface: #2a2a2a;
+    --bg-hover:   #363636;
+    --bg-overlay: rgba(0, 0, 0, 0.72);
+
+    --text-primary:   #dcddde;
+    --text-secondary: #b3b3b3;
+    --text-muted:     #8a8a8a;
+    --text-on-accent: #ffffff;
+
+    --border-subtle: rgba(220, 221, 222, 0.08);
+    --border-strong: rgba(220, 221, 222, 0.2);
+    --accent:        #8a5cf6;
+    --accent-hover:  #a17bff;
+    --accent-press:  #6d3fd4;
+    --danger:        #e16363;
+    --success:       #7cc78b;
+    --focus-ring:    0 0 0 2px var(--bg-base), 0 0 0 4px #a17bff;
+
+    --msg-user-bg:          #2a2a2a;
+    --msg-streaming-border: #6d3fd4;
+    --msg-em-color:         #b89cff;
+}
+
+/* Legacy aliases for pre-migration settings (`dark`, `light`).
+   Map to Alter palettes — the new default. */
+[data-theme='dark'] {
+    --bg-base:    #1a1612;
+    --bg-raised:  #221d18;
+    --bg-surface: #2a241e;
+    --bg-hover:   #342c24;
+    --bg-overlay: rgba(10, 8, 6, 0.72);
+    --text-primary:   #f0e6d6;
+    --text-secondary: #c4b9a5;
+    --text-muted:     #968878;
+    --text-on-accent: #1a1207;
+    --border-subtle: rgba(240, 230, 212, 0.08);
+    --border-strong: rgba(240, 230, 212, 0.18);
+    --accent:        #e6a55c;
+    --accent-hover:  #f0b674;
+    --accent-press:  #b8843f;
+    --danger:        #e07a5c;
+    --success:       #92ab6f;
+    --focus-ring:    0 0 0 2px var(--bg-base), 0 0 0 4px #f0b674;
+    --msg-user-bg:          #2a241e;
+    --msg-streaming-border: #b8843f;
+    --msg-em-color:         #f5c87e;
+}
+[data-theme='light'] {
+    --bg-base:    #faf6ee;
+    --bg-raised:  #f4eee0;
+    --bg-surface: #ebe2cf;
+    --bg-hover:   #ddd0b7;
+    --bg-overlay: rgba(42, 36, 30, 0.4);
+    --text-primary:   #2a241e;
+    --text-secondary: #5a4e3c;
+    --text-muted:     #847458;
+    --text-on-accent: #fffaf0;
+    --border-subtle: rgba(42, 36, 30, 0.1);
+    --border-strong: rgba(42, 36, 30, 0.22);
+    --accent:        #b87833;
+    --accent-hover:  #a86824;
+    --accent-press:  #8a5119;
+    --danger:        #b25240;
+    --success:       #6a8054;
+    --focus-ring:    0 0 0 2px var(--bg-base), 0 0 0 4px #b87833;
+    --msg-user-bg:          #ebe2cf;
+    --msg-em-color:         #8a5119;
+    --msg-streaming-border: #b87833;
+    --weight-body: 400;
+    --shadow-overlay: 0 12px 40px rgba(42, 36, 30, 0.25);
+}
+
+/* ---- High contrast ----
+   Opt-in accessibility variant layered on top of any theme (data-contrast="high").
+   Pushes secondary/muted text toward the primary color and strengthens the
+   otherwise-subtle borders, so structure and de-emphasized text stay legible
+   without changing the theme's character. Body text already meets 4.5:1; this
+   lifts the de-emphasized tokens (the allowed lower bound) further. The focus
+   ring widens uniformly for keyboard users. */
+
+[data-contrast='high'] {
+    --focus-ring: 0 0 0 2px var(--bg-base), 0 0 0 5px var(--accent-hover);
+}
+
+[data-theme='alter-dark'][data-contrast='high'],
+[data-theme='dark'][data-contrast='high'] {
+    --text-secondary: #ddd2bf;
+    --text-muted:     #b6a890;
+    --border-subtle: rgba(240, 230, 212, 0.18);
+    --border-strong: rgba(240, 230, 212, 0.34);
+}
+
+[data-theme='alter-light'][data-contrast='high'],
+[data-theme='light'][data-contrast='high'] {
+    --text-secondary: #3f3528;
+    --text-muted:     #5e5238;
+    --border-subtle: rgba(42, 36, 30, 0.22);
+    --border-strong: rgba(42, 36, 30, 0.4);
+}
+
+[data-theme='purple-dark'][data-contrast='high'] {
+    --text-secondary: #ddd6ea;
+    --text-muted:     #ada3bd;
+    --border-subtle: rgba(238, 233, 247, 0.18);
+    --border-strong: rgba(238, 233, 247, 0.34);
+}
+
+[data-theme='purple-light'][data-contrast='high'] {
+    --text-secondary: #423a4e;
+    --text-muted:     #5c5168;
+    --border-subtle: rgba(40, 35, 49, 0.22);
+    --border-strong: rgba(40, 35, 49, 0.4);
+}
+
+[data-theme='tokyo-night'][data-contrast='high'] {
+    --text-secondary: #c8cef0;
+    --text-muted:     #9aa3c8;
+    --border-subtle: rgba(192, 202, 245, 0.2);
+    --border-strong: rgba(192, 202, 245, 0.36);
+}
+
+[data-theme='obsidian'][data-contrast='high'] {
+    --text-secondary: #d0d0d0;
+    --text-muted:     #ababab;
+    --border-subtle: rgba(220, 221, 222, 0.18);
+    --border-strong: rgba(220, 221, 222, 0.36);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --dur-fast: 0ms;
+        --dur-base: 0ms;
+        --dur-slow: 0ms;
+    }
+}
