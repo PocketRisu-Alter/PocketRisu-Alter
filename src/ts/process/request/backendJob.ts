@@ -6,8 +6,17 @@ import { getModelPresetBackendExecutionSupport } from "../../preset/backendExecu
 const MULTIAGENT_VAULT_KEY = 'risu_multiagent_lite_config_vault_v1';
 
 function readMultiagentConfig(): Record<string, any> | null {
+    const db = getDatabase();
+    // Native config first — no plugin install/setup required. The backend
+    // (server/node/multiagent.cjs) supplies built-in agent prompts, so only
+    // an apiKey is strictly required for the pipeline to run.
+    const native = db.backendMultiagentConfig;
+    if (native && native.apiKey) {
+        return native;
+    }
+    // Backward compatibility: fall back to the MultiAgent browser plugin's
+    // config vault for users who configured it before native settings existed.
     try {
-        const db = getDatabase();
         const raw = db.pluginCustomStorage?.[MULTIAGENT_VAULT_KEY];
         if (!raw) return null;
         const vault = typeof raw === 'string' ? JSON.parse(raw) : raw;

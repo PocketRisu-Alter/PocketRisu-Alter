@@ -221,6 +221,10 @@ export const advancedSettingsItems: SettingItem[] = [
         condition: (ctx) => ctx.db.useBackendChatJobs,
     },
     {
+        type: 'custom', id: 'adv.backendMultiagentConfig', componentId: 'MultiagentBackendSettings',
+        condition: (ctx) => ctx.db.useBackendChatJobs && ctx.db.useBackendMultiagent,
+    },
+    {
         id: 'adv.plainFetch', type: 'check', labelKey: 'forcePlainFetch', bindKey: 'usePlainFetch',
         condition: (ctx) => ctx.db.showUnrecommended, helpKey: 'forcePlainFetch', helpUnrecommended: true, classes: 'mt-4'
     },
