@@ -737,6 +737,41 @@ export function setDatabase(data:Database){
     if (typeof data.useBackendChatJobs !== 'boolean') data.useBackendChatJobs = false
     data.useBackendMultiagent ??= false
     if (typeof data.useBackendMultiagent !== 'boolean') data.useBackendMultiagent = false
+    {
+        const defaults = createDefaultBackendMultiagentConfig()
+        const conf = (typeof data.backendMultiagentConfig === 'object' && data.backendMultiagentConfig)
+            ? data.backendMultiagentConfig as Partial<BackendMultiagentConfig>
+            : {}
+        const agents = (typeof conf.agents === 'object' && conf.agents) ? conf.agents as Record<string, Partial<BackendMultiagentAgentConfig>> : {}
+        const mergeAgent = (name: keyof BackendMultiagentConfig['agents']): BackendMultiagentAgentConfig => {
+            const a = (typeof agents[name] === 'object' && agents[name]) ? agents[name] : {}
+            return {
+                enabled: typeof a.enabled === 'boolean' ? a.enabled : defaults.agents[name].enabled,
+                systemPrompt: typeof a.systemPrompt === 'string' ? a.systemPrompt : '',
+                userPromptTemplate: typeof a.userPromptTemplate === 'string' ? a.userPromptTemplate : '',
+            }
+        }
+        data.backendMultiagentConfig = {
+            sourcePresetId: typeof conf.sourcePresetId === 'string' ? conf.sourcePresetId : defaults.sourcePresetId,
+            provider: typeof conf.provider === 'string' ? conf.provider : defaults.provider,
+            baseUrl: typeof conf.baseUrl === 'string' ? conf.baseUrl : defaults.baseUrl,
+            apiKey: typeof conf.apiKey === 'string' ? conf.apiKey : defaults.apiKey,
+            model: typeof conf.model === 'string' ? conf.model : defaults.model,
+            temperature: typeof conf.temperature === 'number' && !Number.isNaN(conf.temperature) ? conf.temperature : defaults.temperature,
+            maxTokens: typeof conf.maxTokens === 'number' && !Number.isNaN(conf.maxTokens) ? conf.maxTokens : null,
+            extraBodyJson: typeof conf.extraBodyJson === 'string' ? conf.extraBodyJson : defaults.extraBodyJson,
+            window: typeof conf.window === 'number' && !Number.isNaN(conf.window) ? conf.window : defaults.window,
+            strictMode: typeof conf.strictMode === 'boolean' ? conf.strictMode : defaults.strictMode,
+            injectionPosition: typeof conf.injectionPosition === 'string' ? conf.injectionPosition : defaults.injectionPosition,
+            injectionFormat: typeof conf.injectionFormat === 'string' ? conf.injectionFormat : defaults.injectionFormat,
+            analysisLanguage: typeof conf.analysisLanguage === 'string' ? conf.analysisLanguage : defaults.analysisLanguage,
+            agents: {
+                worldbuilding: mergeAgent('worldbuilding'),
+                plot: mergeAgent('plot'),
+                character: mergeAgent('character'),
+            },
+        }
+    }
     data.pluginCustomStorage ??= {}
     data.longPressToPopupEditor ??= false
     data.showInputActionBar ??= true
@@ -969,6 +1004,68 @@ export interface RisuPersona {
     embeddedModule?:RisuModule
 }
 
+export interface BackendMultiagentAgentConfig {
+    enabled: boolean
+    /** Custom system prompt override. Blank = use the server's built-in default. */
+    systemPrompt: string
+    /** Custom user prompt template override. Blank = use the server's built-in default. */
+    userPromptTemplate: string
+}
+
+/**
+ * Native config for the server-side MultiAgent pipeline (server/node/multiagent.cjs).
+ * Mirrors the shape the MultiAgent browser plugin used to store in its config vault,
+ * so the backend option works without installing/configuring that plugin.
+ */
+export interface BackendMultiagentConfig {
+    /** When set, the connection fields (provider/baseUrl/apiKey/model) are
+     * derived at request time from this PocketRisu model preset instead of the
+     * manual fields below. Empty string = manual entry. */
+    sourcePresetId: string
+    provider: string
+    baseUrl: string
+    apiKey: string
+    model: string
+    temperature: number
+    /** Blank field = provider default; stored as null when unset. */
+    maxTokens: number | null
+    extraBodyJson: string
+    window: number
+    strictMode: boolean
+    injectionPosition: string
+    injectionFormat: string
+    analysisLanguage: string
+    agents: {
+        worldbuilding: BackendMultiagentAgentConfig
+        plot: BackendMultiagentAgentConfig
+        character: BackendMultiagentAgentConfig
+    }
+}
+
+export function createDefaultBackendMultiagentConfig(): BackendMultiagentConfig {
+    const agent = (): BackendMultiagentAgentConfig => ({ enabled: true, systemPrompt: '', userPromptTemplate: '' })
+    return {
+        sourcePresetId: '',
+        provider: '',
+        baseUrl: '',
+        apiKey: '',
+        model: '',
+        temperature: 0.7,
+        maxTokens: null,
+        extraBodyJson: '',
+        window: 10,
+        strictMode: false,
+        injectionPosition: 'system-end',
+        injectionFormat: 'classic',
+        analysisLanguage: 'auto',
+        agents: {
+            worldbuilding: agent(),
+            plot: agent(),
+            character: agent(),
+        },
+    }
+}
+
 export interface Database{
     characters: character[],
     apiType: string
@@ -1145,6 +1242,7 @@ export interface Database{
     usePlainFetch:boolean
     useBackendChatJobs:boolean
     useBackendMultiagent:boolean
+    backendMultiagentConfig:BackendMultiagentConfig
     localNetworkMode:boolean
     localNetworkTimeoutSec:number
     memoryAlgorithmType:string // To enable new memory module/algorithms

@@ -599,26 +599,37 @@ async function callAgent(conf, messages) {
 }
 
 // ── Agent runner with diagnostics ─────────────────────────────────────────────
-async function runAgentWithDiagnostics(run, name, action, strictMode) {
+async function runAgentWithDiagnostics(run, name, action, strictMode, onProgress) {
     const started = Date.now();
     logger.info(`[Multiagent] Calling agent '${name}'`);
+    reportAgentProgress(onProgress, { agent: name, status: 'start' });
     try {
         const output = cleanAgentOutput(await action());
         const elapsed = Date.now() - started;
         run.agents[name] = { ok: true, durationMs: elapsed, chars: String(output || '').length };
         logger.info(`[Multiagent] Agent '${name}' OK in ${elapsed}ms, ${String(output || '').length} chars`);
+        reportAgentProgress(onProgress, { agent: name, status: 'done', ms: elapsed });
         return output;
     } catch (err) {
         const elapsed = Date.now() - started;
         run.agents[name] = { ok: false, durationMs: elapsed, chars: 0, error: err.message };
         logger.error(`[Multiagent] Agent '${name}' FAILED in ${elapsed}ms:`, err.message);
+        reportAgentProgress(onProgress, { agent: name, status: 'error', error: err.message });
         if (strictMode) throw err;
         return '';
     }
 }
 
-function markAgentSkipped(run, name) {
+// Progress reporting is best-effort: a broken/throwing sink must never break the
+// pipeline (it only feeds the client status indicator).
+function reportAgentProgress(onProgress, event) {
+    if (typeof onProgress !== 'function') return;
+    try { onProgress(event); } catch { /* ignore */ }
+}
+
+function markAgentSkipped(run, name, onProgress) {
     run.agents[name] = { ok: true, skipped: true, durationMs: 0, chars: 0 };
+    reportAgentProgress(onProgress, { agent: name, status: 'skipped' });
     return '';
 }
 
@@ -629,7 +640,7 @@ function markAgentSkipped(run, name) {
  * @param {Array}  messages — OpenAI message array
  * @returns {Array} messages with injected context (or original on fail-open)
  */
-async function runMultiagentPipeline(conf, messages) {
+async function runMultiagentPipeline(conf, messages, onProgress) {
     if (!Array.isArray(messages)) {
         logger.warn('[Multiagent] Aborting: messages is not an array');
         return messages;
@@ -662,6 +673,9 @@ async function runMultiagentPipeline(conf, messages) {
         return messages;
     }
     logger.info(`[Multiagent] Pipeline start — provider=${effectiveConf.provider} baseUrl=${effectiveConf.baseUrl} model=${effectiveConf.model} agents=[${activeAgents.join(',')}]`);
+    // Announce the agent set up front so the client can pre-render all pending
+    // agents (worldbuilding runs first; plot + character run in parallel after).
+    reportAgentProgress(onProgress, { phase: 'agents-init', agents: activeAgents });
 
     const run = { agents: {} };
     const systemContent = formatSystemContext(messages);
@@ -672,25 +686,25 @@ async function runMultiagentPipeline(conf, messages) {
         ? await runAgentWithDiagnostics(
             run, 'worldbuilding',
             () => callAgent(effectiveConf, buildWorldPromptForConfig(effectiveConf, systemContent, history, userInput, effectiveConf.analysisLanguage)),
-            effectiveConf.strictMode
+            effectiveConf.strictMode, onProgress
         )
-        : markAgentSkipped(run, 'worldbuilding');
+        : markAgentSkipped(run, 'worldbuilding', onProgress);
 
     const plotPromise = liteAgentEnabled(effectiveConf, 'plot')
         ? runAgentWithDiagnostics(
             run, 'plot',
             () => callAgent(effectiveConf, buildPlotPromptForConfig(effectiveConf, contextWorld, history, userInput, effectiveConf.analysisLanguage)),
-            effectiveConf.strictMode
+            effectiveConf.strictMode, onProgress
         )
-        : Promise.resolve(markAgentSkipped(run, 'plot'));
+        : Promise.resolve(markAgentSkipped(run, 'plot', onProgress));
 
     const charPromise = liteAgentEnabled(effectiveConf, 'character')
         ? runAgentWithDiagnostics(
             run, 'character',
             () => callAgent(effectiveConf, buildCharPromptForConfig(effectiveConf, systemContent, contextWorld, '', history, userInput, effectiveConf.analysisLanguage)),
-            effectiveConf.strictMode
+            effectiveConf.strictMode, onProgress
         )
-        : Promise.resolve(markAgentSkipped(run, 'character'));
+        : Promise.resolve(markAgentSkipped(run, 'character', onProgress));
 
     const [contextPlot, contextChar] = await Promise.all([plotPromise, charPromise]);
 

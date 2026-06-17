@@ -42,6 +42,7 @@
         memory:    rs?.kindMemory ?? 'Memory',
         emotion:   rs?.kindEmotion ?? 'Emotion',
         sub:       rs?.kindSub ?? 'Sub',
+        multiagent: rs?.kindMultiagent ?? 'MultiAgent',
     }
 
     // Accent bar / phase text color by phase.

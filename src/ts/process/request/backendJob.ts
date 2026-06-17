@@ -1,13 +1,96 @@
 import { getCurrentCharacter, getCurrentChat, getDatabase, type character, type Chat } from "../../storage/database.svelte";
 import type { ModelModeExtended } from "./shared";
 import { requestChatData, type requestDataArgument, type requestDataResponse, type StreamResponseChunk } from "./request";
-import { resolveChatModelBinding } from "./modelPresetBinding";
+import { resolveChatModelBinding, buildModelPresetCredential } from "./modelPresetBinding";
 import { getModelPresetBackendExecutionSupport } from "../../preset/backendExecutionSupport";
+import type { ModelPreset } from "../../preset/types";
+import { v4 as uuidv4 } from "uuid";
+import { startStatus, setKind, markPhase, appendText, addBadge, endStatus, type StatusBadge } from "../../status/requestStatus";
+import { language } from "../../../lang";
 const MULTIAGENT_VAULT_KEY = 'risu_multiagent_lite_config_vault_v1';
 
-function readMultiagentConfig(): Record<string, any> | null {
+// Request-status indicator bridge (gated by db.showRequestStatus). Wrapped so
+// status reporting can never throw into the backend stream path.
+interface BackendStatusInfo {
+    genId: string;
+    label: string;
+    chatId?: string;
+}
+
+function backendStatusEnabled(): boolean {
     try {
-        const db = getDatabase();
+        return getDatabase()?.showRequestStatus !== false;
+    } catch {
+        return false;
+    }
+}
+
+function safeStatus(fn: () => void): void {
+    try { fn(); } catch (e) { console.error('[BackendJob] status publish failed', e); }
+}
+
+// Per-agent badge for the MultiAgent pipeline (worldbuilding/plot/character),
+// shown on the status indicator so each agent's progress/completion is visible.
+function multiagentAgentLabel(name: string): string {
+    const rs = language.requestStatus as Record<string, string> | undefined;
+    switch (name) {
+        case 'worldbuilding': return rs?.agentWorldbuilding ?? 'World';
+        case 'plot': return rs?.agentPlot ?? 'Plot';
+        case 'character': return rs?.agentCharacter ?? 'Character';
+        default: return name;
+    }
+}
+
+function multiagentAgentBadge(name: string, agentStatus: string): StatusBadge {
+    const label = multiagentAgentLabel(name);
+    const key = `ma-${name}`;
+    switch (agentStatus) {
+        case 'done': return { key, text: `${label} ✓`, tone: 'success' };
+        case 'error': return { key, text: `${label} ✗`, tone: 'warn' };
+        case 'skipped': return { key, text: `${label} —`, tone: 'info' };
+        default: return { key, text: `${label} …`, tone: 'info' };
+    }
+}
+
+// Derive the multiagent connection fields from a PocketRisu model preset so the
+// analysis agent can reuse an existing key/endpoint/model. Only OpenAI-compatible
+// presets are supported — that is the multiagent backend's primary agent wire
+// (`POST {baseUrl}/chat/completions`); other adapter kinds keep manual entry.
+// endpoint.url is the full chat/completions URL, so strip that suffix to get the
+// base the backend re-appends. Returns null when the preset can't supply a key.
+function deriveMultiagentFromPreset(preset: ModelPreset): Record<string, any> | null {
+    if (preset.profileSnapshot.adapterKind !== 'openai-compatible') return null;
+    const apiKey = buildModelPresetCredential(preset)?.apiKey;
+    if (!apiKey) return null;
+    const fullUrl = preset.profileSnapshot.endpoint?.url ?? '';
+    const baseUrl = fullUrl.replace(/\/chat\/completions\/?(\?.*)?$/, '');
+    return {
+        provider: 'openai',
+        apiKey,
+        baseUrl,
+        model: preset.profileSnapshot.modelId,
+    };
+}
+
+function readMultiagentConfig(): Record<string, any> | null {
+    const db = getDatabase();
+    // Native config first — no plugin install/setup required. The backend
+    // (server/node/multiagent.cjs) supplies built-in agent prompts, so only
+    // an apiKey is strictly required for the pipeline to run.
+    const native = db.backendMultiagentConfig;
+    if (native) {
+        const conf: Record<string, any> = { ...native };
+        // Optional: reuse a model preset's key/endpoint/model for the connection.
+        if (native.sourcePresetId) {
+            const preset = (db.modelPresets ?? []).find((p) => p.id === native.sourcePresetId);
+            const derived = preset ? deriveMultiagentFromPreset(preset) : null;
+            if (derived) Object.assign(conf, derived);
+        }
+        if (conf.apiKey) return conf;
+    }
+    // Backward compatibility: fall back to the MultiAgent browser plugin's
+    // config vault for users who configured it before native settings existed.
+    try {
         const raw = db.pluginCustomStorage?.[MULTIAGENT_VAULT_KEY];
         if (!raw) return null;
         const vault = typeof raw === 'string' ? JSON.parse(raw) : raw;
@@ -181,9 +264,23 @@ export async function requestChatDataBackend(
         return { type: 'fail', result: 'Aborted' };
     }
 
+    // Status-indicator info: reuse the message generationId (arg.chatId) as the
+    // entry key so it lines up with the rest of the pipeline; mint a memory-only
+    // key for aux requests that carry none. uuid v4 (not crypto.randomUUID) works
+    // over plain HTTP. Label = bound preset name, else the resolved model id.
+    const status: BackendStatusInfo | null = backendStatusEnabled()
+        ? {
+            genId: arg.chatId ?? `backend-${uuidv4()}`,
+            label: binding.kind === 'modelPreset'
+                ? binding.preset.name
+                : (descriptorResponse.model || ''),
+            chatId: target.chatId,
+        }
+        : null;
+
     return {
         type: 'streaming',
-        result: createBackendJobStream(jobId, target, abortSignal),
+        result: createBackendJobStream(jobId, target, abortSignal, status),
         model: descriptorResponse.model,
     };
 }
@@ -192,6 +289,7 @@ function createBackendJobStream(
     jobId: string,
     target: ChatJobTarget,
     abortSignal: AbortSignal = null,
+    status: BackendStatusInfo | null = null,
 ): ReadableStream<StreamResponseChunk> {
     return new ReadableStream<StreamResponseChunk>({
         start(controller) {
@@ -200,6 +298,34 @@ function createBackendJobStream(
             let flushTimer: ReturnType<typeof setTimeout> | null = null;
             let pendingText: string | null = null;
             let lastQueuedText = '';
+
+            // Request-status indicator state. The backend sends cumulative text in
+            // each chunk, so track what we've already reported to derive deltas
+            // for appendText (which accumulates). statusEnded guards idempotency.
+            let lastStatusText = '';
+            let statusEnded = false;
+            if (status) {
+                safeStatus(() => startStatus(status.genId, {
+                    kind: 'main',
+                    label: status.label,
+                    chatId: status.chatId,
+                    phase: 'connecting',
+                    now: Date.now(),
+                }));
+            }
+            const reportStatusText = (text: string) => {
+                if (!status || statusEnded) return;
+                const delta = text.startsWith(lastStatusText)
+                    ? text.slice(lastStatusText.length)
+                    : text;
+                lastStatusText = text;
+                if (delta) safeStatus(() => appendText(status.genId, { response: delta }, Date.now()));
+            };
+            const endStatusOnce = (outcome: 'done' | 'failed' | 'aborted', error?: string) => {
+                if (!status || statusEnded) return;
+                statusEnded = true;
+                safeStatus(() => endStatus(status.genId, outcome, { now: Date.now(), error }));
+            };
 
             const clearFlushTimer = () => {
                 if (flushTimer) {
@@ -234,6 +360,7 @@ function createBackendJobStream(
                 closed = true;
                 clearFlushTimer();
                 connectionController?.abort();
+                endStatusOnce('done');
                 if (acknowledge) void acknowledgeTarget(target);
                 try { controller.close(); } catch { /* ignore */ }
             };
@@ -244,14 +371,39 @@ function createBackendJobStream(
                 closed = true;
                 clearFlushTimer();
                 connectionController?.abort();
+                endStatusOnce(reason === 'Aborted' ? 'aborted' : 'failed', reason === 'Aborted' ? undefined : reason);
                 if (acknowledge) void acknowledgeTarget(target);
                 try { controller.error(new Error(reason)); } catch { /* ignore */ }
             };
 
             const handleEvent = (data: any) => {
                 if (!data || closed) return;
+                // Phase hint from the server: flip the status-indicator chip between
+                // the server-side MultiAgent pipeline and main prompt generation.
+                if (data.type === 'phase') {
+                    if (!status || statusEnded) return;
+                    if (data.phase === 'multiagent') {
+                        safeStatus(() => { setKind(status.genId, 'multiagent', Date.now()); markPhase(status.genId, 'thinking', Date.now()); });
+                    } else if (data.phase === 'main') {
+                        safeStatus(() => { setKind(status.genId, 'main', Date.now()); markPhase(status.genId, 'connecting', Date.now()); });
+                    }
+                    return;
+                }
+                // Per-agent MultiAgent progress → status-indicator badges.
+                if (data.type === 'agent') {
+                    if (!status || statusEnded) return;
+                    if (data.phase === 'agents-init' && Array.isArray(data.agents)) {
+                        for (const name of data.agents) {
+                            safeStatus(() => addBadge(status.genId, multiagentAgentBadge(name, 'start')));
+                        }
+                    } else if (typeof data.agent === 'string') {
+                        safeStatus(() => addBadge(status.genId, multiagentAgentBadge(data.agent, data.status)));
+                    }
+                    return;
+                }
                 if (data.type === 'chunk' && typeof data.text === 'string') {
                     queueText(data.text);
+                    reportStatusText(data.text);
                     return;
                 }
                 if (data.type !== 'status') return;
@@ -260,7 +412,7 @@ function createBackendJobStream(
                 // server sends a single status event with `text` and no preceding
                 // chunk. Apply it before closing so the message isn't frozen at
                 // whatever partial text was recovered earlier.
-                if (typeof data.text === 'string') queueText(data.text, true);
+                if (typeof data.text === 'string') { queueText(data.text, true); reportStatusText(data.text); }
                 if (data.status === 'done') {
                     flushText();
                     close(true);
@@ -329,21 +481,21 @@ function createBackendJobStream(
 
                     if (closed) return;
                     try {
-                        const status = await fetchStatus();
-                        if (!status) {
+                        const jobStatus = await fetchStatus();
+                        if (!jobStatus) {
                             fail('Backend job not found', false);
                             return;
                         }
-                        if (typeof status.text === 'string') queueText(status.text, true);
-                        if (status.status === 'done') {
+                        if (typeof jobStatus.text === 'string') { queueText(jobStatus.text, true); reportStatusText(jobStatus.text); }
+                        if (jobStatus.status === 'done') {
                             close(true);
                             return;
                         }
-                        if (status.status === 'error') {
-                            fail(status.error || 'Backend job failed', true);
+                        if (jobStatus.status === 'error') {
+                            fail(jobStatus.error || 'Backend job failed', true);
                             return;
                         }
-                        if (status.status === 'cancelled') {
+                        if (jobStatus.status === 'cancelled') {
                             fail('Aborted', true);
                             return;
                         }
