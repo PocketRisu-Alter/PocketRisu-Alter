@@ -2341,6 +2341,7 @@ export const languageKorean = {
     kindMemory: "메모리",
     kindEmotion: "감정",
     kindSub: "보조",
+    kindMultiagent: "멀티에이전트",
     outputTokens: "출력",
     thinkingTokensLabel: "사고",
     tokensPerSec: "tok/s",

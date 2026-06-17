@@ -20,7 +20,7 @@ export type RequestPhase =
 // pipeline's ModelModeExtended: model→main, translate→translate, memory→memory,
 // emotion→emotion, submodel/otherAx→sub. The renderer maps these to localized
 // chip labels (메인 / 번역 / 메모리 / 감정 / 보조).
-export type RequestKind = 'main' | 'translate' | 'memory' | 'emotion' | 'sub'
+export type RequestKind = 'main' | 'translate' | 'memory' | 'emotion' | 'sub' | 'multiagent'
 
 // A phase is terminal when the request has finished one way or another; the
 // renderer uses this to decide dismissal/retention.
@@ -203,6 +203,16 @@ export function startStatus(id: string, init: StartStatusInit): void {
     })
     // Self-start the recompute timer; it self-stops once entries go terminal.
     startStatusTimer()
+}
+
+// Switch an in-flight entry's chip kind (and optionally its label). Used by the
+// backend chat-job path to flip the indicator between 'multiagent' (server-side
+// pipeline running) and 'main' (main prompt generating) within one request.
+export function setKind(id: string, kind: RequestKind, now: number, label?: string): void {
+    update(id, (e) => {
+        if (isTerminalPhase(e.phase)) return e
+        return { ...e, kind, label: label ?? e.label, lastChunkAt: now }
+    })
 }
 
 export function markPhase(id: string, phase: RequestPhase, now: number): void {

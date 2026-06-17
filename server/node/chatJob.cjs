@@ -292,6 +292,10 @@ async function runJob(job) {
         if (ma && Array.isArray(msgs)) {
             const strictMode = Boolean(ma.strictMode);
             logger.info(`[ChatJob] Running multiagent pipeline (strictMode=${strictMode}) for job ${job.id}`);
+            // Phase hint for the client request-status indicator: the MultiAgent
+            // pipeline runs server-side before main generation, so the browser
+            // sees no chunks during it. This lets the toast show "MultiAgent".
+            pushEvent(job, { type: 'phase', phase: 'multiagent' });
             try {
                 job.descriptor.body.messages = await runMultiagentPipeline(ma, msgs);
                 logger.info(`[ChatJob] Multiagent pipeline finished for job ${job.id}`);
@@ -302,6 +306,8 @@ async function runJob(job) {
         } else if (ma) {
             logger.warn(`[ChatJob] Multiagent config present but body.messages is not an array — skipping pipeline for job ${job.id}`);
         }
+        // Phase hint: main prompt generation is starting.
+        pushEvent(job, { type: 'phase', phase: 'main' });
         await executeProvider(job);
         if (job.status === 'cancelled') {
             persistResult(job);

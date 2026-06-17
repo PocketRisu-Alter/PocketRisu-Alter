@@ -3,7 +3,29 @@ import type { ModelModeExtended } from "./shared";
 import { requestChatData, type requestDataArgument, type requestDataResponse, type StreamResponseChunk } from "./request";
 import { resolveChatModelBinding } from "./modelPresetBinding";
 import { getModelPresetBackendExecutionSupport } from "../../preset/backendExecutionSupport";
+import { v4 as uuidv4 } from "uuid";
+import { startStatus, setKind, markPhase, appendText, endStatus } from "../../status/requestStatus";
 const MULTIAGENT_VAULT_KEY = 'risu_multiagent_lite_config_vault_v1';
+
+// Request-status indicator bridge (gated by db.showRequestStatus). Wrapped so
+// status reporting can never throw into the backend stream path.
+interface BackendStatusInfo {
+    genId: string;
+    label: string;
+    chatId?: string;
+}
+
+function backendStatusEnabled(): boolean {
+    try {
+        return getDatabase()?.showRequestStatus !== false;
+    } catch {
+        return false;
+    }
+}
+
+function safeStatus(fn: () => void): void {
+    try { fn(); } catch (e) { console.error('[BackendJob] status publish failed', e); }
+}
 
 function readMultiagentConfig(): Record<string, any> | null {
     const db = getDatabase();
@@ -190,9 +212,23 @@ export async function requestChatDataBackend(
         return { type: 'fail', result: 'Aborted' };
     }
 
+    // Status-indicator info: reuse the message generationId (arg.chatId) as the
+    // entry key so it lines up with the rest of the pipeline; mint a memory-only
+    // key for aux requests that carry none. uuid v4 (not crypto.randomUUID) works
+    // over plain HTTP. Label = bound preset name, else the resolved model id.
+    const status: BackendStatusInfo | null = backendStatusEnabled()
+        ? {
+            genId: arg.chatId ?? `backend-${uuidv4()}`,
+            label: binding.kind === 'modelPreset'
+                ? binding.preset.name
+                : (descriptorResponse.model || ''),
+            chatId: target.chatId,
+        }
+        : null;
+
     return {
         type: 'streaming',
-        result: createBackendJobStream(jobId, target, abortSignal),
+        result: createBackendJobStream(jobId, target, abortSignal, status),
         model: descriptorResponse.model,
     };
 }
@@ -201,6 +237,7 @@ function createBackendJobStream(
     jobId: string,
     target: ChatJobTarget,
     abortSignal: AbortSignal = null,
+    status: BackendStatusInfo | null = null,
 ): ReadableStream<StreamResponseChunk> {
     return new ReadableStream<StreamResponseChunk>({
         start(controller) {
@@ -209,6 +246,34 @@ function createBackendJobStream(
             let flushTimer: ReturnType<typeof setTimeout> | null = null;
             let pendingText: string | null = null;
             let lastQueuedText = '';
+
+            // Request-status indicator state. The backend sends cumulative text in
+            // each chunk, so track what we've already reported to derive deltas
+            // for appendText (which accumulates). statusEnded guards idempotency.
+            let lastStatusText = '';
+            let statusEnded = false;
+            if (status) {
+                safeStatus(() => startStatus(status.genId, {
+                    kind: 'main',
+                    label: status.label,
+                    chatId: status.chatId,
+                    phase: 'connecting',
+                    now: Date.now(),
+                }));
+            }
+            const reportStatusText = (text: string) => {
+                if (!status || statusEnded) return;
+                const delta = text.startsWith(lastStatusText)
+                    ? text.slice(lastStatusText.length)
+                    : text;
+                lastStatusText = text;
+                if (delta) safeStatus(() => appendText(status.genId, { response: delta }, Date.now()));
+            };
+            const endStatusOnce = (outcome: 'done' | 'failed' | 'aborted', error?: string) => {
+                if (!status || statusEnded) return;
+                statusEnded = true;
+                safeStatus(() => endStatus(status.genId, outcome, { now: Date.now(), error }));
+            };
 
             const clearFlushTimer = () => {
                 if (flushTimer) {
@@ -243,6 +308,7 @@ function createBackendJobStream(
                 closed = true;
                 clearFlushTimer();
                 connectionController?.abort();
+                endStatusOnce('done');
                 if (acknowledge) void acknowledgeTarget(target);
                 try { controller.close(); } catch { /* ignore */ }
             };
@@ -253,14 +319,27 @@ function createBackendJobStream(
                 closed = true;
                 clearFlushTimer();
                 connectionController?.abort();
+                endStatusOnce(reason === 'Aborted' ? 'aborted' : 'failed', reason === 'Aborted' ? undefined : reason);
                 if (acknowledge) void acknowledgeTarget(target);
                 try { controller.error(new Error(reason)); } catch { /* ignore */ }
             };
 
             const handleEvent = (data: any) => {
                 if (!data || closed) return;
+                // Phase hint from the server: flip the status-indicator chip between
+                // the server-side MultiAgent pipeline and main prompt generation.
+                if (data.type === 'phase') {
+                    if (!status || statusEnded) return;
+                    if (data.phase === 'multiagent') {
+                        safeStatus(() => { setKind(status.genId, 'multiagent', Date.now()); markPhase(status.genId, 'thinking', Date.now()); });
+                    } else if (data.phase === 'main') {
+                        safeStatus(() => { setKind(status.genId, 'main', Date.now()); markPhase(status.genId, 'connecting', Date.now()); });
+                    }
+                    return;
+                }
                 if (data.type === 'chunk' && typeof data.text === 'string') {
                     queueText(data.text);
+                    reportStatusText(data.text);
                     return;
                 }
                 if (data.type !== 'status') return;
@@ -269,7 +348,7 @@ function createBackendJobStream(
                 // server sends a single status event with `text` and no preceding
                 // chunk. Apply it before closing so the message isn't frozen at
                 // whatever partial text was recovered earlier.
-                if (typeof data.text === 'string') queueText(data.text, true);
+                if (typeof data.text === 'string') { queueText(data.text, true); reportStatusText(data.text); }
                 if (data.status === 'done') {
                     flushText();
                     close(true);
@@ -338,21 +417,21 @@ function createBackendJobStream(
 
                     if (closed) return;
                     try {
-                        const status = await fetchStatus();
-                        if (!status) {
+                        const jobStatus = await fetchStatus();
+                        if (!jobStatus) {
                             fail('Backend job not found', false);
                             return;
                         }
-                        if (typeof status.text === 'string') queueText(status.text, true);
-                        if (status.status === 'done') {
+                        if (typeof jobStatus.text === 'string') { queueText(jobStatus.text, true); reportStatusText(jobStatus.text); }
+                        if (jobStatus.status === 'done') {
                             close(true);
                             return;
                         }
-                        if (status.status === 'error') {
-                            fail(status.error || 'Backend job failed', true);
+                        if (jobStatus.status === 'error') {
+                            fail(jobStatus.error || 'Backend job failed', true);
                             return;
                         }
-                        if (status.status === 'cancelled') {
+                        if (jobStatus.status === 'cancelled') {
                             fail('Aborted', true);
                             return;
                         }
