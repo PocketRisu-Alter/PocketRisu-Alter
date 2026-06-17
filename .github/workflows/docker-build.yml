@@ -6,7 +6,7 @@ on:
     tags:
       - 'v*'
     branches:
-      - multiagent-backend
+      - main
 
 env:
   REGISTRY: ghcr.io
