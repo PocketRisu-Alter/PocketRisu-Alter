@@ -34,7 +34,11 @@
     User2Icon,
     ChevronsLeft,
     ArrowRight,
+    MailIcon,
+    SendIcon,
+    UsersIcon,
   } from "@lucide/svelte";
+  import GithubIcon from "../UI/GithubIcon.svelte";
     import {
   addCharacter,
     changeChar,
@@ -48,7 +52,7 @@
     import BaseRoundedButton from "../UI/BaseRoundedButton.svelte";
     import { getCharacterIndexObject, makeAgoText, selectSingleFile } from "src/ts/util";
     import { v4 } from "uuid";
-    import { checkCharOrder, getFileSrc, saveAsset } from "src/ts/globalApi.svelte";
+    import { checkCharOrder, getFileSrc, openURL, saveAsset } from "src/ts/globalApi.svelte";
     import { alertInput, alertSelect } from "src/ts/alert";
     import SideChatList from "./SideChatList.svelte";
 
