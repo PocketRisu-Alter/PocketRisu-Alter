@@ -7,6 +7,7 @@
     import { addMetadataToElement, getDistance, ParseMarkdown, postTranslationParse, resolveInlayPlaceholders, trimMarkdown, type CbsConditions, type simpleCharacterArgument } from "../../ts/parser/parser.svelte"
     import { getLLMCache, translateHTML } from "../../ts/translator/translator"
     import { getModuleAssets } from "src/ts/process/modules";
+    import { reportMarkdownParse } from "src/ts/process/parseDebug";
     import { getCurrentCharacter } from "src/ts/storage/database.svelte";
     import { getFileSrc } from "src/ts/globalApi.svelte";
 
@@ -342,7 +343,10 @@
         }
     }
 
-    let markParsingResult = $derived.by(() => markParsing(msgDisplay, character, idx))
+    let markParsingResult = $derived.by(() => {
+        reportMarkdownParse(idx)
+        return markParsing(msgDisplay, character, idx)
+    })
 
     $effect(() => {
         const identity = `${idx}:${typeof character === 'string' ? character : JSON.stringify(character ?? null)}`

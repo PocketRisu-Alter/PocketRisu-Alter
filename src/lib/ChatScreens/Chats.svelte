@@ -1,5 +1,6 @@
 <script lang="ts">
     import type { character, Message } from 'src/ts/storage/database.svelte';
+    import isEqual from 'lodash/isEqual';
     import { mount, onDestroy, unmount } from 'svelte';
     import Chat from './Chat.svelte';
     import { getCharImage } from 'src/ts/characters';
@@ -45,6 +46,12 @@
     } = $props();
 
     let chatBody: HTMLDivElement;
+    // Cache the simple-character snapshot so its REFERENCE stays stable while the
+    // character is unchanged. updateChatBody runs on every streaming tick and
+    // Object.assign-copies `character` into every message's reactive props; a
+    // fresh object each tick made every ChatBody's markdown derived re-run (all
+    // messages blank→re-parse during streaming — a real heat/flicker bug).
+    let cachedSimpleChar: ReturnType<typeof createSimpleCharacter> | null = null;
     let hashes: Set<number> = new Set();
     let mountInstances: Map<number, any> = new Map();
     let mountProps: Map<number, any> = new Map();
@@ -72,7 +79,13 @@
         let currentHashes: Set<number> = new Set();
         const charImage = getCharImage(currentCharacter.image, 'css')
         const userImage = getCharImage(userIcon, 'css')
-        const simpleChar = createSimpleCharacter(currentCharacter);
+        // Only swap the reference when the snapshot's CONTENT actually changes,
+        // so streaming ticks don't churn `character` for every message.
+        const candidateSimpleChar = createSimpleCharacter(currentCharacter);
+        if (!cachedSimpleChar || !isEqual(cachedSimpleChar, candidateSimpleChar)) {
+            cachedSimpleChar = candidateSimpleChar;
+        }
+        const simpleChar = cachedSimpleChar;
         const currentChatRoomId = getCurrentChatRoomId() ?? '';
         let loadStart = messages.length - 1
         let loadEnd = messages.length - loadPages
