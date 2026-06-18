@@ -824,10 +824,18 @@ import { isMobile } from 'src/ts/platform'
                 showNewMessageButton = false;
             }
         }}>
+            <!-- fixedChatTextarea ON  → floating overlay (h-0 sticky anchor + the
+                 composer translated up to hover above the bottom edge).
+                 fixedChatTextarea OFF → in-flow composer that sits at the end of
+                 the message list and scrolls with it. -->
             <div
-                    class="sticky right-0 bottom-0 z-[29] h-0 w-full overflow-visible pointer-events-none"
+                    class={DBState.db.fixedChatTextarea
+                        ? "sticky right-0 bottom-0 z-[29] h-0 w-full overflow-visible pointer-events-none"
+                        : "w-full"}
             >
-              <div bind:clientHeight={composerOverlayHeight} class="pointer-events-auto mx-auto w-full max-w-3xl px-2 pb-4 -translate-y-full">
+              <div bind:clientHeight={composerOverlayHeight} class={DBState.db.fixedChatTextarea
+                        ? "pointer-events-auto mx-auto w-full max-w-3xl px-2 pb-4 -translate-y-full"
+                        : "pointer-events-auto mx-auto w-full max-w-3xl px-2 pt-2 pb-2"}>
                 <!-- "plugin-compat-items-stretch" is a compat hook (not a Tailwind class):
                      plugins that locate the composer via div[class*="items-stretch"] (e.g. gemini-cache-keeper)
                      relied on the pre-redesign container class. Keep it so they can still find/anchor their UI,
@@ -1114,7 +1122,11 @@ import { isMobile } from 'src/ts/platform'
             {/if}
               </div>
             </div>
-            <div class="w-full shrink-0 pointer-events-none" style:height={`calc(${composerOverlayHeight}px + 0.75rem)`}></div>
+            {#if DBState.db.fixedChatTextarea}
+                <!-- Reserve the floating composer's footprint so messages aren't hidden
+                     behind it. In-flow mode needs no spacer (the composer takes real space). -->
+                <div class="w-full shrink-0 pointer-events-none" style:height={`calc(${composerOverlayHeight}px + 0.75rem)`}></div>
+            {/if}
 
             {#if !currentChatReady}
                 <div class="w-full flex justify-center text-textcolor2 italic mb-12">
@@ -1136,7 +1148,7 @@ import { isMobile } from 'src/ts/platform'
             <Chats
                 bind:this={chatsInstance}
                 messages={currentChat}
-                bottomInset={composerOverlayHeight + 12}
+                bottomInset={DBState.db.fixedChatTextarea ? composerOverlayHeight + 12 : 0}
                 loadPages={loadPages}
                 onReroll={reroll}
                 onNextSwipe={nextSwipe}

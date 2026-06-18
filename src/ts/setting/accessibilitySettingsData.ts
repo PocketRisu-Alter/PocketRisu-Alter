@@ -82,6 +82,13 @@ export const accessibilitySettingsItems: SettingItem[] = [
         keywords: ['input', 'action', 'bar', 'toolbar', 'copy', 'reset', 'expand', 'editor']
     },
     {
+        id: 'acc.fixedChatTextarea',
+        type: 'check',
+        labelKey: 'fixedChatTextarea',
+        bindKey: 'fixedChatTextarea',
+        keywords: ['input', 'composer', 'fixed', 'floating', 'bottom', 'pin', 'sticky']
+    },
+    {
         id: 'acc.enableDragPartialEdit',
         type: 'check',
         labelKey: 'enableDragPartialEdit',
@@ -363,6 +370,7 @@ export const accessibilityEditingItems = pick([
     'acc.enableDragPartialEdit',
     'acc.longPressToPopupEditor',
     'acc.showInputActionBar',
+    'acc.fixedChatTextarea',
 ]);
 
 export const accessibilityScrollItems = pick([
