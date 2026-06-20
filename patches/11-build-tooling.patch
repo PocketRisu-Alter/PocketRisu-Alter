@@ -1,3 +1,14 @@
+diff --git a/.gitignore b/.gitignore
+index 6a84a9269..8cebf3565 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -58,3 +58,6 @@ dist.zip
+ # Due to Cargo.lock makes the project build fail, we ignore it
+ Cargo.lock
+ test/fixtures/
++.ssh/
++deploy.sh
++release.sh
 diff --git a/.opencode/AGENTS.md b/.opencode/AGENTS.md
 new file mode 100644
 index 000000000..45b32d3a2
@@ -153,10 +164,18 @@ index 000000000..530c5ffa9
 +  }
 +}
 diff --git a/package.json b/package.json
-index 2cbda45d9..ad1dbfc97 100644
+index 2cbda45d9..783cc4b04 100644
 --- a/package.json
 +++ b/package.json
-@@ -8,7 +8,8 @@
+@@ -1,14 +1,15 @@
+ {
+   "name": "pocketrisu",
+   "private": true,
+-  "version": "1.8.1",
++  "version": "1.8.1-alter.2",
+   "packageManager": "pnpm@10.34.1",
+   "engines": {
+     "node": ">=22.12.0"
    },
    "type": "module",
    "scripts": {

@@ -22,18 +22,18 @@ touches a non-overlapping set of files, so any subset applies independently.
 
 | # | Module | What it is | +/- |
 |---|--------|------------|-----|
-| 01 | **backend-jobs** | Node backend job runner + multi-agent server, client `backendJob.ts`, presets-as-backend-jobs, capability detection/tags. | +4932 / -63 |
-| 02 | **chat-rendering** | Streaming/scroll/image fixes + **floating composer** (`DefaultChatScreen.svelte`, fork's design kept over upstream's fixed-textarea revert). | +447 / -398 |
+| 01 | **backend-jobs** | Node backend job runner + multi-agent server, client `backendJob.ts`, presets-as-backend-jobs, capability detection/tags, native backend MultiAgent config UI (`MultiagentBackendSettings.svelte`), per-agent request status indicator (`requestStatus.ts`, `RequestStatusToast.svelte`). | +5261 / -47 |
+| 02 | **chat-rendering** | Streaming/scroll/image fixes + **floating composer** (`DefaultChatScreen.svelte`, fork's design kept over upstream's fixed-textarea revert), markdown re-parse throttling, mobile body layout, debug-log parsing (`parseDebug.ts`). | +543 / -395 |
 | 03 | **design-system** | AlterRisu design system + settings workbench styling, colorscheme, bubble editor. | +1192 / -281 |
 | 04 | **settings-selects** | Constrain overflowing `<select>` menus in setting lists. | +111 / -21 |
-| 05 | **sidebar-nav** | Sidebar related-links + mobile header/chat-list (merged with upstream's recent-chats list). | +262 / -88 |
-| 06 | **remove-update-telemetry** | Strip auto-update popup, public-stats telemetry, dev panel, patch-note feed. | +22 / -485 |
+| 05 | **sidebar-nav** | Sidebar related-links + mobile header/chat-list (merged with upstream's recent-chats list); drops `GithubIcon.svelte` with the GitHub related-link button. | +219 / -103 |
+| 06 | **remove-update-telemetry** | Strip auto-update popup, public-stats telemetry, dev panel, patch-note feed, and upstream promotional links (GitHub star/feedback form/contact email) from `MainMenu.svelte`; restores the "fix chat input to bottom" accessibility toggle. | +24 / -519 |
 | 07 | **ci-docker** | Docker workflow (build + publish to GHCR **on push to `main`**), Dockerfile, docker-compose. | +52 / -68 |
-| 08 | **docs-readme** | Korean-only docs, drop multilingual docs/i18n, English README. | +249 / -3422 |
-| 09 | **i18n-strings** | In-app translation strings (capability/settings keys + rebrand). | +147 / -139 |
+| 08 | **docs-readme** | Korean-only docs, drop multilingual docs/i18n, English README, internal `TODO.md` planning notes. | +287 / -3388 |
+| 09 | **i18n-strings** | In-app translation strings (capability/settings keys + rebrand). | +207 / -137 |
 | 10 | **branding-registry** | `PocketRisu` → `PocketRisu-Alter` in bundled provider notes. | +20 / -20 |
-| 11 | **build-tooling** | package.json, pnpm, vite, opencode config, test artifact. | +1374 / -1349 |
-| 12 | **core-misc** | Cross-cutting core edits: `styles.css` (scrollbar), bootstrap/polyfill, storage, misc UI. | +533 / -157 |
+| 11 | **build-tooling** | package.json, pnpm, vite, opencode config, test artifact, `.gitignore`. | +1369 / -1341 |
+| 12 | **core-misc** | Cross-cutting core edits: `styles.css` (scrollbar), bootstrap/polyfill, storage, misc UI. | +624 / -144 |
 
 ## Conflicts resolved when porting v1.7.3 → v1.8.1
 

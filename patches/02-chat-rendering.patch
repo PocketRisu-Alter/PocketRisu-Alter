@@ -248,10 +248,18 @@ index 03406bde3..48f4fa848 100644
              {@render senderIcon({rounded: DBState.db.roundIcons})}
              <span class="flex flex-col ml-4 w-full max-w-full min-w-0 text-black">
 diff --git a/src/lib/ChatScreens/ChatBody.svelte b/src/lib/ChatScreens/ChatBody.svelte
-index 6d8b8d204..56ae618f8 100644
+index 6d8b8d204..dcb16f525 100644
 --- a/src/lib/ChatScreens/ChatBody.svelte
 +++ b/src/lib/ChatScreens/ChatBody.svelte
-@@ -42,6 +42,92 @@
+@@ -7,6 +7,7 @@
+     import { addMetadataToElement, getDistance, ParseMarkdown, postTranslationParse, resolveInlayPlaceholders, trimMarkdown, type CbsConditions, type simpleCharacterArgument } from "../../ts/parser/parser.svelte"
+     import { getLLMCache, translateHTML } from "../../ts/translator/translator"
+     import { getModuleAssets } from "src/ts/process/modules";
++    import { reportMarkdownParse } from "src/ts/process/parseDebug";
+     import { getCurrentCharacter } from "src/ts/storage/database.svelte";
+     import { getFileSrc } from "src/ts/globalApi.svelte";
+ 
+@@ -42,6 +43,92 @@
      let lastCharArg:string|simpleCharacterArgument = null
      let lastChatId = -10
  
@@ -344,7 +352,7 @@ index 6d8b8d204..56ae618f8 100644
      function getCbsCondition(){
          try{
              const cbsConditions:CbsConditions = {
-@@ -59,7 +145,6 @@
+@@ -59,7 +146,6 @@
      }
  
      const markParsing = async (data: string, charArg: string | simpleCharacterArgument, chatID: number, tries?:number) => {
@@ -352,7 +360,7 @@ index 6d8b8d204..56ae618f8 100644
          translated;
          retranslate;
          let lastParsedQueue = ''
-@@ -78,7 +163,7 @@
+@@ -78,7 +164,7 @@
                              : !DBState.db.legacyTranslation
                              ? await getLLMCache(await ParseMarkdown(data, charArg, 'pretranslate', chatID, getCbsCondition()))
                              : await getLLMCache(await ParseMarkdown(data, charArg, mode, chatID, getCbsCondition()))
@@ -361,7 +369,7 @@ index 6d8b8d204..56ae618f8 100644
                              translateText = cache !== null
                          }
                          else{
-@@ -89,11 +174,9 @@
+@@ -89,11 +175,9 @@
                      const lastTranslated = translated
  
                      setTimeout(() => {
@@ -374,7 +382,7 @@ index 6d8b8d204..56ae618f8 100644
                      if (lastTranslated !== translateText) {
                          return;
                      }
-@@ -107,7 +190,7 @@
+@@ -107,7 +191,7 @@
                  }
  
                  let transResult
@@ -383,7 +391,7 @@ index 6d8b8d204..56ae618f8 100644
                  if(DBState.db.translatorType === 'llm' && DBState.db.translateBeforeHTMLFormatting){
                      await sleep(100)
                      translating = true
-@@ -148,18 +231,15 @@
+@@ -148,18 +232,15 @@
                  lastParsedQueue = marked
                  lastCharArg = charArg
                  return marked
@@ -403,7 +411,7 @@ index 6d8b8d204..56ae618f8 100644
              lastParsed = lastParsedQueue
          }
      }
-@@ -169,7 +249,7 @@
+@@ -169,7 +250,7 @@
              return
          }
          const imgs = bodyRoot.querySelectorAll('img:not([src^="data:"]):not([src^="http:"]):not([src^="https:"]):not([src^="blob:"]):not([src^="file:"]):not([src^="tauri:"]):not([src^="/"]):not([noimage])') as NodeListOf<HTMLImageElement>
@@ -412,7 +420,7 @@ index 6d8b8d204..56ae618f8 100644
          if (imgs.length > 0) {
              const currentCharacter = getCurrentCharacter()
              const styl = currentCharacter.prebuiltAssetStyle
-@@ -184,22 +264,33 @@
+@@ -184,22 +265,33 @@
  
              imgs.forEach(async (img) => {
                  const name = img.getAttribute('src')?.toLocaleLowerCase() || ''
@@ -454,7 +462,7 @@ index 6d8b8d204..56ae618f8 100644
                      return
                  }
  
-@@ -222,17 +313,27 @@
+@@ -222,17 +314,27 @@
                      }
                  }
                  if(currentFound){
@@ -490,8 +498,15 @@ index 6d8b8d204..56ae618f8 100644
                  }
                  else{
                      img.setAttribute('noimage', 'true')
-@@ -244,18 +345,40 @@
-     let markParsingResult = $derived.by(() => markParsing(msgDisplay, character, idx))
+@@ -241,21 +343,46 @@
+         }
+     }
+ 
+-    let markParsingResult = $derived.by(() => markParsing(msgDisplay, character, idx))
++    let markParsingResult = $derived.by(() => {
++        reportMarkdownParse(idx)
++        return markParsing(msgDisplay, character, idx)
++    })
  
      $effect(() => {
 -        markParsingResult
@@ -603,12 +618,39 @@ index 60b64610b..7a7dacb68 100644
  </style>
 \ No newline at end of file
 diff --git a/src/lib/ChatScreens/Chats.svelte b/src/lib/ChatScreens/Chats.svelte
-index ba05f62e5..dbfa10d1f 100644
+index ba05f62e5..17e02b5de 100644
 --- a/src/lib/ChatScreens/Chats.svelte
 +++ b/src/lib/ChatScreens/Chats.svelte
-@@ -44,7 +44,8 @@
+@@ -1,5 +1,6 @@
+ <script lang="ts">
+     import type { character, Message } from 'src/ts/storage/database.svelte';
++    import isEqual from 'lodash/isEqual';
+     import { mount, onDestroy, unmount } from 'svelte';
+     import Chat from './Chat.svelte';
+     import { getCharImage } from 'src/ts/characters';
+@@ -27,6 +28,7 @@
+         userIcon,
+         loadPages,
+         userIconPortrait,
++        bottomInset = 0,
+         hasNewUnreadMessage = $bindable(false)
+     }:{
+         messages: Message[]
+@@ -39,12 +41,20 @@
+         userIcon: string
+         loadPages: number
+         userIconPortrait?: boolean
++        bottomInset?: number
+         hasNewUnreadMessage?: boolean
+     } = $props();
  
      let chatBody: HTMLDivElement;
++    // Cache the simple-character snapshot so its REFERENCE stays stable while the
++    // character is unchanged. updateChatBody runs on every streaming tick and
++    // Object.assign-copies `character` into every message's reactive props; a
++    // fresh object each tick made every ChatBody's markdown derived re-run (all
++    // messages blank→re-parse during streaming — a real heat/flicker bug).
++    let cachedSimpleChar: ReturnType<typeof createSimpleCharacter> | null = null;
      let hashes: Set<number> = new Set();
 -    let mountInstances: Map<number, {}> = new Map();
 +    let mountInstances: Map<number, any> = new Map();
@@ -616,15 +658,23 @@ index ba05f62e5..dbfa10d1f 100644
  
      //Non-cryptographic hash function to generate a unique hash for each message
      function hashCode(str:string):number {
-@@ -70,6 +71,7 @@
+@@ -69,7 +79,14 @@
+         let currentHashes: Set<number> = new Set();
          const charImage = getCharImage(currentCharacter.image, 'css')
          const userImage = getCharImage(userIcon, 'css')
-         const simpleChar = createSimpleCharacter(currentCharacter);
+-        const simpleChar = createSimpleCharacter(currentCharacter);
++        // Only swap the reference when the snapshot's CONTENT actually changes,
++        // so streaming ticks don't churn `character` for every message.
++        const candidateSimpleChar = createSimpleCharacter(currentCharacter);
++        if (!cachedSimpleChar || !isEqual(cachedSimpleChar, candidateSimpleChar)) {
++            cachedSimpleChar = candidateSimpleChar;
++        }
++        const simpleChar = cachedSimpleChar;
 +        const currentChatRoomId = getCurrentChatRoomId() ?? '';
          let loadStart = messages.length - 1
          let loadEnd = messages.length - loadPages
  
-@@ -100,43 +102,48 @@
+@@ -100,43 +117,48 @@
              const messageLargePortrait = message.role === 'user' ? (userIconPortrait ?? false) : ((currentCharacter as character).largePortrait ?? false);
              const reloadPointer = reloadPointerMap[i] ?? 0;
              const isRerollTarget = i === lastRealCharIdx;
@@ -700,7 +750,7 @@ index ba05f62e5..dbfa10d1f 100644
                  const nextElement = nextHash === 0 ? null : chatBody.querySelector(`[x-hashed="${nextHash}"]`);
                  if(nextElement){
                      chatBody.insertBefore(b, nextElement?.nextSibling);
-@@ -145,6 +152,12 @@
+@@ -145,6 +167,12 @@
                      chatBody.prepend(b);
                  }
              }
@@ -713,7 +763,7 @@ index ba05f62e5..dbfa10d1f 100644
              nextHash = currentHash;
  
          }
-@@ -156,6 +169,7 @@
+@@ -156,6 +184,7 @@
              if(inst){
                  unmount(inst);
                  mountInstances.delete(hash);
@@ -721,7 +771,7 @@ index ba05f62e5..dbfa10d1f 100644
              }
              const element = chatBody.querySelector(`[x-hashed="${hash}"]`);
              if(element){
-@@ -173,6 +187,7 @@
+@@ -173,6 +202,7 @@
              unmount(inst);
          });
          mountInstances.clear();
@@ -729,7 +779,7 @@ index ba05f62e5..dbfa10d1f 100644
      })
  
      function checkIfAtBottom() {
-@@ -185,17 +200,124 @@
+@@ -185,17 +215,127 @@
          return rect.top <= scRect.bottom + 100;
      }
  
@@ -750,7 +800,10 @@ index ba05f62e5..dbfa10d1f 100644
 +        if (!lastEl) return true;
 +        const rect = lastEl.getBoundingClientRect();
 +        const scRect = chatBody.parentElement.getBoundingClientRect();
-+        return rect.bottom <= scRect.bottom + STICK_THRESHOLD;
++        // When pinned, the latest message rests `bottomInset` above the raw
++        // viewport bottom (the floating composer occupies that strip), so the
++        // stick zone is measured against `scRect.bottom - bottomInset`.
++        return rect.bottom <= scRect.bottom - bottomInset + STICK_THRESHOLD;
 +    }
 +
 +    let pinnedToBottom = true;
@@ -814,7 +867,7 @@ index ba05f62e5..dbfa10d1f 100644
 +                const lastEl = chatBody?.firstElementChild as HTMLElement | null;
 +                if (lastEl) {
 +                    withSuppressedScroll(() => {
-+                        scrollWithinContainer(lastEl, container, { block: 'end', behavior: 'instant' });
++                        scrollWithinContainer(lastEl, container, { block: 'end', behavior: 'instant', bottomInset });
 +                    });
 +                }
 +            } else if (anchorEl && chatBody?.contains(anchorEl)) {
@@ -843,7 +896,7 @@ index ba05f62e5..dbfa10d1f 100644
          const chatScreen = chatBody.parentElement;
          if(!element || !chatScreen) return;
 -        scrollWithinContainer(element, chatScreen, { block: 'start', behavior: 'instant' });
-+        scrollWithinContainer(element, chatScreen, { block: 'end', behavior: 'instant' });
++        scrollWithinContainer(element, chatScreen, { block: 'end', behavior: 'instant', bottomInset });
      }
  
      export const scrollToLatestMessage = () => {
@@ -855,7 +908,7 @@ index ba05f62e5..dbfa10d1f 100644
          scrollLatestIntoChatScreen();
      }
  
-@@ -210,17 +332,13 @@
+@@ -210,17 +350,13 @@
          const currentChatRoomId = getCurrentChatRoomId();
          const isSameChat = currentChatRoomId === previousChatRoomId;
  
@@ -879,7 +932,7 @@ index ba05f62e5..dbfa10d1f 100644
          }
          previousLength = messages.length;
 diff --git a/src/lib/ChatScreens/DefaultChatScreen.svelte b/src/lib/ChatScreens/DefaultChatScreen.svelte
-index 4ead4a722..fbed15d40 100644
+index 4ead4a722..500e72fda 100644
 --- a/src/lib/ChatScreens/DefaultChatScreen.svelte
 +++ b/src/lib/ChatScreens/DefaultChatScreen.svelte
 @@ -6,14 +6,13 @@
@@ -1157,7 +1210,7 @@ index 4ead4a722..fbed15d40 100644
                  <ArrowDown size={14} />
                  <span>{language.newMessage}</span>
              </button>
-@@ -891,17 +803,36 @@ import { isMobile } from 'src/ts/platform'
+@@ -891,17 +803,44 @@ import { isMobile } from 'src/ts/platform'
              <span>{language.selectChatToView}</span>
          </div>
      {:else}
@@ -1183,13 +1236,21 @@ index 4ead4a722..fbed15d40 100644
 +                showNewMessageButton = false;
 +            }
 +        }}>
++            <!-- fixedChatTextarea ON  → floating overlay (h-0 sticky anchor + the
++                 composer translated up to hover above the bottom edge).
++                 fixedChatTextarea OFF → in-flow composer that sits at the end of
++                 the message list and scrolls with it. -->
              <div
 -                    class="{DBState.db.fixedChatTextarea ? 'sticky pt-2 pb-2 right-0 bottom-0 bg-bgcolor' : 'mt-2 mb-2'} w-full"
 -                    style="{DBState.db.fixedChatTextarea ? 'z-index:29;' : ''}"
-+                    class="sticky right-0 bottom-0 z-[29] h-0 w-full overflow-visible pointer-events-none"
++                    class={DBState.db.fixedChatTextarea
++                        ? "sticky right-0 bottom-0 z-[29] h-0 w-full overflow-visible pointer-events-none"
++                        : "w-full"}
              >
 -              <div class="mx-auto w-full {composerWidthClass} px-2">
-+              <div bind:clientHeight={composerOverlayHeight} class="pointer-events-auto mx-auto w-full max-w-3xl px-2 pb-4 -translate-y-full">
++              <div bind:clientHeight={composerOverlayHeight} class={DBState.db.fixedChatTextarea
++                        ? "pointer-events-auto mx-auto w-full max-w-3xl px-2 pb-4 -translate-y-full"
++                        : "pointer-events-auto mx-auto w-full max-w-3xl px-2 pt-2 pb-2"}>
                  <!-- "plugin-compat-items-stretch" is a compat hook (not a Tailwind class):
                       plugins that locate the composer via div[class*="items-stretch"] (e.g. gemini-cache-keeper)
                       relied on the pre-redesign container class. Keep it so they can still find/anchor their UI,
@@ -1199,7 +1260,7 @@ index 4ead4a722..fbed15d40 100644
                  {#if DBState.db.characters[$selectedCharID]?.chaId !== '§playground'}
                      <ShDropdownMenu bind:open={openMenu}>
                          <ShDropdownMenuTrigger>
-@@ -1008,7 +939,7 @@ import { isMobile } from 'src/ts/platform'
+@@ -1008,7 +947,7 @@ import { isMobile } from 'src/ts/platform'
                            class:order-first={multiline}
                            class:overflow-y-auto={inputOverflow}
                            class:overflow-y-hidden={!inputOverflow}
@@ -1208,7 +1269,7 @@ index 4ead4a722..fbed15d40 100644
                            bind:value={messageInput}
                            bind:this={inputEle}
                            onkeydown={(e) => {
-@@ -1063,7 +994,6 @@ import { isMobile } from 'src/ts/platform'
+@@ -1063,7 +1002,6 @@ import { isMobile } from 'src/ts/platform'
                          }
                      }}
                            oninput={()=>{updateInputSizeAll();updateInputTransateMessage(false)}}
@@ -1216,7 +1277,7 @@ index 4ead4a722..fbed15d40 100644
                            style:height={inputHeight}
                  ></textarea>
  
-@@ -1087,7 +1017,7 @@ import { isMobile } from 'src/ts/platform'
+@@ -1087,7 +1025,7 @@ import { isMobile } from 'src/ts/platform'
                      <button
                              onclick={send}
                              aria-label={willResend ? language.reroll : language.send}
@@ -1225,7 +1286,7 @@ index 4ead4a722..fbed15d40 100644
                      >
                          {#if willResend}
                              <RefreshCcwIcon size={18} />
-@@ -1097,8 +1027,6 @@ import { isMobile } from 'src/ts/platform'
+@@ -1097,8 +1035,6 @@ import { isMobile } from 'src/ts/platform'
                      </button>
                  {/if}
                  </div>
@@ -1234,7 +1295,7 @@ index 4ead4a722..fbed15d40 100644
              {#if DBState.db.useAutoTranslateInput && DBState.db.characters[$selectedCharID]?.chaId !== '§playground'}
                  <div class="flex items-center mt-2 mb-2">
                      <label for='messageInputTranslate' class="text-textcolor ml-4">
-@@ -1132,7 +1060,7 @@ import { isMobile } from 'src/ts/platform'
+@@ -1132,7 +1068,7 @@ import { isMobile } from 'src/ts/platform'
                          {#await getInlayAsset(file) then inlayAsset}
                              <div class="relative">
                                  {#if inlayAsset.type === 'image'}
@@ -1243,7 +1304,7 @@ index 4ead4a722..fbed15d40 100644
                                  {:else if inlayAsset.type === 'video'}
                                      <video controls class="max-w-48 max-h-48 border border-darkborderc">
                                          <source src={inlayAsset.data} type="video/mp4" />
-@@ -1184,40 +1112,9 @@ import { isMobile } from 'src/ts/platform'
+@@ -1184,39 +1120,12 @@ import { isMobile } from 'src/ts/platform'
                      : msg
                  )} {send}/>
              {/if}
@@ -1280,14 +1341,24 @@ index 4ead4a722..fbed15d40 100644
 -                        </section>
 -                    {/each}
 -                </div>
--            {/if}
 +              </div>
 +            </div>
-+            <div class="w-full shrink-0 pointer-events-none" style:height={`calc(${composerOverlayHeight}px + 0.75rem)`}></div>
++            {#if DBState.db.fixedChatTextarea}
++                <!-- Reserve the floating composer's footprint so messages aren't hidden
++                     behind it. In-flow mode needs no spacer (the composer takes real space). -->
++                <div class="w-full shrink-0 pointer-events-none" style:height={`calc(${composerOverlayHeight}px + 0.75rem)`}></div>
+             {/if}
  
              {#if !currentChatReady}
-                 <div class="w-full flex justify-center text-textcolor2 italic mb-12">
-@@ -1331,8 +1228,7 @@ import { isMobile } from 'src/ts/platform'
+@@ -1239,6 +1148,7 @@ import { isMobile } from 'src/ts/platform'
+             <Chats
+                 bind:this={chatsInstance}
+                 messages={currentChat}
++                bottomInset={DBState.db.fixedChatTextarea ? composerOverlayHeight + 12 : 0}
+                 loadPages={loadPages}
+                 onReroll={reroll}
+                 onNextSwipe={nextSwipe}
+@@ -1331,8 +1241,7 @@ import { isMobile } from 'src/ts/platform'
              <textarea
                      bind:value={messageInput}
                      bind:this={fullscreenEle}
@@ -1297,7 +1368,7 @@ index 4ead4a722..fbed15d40 100644
                      class="flex-1 min-h-0 w-full resize-none rounded-md border border-darkborderc bg-transparent p-3 text-textcolor text-base outline-hidden overflow-y-auto focus:border-textcolor transition-colors"
              ></textarea>
              <div class="flex justify-end mt-3">
-@@ -1346,6 +1242,14 @@ import { isMobile } from 'src/ts/platform'
+@@ -1346,6 +1255,14 @@ import { isMobile } from 'src/ts/platform'
      </div>
  {/if}
  <style>
@@ -1343,6 +1414,51 @@ index 6cd827cf5..b0c410580 100644
                          class="new-image"
                          style:width={`${100 / currentSrc.length}%`}
                          style:left={`${100 / currentSrc.length * i}%`}
+diff --git a/src/lib/ChatScreens/scrollWithin.ts b/src/lib/ChatScreens/scrollWithin.ts
+index 2a8ba316a..86da68009 100644
+--- a/src/lib/ChatScreens/scrollWithin.ts
++++ b/src/lib/ChatScreens/scrollWithin.ts
+@@ -5,12 +5,17 @@
+ export function scrollWithinContainer(
+     el: HTMLElement,
+     container: HTMLElement,
+-    options: { block: 'start' | 'end'; behavior: ScrollBehavior }
++    options: { block: 'start' | 'end'; behavior: ScrollBehavior; bottomInset?: number }
+ ) {
+     const elRect = el.getBoundingClientRect()
+     const containerRect = container.getBoundingClientRect()
++    // `bottomInset` reserves space at the bottom of the viewport (e.g. for a
++    // floating composer that overlays the scroll area). For `block: 'end'` the
++    // element is aligned to `containerRect.bottom - bottomInset` instead of the
++    // raw bottom, so it lands just above the overlay with no leftover scroll gap.
++    const inset = options.bottomInset ?? 0
+     const offset = options.block === 'start'
+         ? elRect.top - containerRect.top
+-        : elRect.bottom - containerRect.bottom
++        : elRect.bottom - (containerRect.bottom - inset)
+     container.scrollTo({ top: container.scrollTop + offset, behavior: options.behavior })
+ }
+diff --git a/src/lib/Mobile/MobileBody.svelte b/src/lib/Mobile/MobileBody.svelte
+index 36f3b16c6..1bd02085f 100644
+--- a/src/lib/Mobile/MobileBody.svelte
++++ b/src/lib/Mobile/MobileBody.svelte
+@@ -33,7 +33,15 @@
+     </button>
+ </div>
+ {/if}
+-<div class="w-full flex-1 overflow-y-auto bg-bgcolor relative">
++<!-- When the chat screen is shown it owns its own internal scroller
++     (.default-chat-screen). Making this wrapper a second overflow-y-auto created
++     a nested scroller whose %-height didn't resolve on mobile, so the inner
++     scroller never scrolled and its sticky floating composer "came undone".
++     Use a constrained flex fill (no competing overflow) for the chat case;
++     other mobile tab views keep the scrollable block wrapper. -->
++<div class={`w-full flex-1 bg-bgcolor relative ${(!($MobileSideBar > 0) && $selectedCharID !== -1)
++        ? 'flex flex-col min-h-0 overflow-hidden'
++        : 'overflow-y-auto'}`}>
+     {#if $MobileSideBar > 0}
+         <div class="w-full flex flex-col p-2 mt-2 h-full">
+             {#if $MobileSideBar === 1}
 diff --git a/src/styles/chat-images.css b/src/styles/chat-images.css
 new file mode 100644
 index 000000000..e44365138
@@ -1372,4 +1488,61 @@ index 000000000..e44365138
 +.chat-message-container .chattext .x-risu-risu-inlay-image {
 +  width: 100%;
 +  max-width: 100%;
++}
+diff --git a/src/ts/process/parseDebug.ts b/src/ts/process/parseDebug.ts
+new file mode 100644
+index 000000000..215db82e2
+--- /dev/null
++++ b/src/ts/process/parseDebug.ts
+@@ -0,0 +1,51 @@
++// Dev-only markdown re-parse tracer.
++//
++// Markdown parsing is one of the heaviest per-message operations (markdown +
++// sanitize). If a message's `markParsing` re-runs on unrelated/idle reactive
++// updates, EVERY visible message re-parses on each tick — a plausible cause of
++// the device heating up during normal use.
++//
++// This tracer counts parses in a rolling window so you can SEE whether idle,
++// scrolling, or unrelated UI actions trigger a re-parse storm.
++//
++//   Enable:  localStorage.setItem('risu-parse-debug','1')  then reload
++//   Disable: localStorage.removeItem('risu-parse-debug')
++//
++// When disabled it costs a single cached boolean check, so it can stay wired in
++// production without measurable overhead.
++
++let enabled: boolean | null = null
++
++function isEnabled(): boolean {
++    if (enabled === null) {
++        try {
++            enabled = localStorage.getItem('risu-parse-debug') === '1'
++        } catch {
++            enabled = false
++        }
++    }
++    return enabled
++}
++
++const WINDOW_MS = 1000
++let windowStart = 0
++let count = 0
++const seenIdx = new Set<number>()
++
++export function reportMarkdownParse(idx: number): void {
++    if (!isEnabled()) return
++    const now = Date.now()
++    if (windowStart === 0) windowStart = now
++    count++
++    seenIdx.add(idx)
++    if (now - windowStart >= WINDOW_MS) {
++        const idxList = [...seenIdx].sort((a, b) => a - b)
++        console.info(
++            `[parse-debug] ${count} markdown parse(s) in ${now - windowStart}ms ` +
++            `across ${seenIdx.size} message(s): idx [${idxList.join(',')}]`
++        )
++        windowStart = now
++        count = 0
++        seenIdx.clear()
++    }
 +}

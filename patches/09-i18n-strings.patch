@@ -107,7 +107,7 @@ index f83062f3d..10b62ffbe 100644
          "eval": "Code aus Strings auswerten",
          "globalAccess": "Zugriff auf globale Variablen",
 diff --git a/src/lang/en.ts b/src/lang/en.ts
-index 974ed45d9..8d8c4ff31 100644
+index 974ed45d9..2e399cfcd 100644
 --- a/src/lang/en.ts
 +++ b/src/lang/en.ts
 @@ -30,7 +30,7 @@ export const languageEnglish = {
@@ -167,7 +167,7 @@ index 974ed45d9..8d8c4ff31 100644
      persona: "Persona",
      icon: "Icon",
      account: "Account",
-@@ -919,12 +919,14 @@ export const languageEnglish = {
+@@ -919,12 +919,47 @@ export const languageEnglish = {
      webdeeplwarn: "This option is not recommended for use with web version, as it can cause CORS errors.",
      saveBackupLocal: "Save Backup Locally",
      saveBackupForUpstream: "Save Backup for Original RisuAI",
@@ -180,10 +180,43 @@ index 974ed45d9..8d8c4ff31 100644
      forcePlainFetch: "Force Plain Fetch",
 +    useBackendChatJobs: "Run Chat Generation on Server",
 +    useBackendMultiagent: "Run MultiAgent Pipeline on Server",
++    backendMultiagent: {
++        sectionName: "Backend MultiAgent",
++        description: "Native config for the server-side MultiAgent pipeline. No plugin install required — set an API key here and the backend runs the pipeline using its built-in agent prompts. Leave a prompt blank to use the server default.",
++        connectionSource: "Connection source",
++        connectionSourceManual: "Manual entry",
++        usingPresetConnection: "Using the selected model preset's API key, endpoint, and model. Only OpenAI-compatible presets are supported.",
++        apiKey: "Analysis agent API key",
++        apiKeyPlaceholder: "Required to enable the pipeline",
++        baseUrl: "Base URL",
++        model: "Model",
++        provider: "Provider label (optional)",
++        temperature: "Temperature",
++        maxTokens: "Max tokens (blank = default)",
++        maxTokensPlaceholder: "default",
++        contextWindow: "Context window (messages)",
++        extraBodyJson: "Extra body JSON (OpenAI-compatible, optional)",
++        strictMode: "Strict mode",
++        strictModeLenient: "Lenient (fail-open)",
++        strictModeStrict: "Strict (block on error)",
++        injectionPosition: "Injection position",
++        injectionFormat: "Injection format",
++        analysisLanguage: "Analysis language",
++        agents: "Agents",
++        agentWorldbuilding: "Worldbuilding agent",
++        agentPlot: "Plot agent",
++        agentCharacter: "Character agent",
++        agentEnabled: "Enabled",
++        systemPromptOverride: "System prompt override (blank = built-in)",
++        systemPromptPlaceholder: "Leave blank to use the server's built-in system prompt",
++        userPromptOverride: "User prompt template override (blank = built-in)",
++        userPromptPlaceholder: "Leave blank to use the server's built-in user prompt template",
++        resetToDefaults: "Reset to defaults",
++    },
      autoFillRequestURL: "Autofill Request URL",
      newOAIHandle: "New OpenAI Handling",
      inlayImage: "Inlay Image Feature",
-@@ -1028,8 +1030,8 @@ export const languageEnglish = {
+@@ -1028,8 +1063,8 @@ export const languageEnglish = {
      trash: "Trash",
      trashDesc: "Deleted characters are moved to trash. you can restore or delete them permanently. deleted characters are automatically purged after 3 days.",
      shareExport: "Share/Export",
@@ -194,7 +227,7 @@ index 974ed45d9..8d8c4ff31 100644
      jsonDesc: "JSON format is a format that is easy to read and write for both humans and machines.",
      nickname: "Nickname",
      useRegexLorebook: "Use Regex",
-@@ -1250,7 +1252,7 @@ export const languageEnglish = {
+@@ -1250,7 +1285,7 @@ export const languageEnglish = {
      home: "Home",
      showSavingIcon: "Show Saving Icon",
      pluginVersionWarn:
@@ -203,7 +236,7 @@ index 974ed45d9..8d8c4ff31 100644
      imageTranslation: "Image Translation",
      banCharacterset: "Auto Regenerate On Characterset",
      realmDirectOpen: "Directly open character in RisuRealm",
-@@ -1471,7 +1473,7 @@ export const languageEnglish = {
+@@ -1471,7 +1506,7 @@ export const languageEnglish = {
      modelModeLockLegacy: "Lock to legacy model mode",
      modelModeLockLegacyDesc: "Use the original RisuAI model system",
      modelModeLockPreset: "Lock to model preset mode",
@@ -212,7 +245,7 @@ index 974ed45d9..8d8c4ff31 100644
      modelModeLockNone: "No lock",
      modelModeLockNoneDesc: "Choose the mode per chat",
      newChatModelModeLabel: "Default model mode for new chats",
-@@ -1570,10 +1572,10 @@ export const languageEnglish = {
+@@ -1570,10 +1605,10 @@ export const languageEnglish = {
      nightlyWarning:
          "## Nightly Builds\n\nYou are connecting to a nightly build of the software. This version is meant for testing and most likely contains bugs. **In this version, even if you encounter issues, we do not support resolving them directly.**",
      loginSionyw: "Login with Sionyw Account",
@@ -225,7 +258,7 @@ index 974ed45d9..8d8c4ff31 100644
  
      pluginRisksInuserFriendly: {
          eval: "Evaluating Code from Strings",
-@@ -1630,8 +1632,8 @@ export const languageEnglish = {
+@@ -1630,8 +1665,8 @@ export const languageEnglish = {
      partialBackupFirstConfirm: "⚠️ WARNING: Partial Local Backup ⚠️\n\nThis backup quickly saves only essential information.\n\nIncluded:\n- Database (chat history, characters, modules, plugins, prompts, settings, etc.)\n- Character profile icons (main images)\n- User icons and custom backgrounds\n- Persona icons\n- Folder images\n- Bot preset images\n\n⚠️ NOT Included:\n- Emotion images\n- Additional character assets\n- VITS voice files\n- All other additional media files\n\nThis backup file does NOT include all character assets!\nIf you need a complete backup, use the regular local backup.\n\nDo you want to continue?",
      partialBackupSecondConfirm: "⚠️⚠️ FINAL WARNING ⚠️⚠️\n\nThis backup saves only character profile images and does NOT save most other assets!\n\nWhat will be saved:\n- Database (chat history, characters, modules, plugins, prompts, settings, etc.)\n- Character profile icons (main images)\n- User icons and custom backgrounds\n- Persona icons\n- Folder images\n- Bot preset images\n\nWhat will NOT be saved:\n- Emotion images\n- Additional character assets\n- VITS voice files\n- All other media files\n\n⚠️ Proceed ONLY if you don't need character assets in your backup file! ⚠️\n\nAre you really sure you want to proceed with partial backup?",
      savePartialLocalBackup: "Save Partial Backup Locally (Excluding Character Assets)",
@@ -236,7 +269,7 @@ index 974ed45d9..8d8c4ff31 100644
      serverBackupSave: "Save Backup to Server",
      serverBackupManage: "Manage Server Backups",
      serverBackupSaving: "Saving backup to server...",
-@@ -1728,7 +1730,7 @@ export const languageEnglish = {
+@@ -1728,7 +1763,7 @@ export const languageEnglish = {
      togglePresetExported: (name: string) => `Preset "${name}" exported.`,
      longPressToPopupEditor: "Long press to open popup editor",
      showInputActionBar: "Show input action bar",
@@ -245,7 +278,7 @@ index 974ed45d9..8d8c4ff31 100644
      importSaveZip: "Load from Save Folder (Zip Upload)",
      importSaveZipDesc: "Compress your existing RisuAI project's save folder into a zip file and upload it here to import your data. Uploading may fail if the zip file is too large — in that case, copy the save folder directly into the server's save directory and restart to migrate automatically.",
      importSaveFolderScanning: "Scanning save folder...",
-@@ -1789,7 +1791,7 @@ export const languageEnglish = {
+@@ -1789,7 +1824,7 @@ export const languageEnglish = {
      nanoGPTManualModelSelect: "Manual Model Select",
      // Remote Access (Cloudflare Quick Tunnel)
      remoteAccess: "Remote Access",
@@ -254,7 +287,7 @@ index 974ed45d9..8d8c4ff31 100644
      remoteAccessOpen: "Open Remote Access",
      remoteAccessClose: "Close Remote Access",
      remoteAccessCloseConfirm: "Close remote access? The link will expire.",
-@@ -1888,7 +1890,7 @@ export const languageEnglish = {
+@@ -1888,7 +1923,7 @@ export const languageEnglish = {
      storageDiskHeaderUnknown: "Disk size unavailable",
      storageDiskOther: "Other (system & apps)",
      storageDiskFree: "Free",
@@ -263,7 +296,7 @@ index 974ed45d9..8d8c4ff31 100644
  
      // Per-row labels (shown in the breakdown list with ⓘ explanations)
      storageRowDbFile: "risuai.db",
-@@ -1920,7 +1922,7 @@ export const languageEnglish = {
+@@ -1920,7 +1955,7 @@ export const languageEnglish = {
      storageRowReclaimable: (size: number) =>
          `${(size / 1024 / 1024).toFixed(1)} MB reclaimable — run Optimize to compact.`,
      storageInternalOnly: "Show with full disk",
@@ -272,7 +305,7 @@ index 974ed45d9..8d8c4ff31 100644
  
      // 2 GB BLOB limit (separate section)
      storageBlobLimit: "2 GB BLOB limit",
-@@ -2001,7 +2003,7 @@ export const languageEnglish = {
+@@ -2001,7 +2036,7 @@ export const languageEnglish = {
  
      // Data migration (formerly "Account & Files")
      migration: "Data Migration",
@@ -281,6 +314,30 @@ index 974ed45d9..8d8c4ff31 100644
      migrationInfoBackupMoved: "Server backups, local backups, and DB snapshots have moved to [System → Backups].",
      migrationGotoBackupTab: "Open Backups tab",
      migrationLegacyAccordion: "RisuAI-style backup (legacy)",
+@@ -2084,12 +2119,6 @@ export const languageEnglish = {
+     backupLocalDownloadDesc: "Generate a fresh backup from current data and download it directly to your device.",
+     backupLocalRestoreDesc: "Restore from a backup file on your device.",
+ 
+-    relatedGithub: "GitHub",
+-    relatedGithubDesc: "Star this project to show your support.",
+-    relatedFeedbackForm: "Feedback Form",
+-    relatedFeedbackFormDesc: "Submit issues or share suggestions.",
+-    relatedContactEmail: "Contact",
+-    relatedContactEmailDesc: "Send a direct email to the developer.",
+     relatedArcaLive: "ArcaLive Channel",
+     relatedArcaLiveDesc: "Discuss with other users in the AI chat channel.",
+ 
+@@ -2114,6 +2143,10 @@ export const languageEnglish = {
+         kindMemory: "Memory",
+         kindEmotion: "Emotion",
+         kindSub: "Sub",
++        kindMultiagent: "MultiAgent",
++        agentWorldbuilding: "World",
++        agentPlot: "Plot",
++        agentCharacter: "Character",
+         outputTokens: "out",
+         thinkingTokensLabel: "think",
+         tokensPerSec: "tok/s",
 diff --git a/src/lang/es.ts b/src/lang/es.ts
 index efea9b458..7c869b010 100644
 --- a/src/lang/es.ts
@@ -413,7 +470,7 @@ index e88993402..989d05cba 100644
          "extractJson": "Wenn es nicht leer ist, werden bestimmte JSON-Daten aus der Antwort extrahiert. Wenn Sie beispielsweise `response.text[0]` in der Antwort `{\"response\": {\"text\": [\"hallo\"]}}` extrahieren möchten, können Sie `response.text.0` eingeben.",
          "translatorNote": "Hier können Sie für jeden Charakter eine eindeutige Übersetzungsanweisung hinzufügen. Diese Option gilt nur bei Verwendung des Ax.-Modells für die Übersetzung. Fügen Sie dazu `{{slot::tnote}}` in die Spracheinstellungen ein. Es funktioniert nicht in Gruppenchats.",
 diff --git a/src/lang/help.en.ts b/src/lang/help.en.ts
-index b1ded97f4..3a1f58f24 100644
+index b1ded97f4..db8523e16 100644
 --- a/src/lang/help.en.ts
 +++ b/src/lang/help.en.ts
 @@ -1,5 +1,5 @@
@@ -427,7 +484,7 @@ index b1ded97f4..3a1f58f24 100644
          useExperimental: "If enabled, it will show some experimental features.",
          forceProxyAsOpenAI: "If enabled, it will force to use OpenAI format when using reverse proxy.",
          forcePlainFetch: "If enabled, it will use the browser Fetch API instead of the native HTTP request. This can cause CORS errors.",
-+        useBackendMultiagent: "If enabled and Run Chat Generation on Server is active, the MultiAgent RP pipeline runs on the server instead of the browser. Requires the multiagent plugin to be configured (API key set). Falls back gracefully if the pipeline fails.",
++        useBackendMultiagent: "If enabled and Run Chat Generation on Server is active, the MultiAgent RP pipeline runs on the server instead of the browser. Configure it in the Backend MultiAgent section below (an API key is required) — no plugin install needed. Falls back gracefully if the pipeline fails.",
 +        useBackendChatJobs: "If enabled, the actual AI request is executed by the PocketRisu-Alter server. Generation continues even if you turn off the screen or close the browser, and the completed message is loaded when you reopen the app. Currently OpenAI-compatible providers only.",
          autoFillRequestURL: "If enabled, it will automatically fill the request URL to match the current model.",
          localNetworkModeDesc: "Routes private/LAN model URLs through the local server instead of browser direct fetch.\n\n**Purpose**\n- Avoid browser private-network/CORS restrictions\n- Mitigate timeout risk for slow first-token local inference\n\n**How it works**\n- Streaming uses experimental Job+WebSocket relay first (fallback to /proxy2)\n- Non-streaming uses /proxy2 relay\n\n**Constraints**\n- Scope is OpenAI-compatible request paths only",
@@ -684,7 +741,7 @@ index 65ac89726..56609ac83 100644
          "extractJson": "此欄位不為空時，將從回應中提取特定 JSON 資料。例如：要從回應 `{\"response\": {\"text\": [\"hello\"]}}` 提取 `response.text[0]`，請填寫 `response.text.0`。",
          "translatorNote": "可在此處為每個角色加入獨特的翻譯備註，但僅適用於使用 Ax. 模型進行翻譯。要啟用此功能，請在語言設定中包含 `{{slot::tnote}}`。此功能不適用群組對話。",
 diff --git a/src/lang/ko.ts b/src/lang/ko.ts
-index ed585a767..de49eefd5 100644
+index ed585a767..8e2c7dfc1 100644
 --- a/src/lang/ko.ts
 +++ b/src/lang/ko.ts
 @@ -28,7 +28,7 @@ export const languageKorean = {
@@ -720,16 +777,49 @@ index ed585a767..de49eefd5 100644
    sayNothing: "어떤 문자열도 입력되지 않을 시 'say nothing' 입력",
    regexScript: "정규식 스크립트",
    type: "타입",
-@@ -1008,6 +1008,8 @@ export const languageKorean = {
+@@ -1008,6 +1008,41 @@ export const languageKorean = {
    cot: "생각의 사슬",
    forcePlainFetch: "직접 요청 보내기",
    autoFillRequestURL: "요청 URL 자동 채우기",
 +  useBackendChatJobs: "채팅 생성을 서버에서 실행",
 +  useBackendMultiagent: "MultiAgent 파이프라인을 서버에서 실행",
++  backendMultiagent: {
++    sectionName: "백엔드 MultiAgent",
++    description: "서버 측 MultiAgent 파이프라인의 네이티브 설정입니다. 플러그인 설치가 필요 없습니다 — 여기에 API 키만 입력하면 서버가 내장 에이전트 프롬프트로 파이프라인을 실행합니다. 프롬프트를 비워두면 서버 기본값을 사용합니다.",
++    connectionSource: "연결 소스",
++    connectionSourceManual: "직접 입력",
++    usingPresetConnection: "선택한 모델 프리셋의 API 키·엔드포인트·모델을 사용합니다. OpenAI 호환 프리셋만 지원됩니다.",
++    apiKey: "분석 에이전트 API 키",
++    apiKeyPlaceholder: "파이프라인 활성화에 필요",
++    baseUrl: "Base URL",
++    model: "모델",
++    provider: "제공자 라벨 (선택)",
++    temperature: "Temperature",
++    maxTokens: "최대 토큰 (비우면 기본값)",
++    maxTokensPlaceholder: "기본값",
++    contextWindow: "컨텍스트 윈도우 (메시지 수)",
++    extraBodyJson: "추가 본문 JSON (OpenAI 호환, 선택)",
++    strictMode: "엄격 모드",
++    strictModeLenient: "관대 (실패 시 무시하고 진행)",
++    strictModeStrict: "엄격 (오류 시 차단)",
++    injectionPosition: "주입 위치",
++    injectionFormat: "주입 형식",
++    analysisLanguage: "분석 언어",
++    agents: "에이전트",
++    agentWorldbuilding: "세계관 에이전트",
++    agentPlot: "플롯 에이전트",
++    agentCharacter: "캐릭터 에이전트",
++    agentEnabled: "활성화",
++    systemPromptOverride: "시스템 프롬프트 오버라이드 (비우면 내장 기본값)",
++    systemPromptPlaceholder: "비워두면 서버의 내장 시스템 프롬프트를 사용합니다",
++    userPromptOverride: "유저 프롬프트 템플릿 오버라이드 (비우면 내장 기본값)",
++    userPromptPlaceholder: "비워두면 서버의 내장 유저 프롬프트 템플릿을 사용합니다",
++    resetToDefaults: "기본값으로 초기화",
++  },
    newOAIHandle: "새로운 OpenAI 방식 적용",
    inlayImage: "인레이 이미지",
    nativeAutomark: "실험적 네이티브 오토마크 사용",
-@@ -1122,8 +1124,8 @@ export const languageKorean = {
+@@ -1122,8 +1157,8 @@ export const languageKorean = {
      "삭제된 캐릭터는 휴지통에 보관됩니다. 복구하거나 영구 삭제할 수 있습니다. 3일 후에는 자동으로 영구 삭제됩니다.",
    shareExport: "공유/엑스포트",
    risupresetDesc:
@@ -740,7 +830,7 @@ index ed585a767..de49eefd5 100644
    jsonDesc: "JSON은 데이터를 저장하고 불러오기 위한 일반적인 포맷입니다.",
    nickname: "닉네임",
    useRegexLorebook: "정규식 사용",
-@@ -1359,7 +1361,7 @@ export const languageKorean = {
+@@ -1359,7 +1394,7 @@ export const languageKorean = {
    home: "홈",
    showSavingIcon: "저장 아이콘 표시",
    pluginVersionWarn:
@@ -749,7 +839,7 @@ index ed585a767..de49eefd5 100644
    imageTranslation: "이미지 번역",
    banCharacterset: "문자 집합으로 자동 재생성",
    realmDirectOpen: "RisuRealm 미리보기에서 바로 열기",
-@@ -1695,11 +1697,11 @@ export const languageKorean = {
+@@ -1695,11 +1730,11 @@ export const languageKorean = {
      "## 나이틀리 빌드\n\n나이틀리 빌드에 연결하려고 합니다. 이 버전은 테스트용이며 버그가 포함되어 있을 수 있습니다. **이 버전에서는 버그 등 문제가 발생하더라도 직접적으로 해결하는 것을 지원하지 않습니다.**",
    loginSionyw: "Sionyw 계정으로 로그인",
    pluginRiskDetectedAlert:
@@ -763,7 +853,7 @@ index ed585a767..de49eefd5 100644
    pluginRisksInuserFriendly: {
      eval: "문자열에서 코드 실행",
      globalAccess: "글로벌 변수 접근",
-@@ -2046,12 +2048,12 @@ export const languageKorean = {
+@@ -2046,12 +2081,12 @@ export const languageKorean = {
    storageDiskOther: "기타 (시스템 및 다른 앱)",
    storageDiskFree: "여유 공간",
    storageDiskRisuTotal: (size: number) =>
@@ -778,7 +868,7 @@ index ed585a767..de49eefd5 100644
    storageRowWal: "WAL (Write-Ahead Log)",
    storageRowWalDesc:
      "임시 트랜잭션 로그. 저장이 먼저 여기 기록된 뒤 본 파일에 통합됩니다. 사용 중엔 정상적으로 존재.",
-@@ -2090,7 +2092,7 @@ export const languageKorean = {
+@@ -2090,7 +2125,7 @@ export const languageKorean = {
      `${(size / 1024 / 1024).toFixed(1)} MB 회수 가능 — Optimize로 압축.`,
    storageInternalOnly: "저장공간과 함께보기",
    storageInternalOnlyHint:
@@ -787,7 +877,7 @@ index ed585a767..de49eefd5 100644
  
    // 2 GB BLOB 한계 (별도 섹션)
    storageBlobLimit: "2 GB BLOB 한계",
-@@ -2186,7 +2188,7 @@ export const languageKorean = {
+@@ -2186,7 +2221,7 @@ export const languageKorean = {
    // 데이터 이전 (구 "계정 & 파일")
    migration: "데이터 이전",
    migrationDesc:
@@ -796,7 +886,7 @@ index ed585a767..de49eefd5 100644
    migrationInfoBackupMoved:
      "서버 백업, 로컬 백업, 자동 스냅샷 관리는 [시스템 → 백업] 탭으로 이동했습니다.",
    migrationGotoBackupTab: "백업 탭 열기",
-@@ -2195,7 +2197,7 @@ export const languageKorean = {
+@@ -2195,7 +2230,7 @@ export const languageKorean = {
      "원본 RisuAI 호환 포맷으로 백업·내보내기를 수행하는 보조 기능들입니다. 일반적인 백업 작업은 백업 탭을 사용하세요.",
    migrationSaveFolderAccordion: "노드리스에서 save 폴더 가져오기",
    migrationSaveFolderDesc:
@@ -805,6 +895,30 @@ index ed585a767..de49eefd5 100644
    migrationLoadUpstreamBackup: "원본 리스 로컬 백업 불러오기",
  
    // 시스템 → 백업 탭
+@@ -2280,12 +2315,6 @@ export const languageKorean = {
+     "현재 데이터로 새 백업을 만들어 사용자 기기로 즉시 다운로드합니다.",
+   backupLocalRestoreDesc: "사용자 기기의 백업 파일에서 복원합니다.",
+ 
+-  relatedGithub: "GitHub",
+-  relatedGithubDesc: "Star를 눌러 프로젝트를 응원해주세요.",
+-  relatedFeedbackForm: "의견 보내기",
+-  relatedFeedbackFormDesc: "이슈 제보 및 의견을 보내주세요.",
+-  relatedContactEmail: "개발자 이메일",
+-  relatedContactEmailDesc: "개발자에게 직접 메일을 보낼 수 있어요.",
+   relatedArcaLive: "아카라이브 채널",
+   relatedArcaLiveDesc: "AI 채팅 채널에서 다른 사용자와 이야기를 나눠보세요.",
+ 
+@@ -2309,6 +2338,10 @@ export const languageKorean = {
+     kindMemory: "메모리",
+     kindEmotion: "감정",
+     kindSub: "보조",
++    kindMultiagent: "멀티에이전트",
++    agentWorldbuilding: "세계관",
++    agentPlot: "플롯",
++    agentCharacter: "캐릭터",
+     outputTokens: "출력",
+     thinkingTokensLabel: "사고",
+     tokensPerSec: "tok/s",
 diff --git a/src/lang/vi.ts b/src/lang/vi.ts
 index 257613a10..bb23afbb4 100644
 --- a/src/lang/vi.ts

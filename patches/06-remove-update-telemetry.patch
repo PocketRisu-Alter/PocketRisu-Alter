@@ -256,10 +256,18 @@ index c17f12554..000000000
 -    {/if}
 -{/snippet}
 diff --git a/src/lib/UI/MainMenu.svelte b/src/lib/UI/MainMenu.svelte
-index e6a4a42d5..dcefc1e68 100644
+index e6a4a42d5..faf417bde 100644
 --- a/src/lib/UI/MainMenu.svelte
 +++ b/src/lib/UI/MainMenu.svelte
-@@ -9,8 +9,6 @@
+@@ -2,15 +2,12 @@
+     import { DBState } from 'src/ts/stores.svelte';
+     import Hub from "./Realm/RealmMain.svelte";
+     import { OpenRealmStore, RealmInitialOpenChar } from "src/ts/stores.svelte";
+-    import { ArrowLeft, ChevronDown, MailIcon, SendIcon, TriangleAlertIcon, UsersIcon } from "@lucide/svelte";
+-    import GithubIcon from "./GithubIcon.svelte";
++    import { ArrowLeft, ChevronDown, TriangleAlertIcon, UsersIcon } from "@lucide/svelte";
+     import { getVersionString, openURL } from "src/ts/globalApi.svelte";
+     import { language } from "src/lang";
      import { getRisuHub, hubAdditionalHTML } from "src/ts/characterCards";
      import RisuHubIcon from "./Realm/RealmHubIcon.svelte";
      import Title from "./Title.svelte";
@@ -268,7 +276,7 @@ index e6a4a42d5..dcefc1e68 100644
      import { isSecureContext } from "src/ts/secureContext";
      import { openSettings, SettingsRoute } from "src/ts/routing";
      import ShButton from "./GUI/ShButton.svelte";
-@@ -24,34 +22,6 @@
+@@ -24,34 +21,6 @@
      {#if !$OpenRealmStore}
        <Title />
        <h3 class="text-textcolor2 mt-1">v{getVersionString()}</h3>
@@ -303,6 +311,54 @@ index e6a4a42d5..dcefc1e68 100644
      {/if}
      <div class="w-full flex p-4 flex-col text-textcolor max-w-4xl">
        {#if !$OpenRealmStore}
+@@ -128,46 +97,7 @@
+         Related Links
+       </h1>
+         <div class="grid w-full grid-cols-1 gap-4 p-2 md:grid-cols-2">
+-          <button class="group relative flex min-h-35 flex-col justify-center overflow-hidden rounded-2xl border border-borderc/10 bg-darkbg p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:border-borderc/30 hover:bg-selected/50 hover:shadow-xl hover:shadow-darkbg/50" onclick={() => {
+-            openURL("https://github.com/PocketRisu/PocketRisu")
+-          }}>
+-            <div class="relative z-10 w-[68%] sm:w-[70%]">
+-              <h2 class="text-2xl font-bold tracking-tight text-textcolor">{language.relatedGithub}</h2>
+-              <span class="mt-2 block text-base leading-relaxed text-textcolor2">
+-                {language.relatedGithubDesc}
+-              </span>
+-            </div>
+-            <div aria-hidden="true" class="pointer-events-none absolute -right-12 top-1/2 -translate-y-1/2 text-textcolor">
+-              <GithubIcon class={relatedLinkIconClass} />
+-            </div>
+-          </button>
+-          <button class="group relative flex min-h-35 flex-col justify-center overflow-hidden rounded-2xl border border-borderc/10 bg-darkbg p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:border-borderc/30 hover:bg-selected/50 hover:shadow-xl hover:shadow-darkbg/50" onclick={() => {
+-            openURL("https://forms.gle/5ms5XntMrfaxmHTSA")
+-          }}>
+-            <div class="relative z-10 w-[68%] sm:w-[70%]">
+-              <h2 class="text-2xl font-bold tracking-tight text-textcolor">{language.relatedFeedbackForm}</h2>
+-              <span class="mt-2 block text-base leading-relaxed text-textcolor2">
+-                {language.relatedFeedbackFormDesc}
+-              </span>
+-            </div>
+-            <div aria-hidden="true" class="pointer-events-none absolute -right-12 top-1/2 -translate-y-1/2 text-textcolor">
+-              <SendIcon class={relatedLinkIconClass} strokeWidth={1} />
+-            </div>
+-          </button>
+-          <button class="group relative flex min-h-35 flex-col justify-center overflow-hidden rounded-2xl border border-borderc/10 bg-darkbg p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:border-borderc/30 hover:bg-selected/50 hover:shadow-xl hover:shadow-darkbg/50" onclick={() => {
+-            openURL("mailto:contact@pocketrisu.com")
+-          }}>
+-            <div class="relative z-10 w-[68%] sm:w-[70%]">
+-              <h2 class="text-2xl font-bold tracking-tight text-textcolor">{language.relatedContactEmail}</h2>
+-              <span class="mt-2 block text-base leading-relaxed text-textcolor2">
+-                {language.relatedContactEmailDesc}
+-              </span>
+-            </div>
+-            <div aria-hidden="true" class="pointer-events-none absolute -right-12 top-1/2 -translate-y-1/2 text-textcolor">
+-              <MailIcon class={relatedLinkIconClass} strokeWidth={1} />
+-            </div>
+-          </button>
+-          <button class="group relative flex min-h-35 flex-col justify-center overflow-hidden rounded-2xl border border-borderc/10 bg-darkbg p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:border-borderc/30 hover:bg-selected/50 hover:shadow-xl hover:shadow-darkbg/50" onclick={() => {
++           <button class="group relative flex min-h-35 flex-col justify-center overflow-hidden rounded-2xl border border-borderc/10 bg-darkbg p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:border-borderc/30 hover:bg-selected/50 hover:shadow-xl hover:shadow-darkbg/50" onclick={() => {
+             openURL("https://arca.live/b/characterai")
+           }}>
+             <div class="relative z-10 w-[68%] sm:w-[70%]">
 diff --git a/src/lib/_dev/DevPanel.svelte b/src/lib/_dev/DevPanel.svelte
 index 6fd4fe464..5ae6d7418 100644
 --- a/src/lib/_dev/DevPanel.svelte
@@ -438,7 +494,7 @@ index c6ea708e4..000000000
 -    }
 -}
 diff --git a/src/ts/setting/accessibilitySettingsData.ts b/src/ts/setting/accessibilitySettingsData.ts
-index 31c9d49b0..6bf4d71c9 100644
+index 31c9d49b0..5e3730dbe 100644
 --- a/src/ts/setting/accessibilitySettingsData.ts
 +++ b/src/ts/setting/accessibilitySettingsData.ts
 @@ -49,14 +49,6 @@ export const accessibilitySettingsItems: SettingItem[] = [
@@ -456,7 +512,21 @@ index 31c9d49b0..6bf4d71c9 100644
      {
          id: 'acc.clickToEdit',
          type: 'check',
-@@ -366,7 +358,6 @@ export const accessibilityEditingItems = pick([
+@@ -89,6 +81,13 @@ export const accessibilitySettingsItems: SettingItem[] = [
+         helpKey: 'showInputActionBar',
+         keywords: ['input', 'action', 'bar', 'toolbar', 'copy', 'reset', 'expand', 'editor']
+     },
++    {
++        id: 'acc.fixedChatTextarea',
++        type: 'check',
++        labelKey: 'fixedChatTextarea',
++        bindKey: 'fixedChatTextarea',
++        keywords: ['input', 'composer', 'fixed', 'floating', 'bottom', 'pin', 'sticky']
++    },
+     {
+         id: 'acc.enableDragPartialEdit',
+         type: 'check',
+@@ -366,12 +365,12 @@ export const accessibilityEditingItems = pick([
      'acc.confirmReroll',
      'acc.sendKeyPC',
      'acc.sendKeyMobile',
@@ -464,6 +534,12 @@ index 31c9d49b0..6bf4d71c9 100644
      'acc.clickToEdit',
      'acc.enableBlockPartialEdit',
      'acc.enableDragPartialEdit',
+     'acc.longPressToPopupEditor',
+     'acc.showInputActionBar',
++    'acc.fixedChatTextarea',
+ ]);
+ 
+ export const accessibilityScrollItems = pick([
 diff --git a/src/ts/update.ts b/src/ts/update.ts
 deleted file mode 100644
 index 5d1dc4fce..000000000

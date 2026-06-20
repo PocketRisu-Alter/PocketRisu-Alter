@@ -807,10 +807,10 @@ index da4b9dc91..fc0727428 100644
 -globalThis.TransformStream = globalThis.TransformStream ?? TransformStream   
 +globalThis.TransformStream = globalThis.TransformStream ?? TransformStream;
 diff --git a/src/ts/setting/advancedSettingsData.ts b/src/ts/setting/advancedSettingsData.ts
-index 87b82f647..9cc56694b 100644
+index 87b82f647..942d402c9 100644
 --- a/src/ts/setting/advancedSettingsData.ts
 +++ b/src/ts/setting/advancedSettingsData.ts
-@@ -211,6 +211,15 @@ export const advancedSettingsItems: SettingItem[] = [
+@@ -211,6 +211,19 @@ export const advancedSettingsItems: SettingItem[] = [
      },
  
      // Unrecommended Extra (Condition: showUnrecommended)
@@ -823,14 +823,23 @@ index 87b82f647..9cc56694b 100644
 +        helpKey: 'useBackendMultiagent', showExperimental: true,
 +        condition: (ctx) => ctx.db.useBackendChatJobs,
 +    },
++    {
++        type: 'custom', id: 'adv.backendMultiagentConfig', componentId: 'MultiagentBackendSettings',
++        condition: (ctx) => ctx.db.useBackendChatJobs && ctx.db.useBackendMultiagent,
++    },
      {
          id: 'adv.plainFetch', type: 'check', labelKey: 'forcePlainFetch', bindKey: 'usePlainFetch',
          condition: (ctx) => ctx.db.showUnrecommended, helpKey: 'forcePlainFetch', helpUnrecommended: true, classes: 'mt-4'
 diff --git a/src/ts/setting/customComponents.ts b/src/ts/setting/customComponents.ts
-index 4212faa0d..9bc7ac20d 100644
+index 4212faa0d..1fd55bab7 100644
 --- a/src/ts/setting/customComponents.ts
 +++ b/src/ts/setting/customComponents.ts
-@@ -23,6 +23,7 @@ import InlayCompressButton from 'src/lib/Setting/Pages/Advanced/InlayCompressBut
+@@ -19,10 +19,12 @@ import SeparateParametersSection from 'src/lib/Setting/Pages/SeparateParametersS
+ import TranslatorPresetSettings from 'src/lib/Setting/Pages/Language/TranslatorPresetSettings.svelte';
+ import BanCharacterSetSettings from 'src/lib/Setting/Pages/Advanced/BanCharacterSetSettings.svelte';
+ import SettingsExportButtons from 'src/lib/Setting/Pages/Advanced/SettingsExportButtons.svelte';
++import MultiagentBackendSettings from 'src/lib/Setting/Pages/Advanced/MultiagentBackendSettings.svelte';
+ import InlayCompressButton from 'src/lib/Setting/Pages/Advanced/InlayCompressButton.svelte';
  import ColorSchemeSelect from 'src/lib/Setting/Pages/Display/ColorSchemeSelect.svelte';
  import CustomColorSchemeEditor from 'src/lib/Setting/Pages/Display/CustomColorSchemeEditor.svelte';
  import CustomTextThemeEditor from 'src/lib/Setting/Pages/Display/CustomTextThemeEditor.svelte';
@@ -838,7 +847,12 @@ index 4212faa0d..9bc7ac20d 100644
  import CustomBackgroundToggle from 'src/lib/Setting/Pages/Display/CustomBackgroundToggle.svelte';
  import NullableTextColorToggle from 'src/lib/Setting/Pages/Display/NullableTextColorToggle.svelte';
  import NotificationToggle from 'src/lib/Setting/Pages/Display/NotificationToggle.svelte';
-@@ -47,6 +48,7 @@ export const customComponents: Record<string, Component<any>> = {
+@@ -43,10 +45,12 @@ export const customComponents: Record<string, Component<any>> = {
+     'TranslatorPresetSettings': TranslatorPresetSettings,
+     'BanCharacterSetSettings': BanCharacterSetSettings,
+     'SettingsExportButtons': SettingsExportButtons,
++    'MultiagentBackendSettings': MultiagentBackendSettings,
+     'InlayCompressButton': InlayCompressButton,
      'ColorSchemeSelect': ColorSchemeSelect,
      'CustomColorSchemeEditor': CustomColorSchemeEditor,
      'CustomTextThemeEditor': CustomTextThemeEditor,
@@ -954,7 +968,7 @@ index 16a282245..a45ce567d 100644
          await this.Init()
          return this.realStorage.exportBackup(opts)
 diff --git a/src/ts/storage/database.svelte.ts b/src/ts/storage/database.svelte.ts
-index f4dcf773c..055a0e002 100644
+index f4dcf773c..bda203eeb 100644
 --- a/src/ts/storage/database.svelte.ts
 +++ b/src/ts/storage/database.svelte.ts
 @@ -560,6 +560,15 @@ export function setDatabase(data:Database){
@@ -973,7 +987,7 @@ index f4dcf773c..055a0e002 100644
      data.strictJsonSchema ??= true
      data.statics ??= {
          messages: 0,
-@@ -724,6 +733,10 @@ export function setDatabase(data:Database){
+@@ -724,6 +733,45 @@ export function setDatabase(data:Database){
      if (typeof data.localNetworkMode !== 'boolean') data.localNetworkMode = false
      data.localNetworkTimeoutSec ??= 600
      if (typeof data.localNetworkTimeoutSec !== 'number' || Number.isNaN(data.localNetworkTimeoutSec)) data.localNetworkTimeoutSec = 600
@@ -981,10 +995,114 @@ index f4dcf773c..055a0e002 100644
 +    if (typeof data.useBackendChatJobs !== 'boolean') data.useBackendChatJobs = false
 +    data.useBackendMultiagent ??= false
 +    if (typeof data.useBackendMultiagent !== 'boolean') data.useBackendMultiagent = false
++    {
++        const defaults = createDefaultBackendMultiagentConfig()
++        const conf = (typeof data.backendMultiagentConfig === 'object' && data.backendMultiagentConfig)
++            ? data.backendMultiagentConfig as Partial<BackendMultiagentConfig>
++            : {}
++        const agents = (typeof conf.agents === 'object' && conf.agents) ? conf.agents as Record<string, Partial<BackendMultiagentAgentConfig>> : {}
++        const mergeAgent = (name: keyof BackendMultiagentConfig['agents']): BackendMultiagentAgentConfig => {
++            const a = (typeof agents[name] === 'object' && agents[name]) ? agents[name] : {}
++            return {
++                enabled: typeof a.enabled === 'boolean' ? a.enabled : defaults.agents[name].enabled,
++                systemPrompt: typeof a.systemPrompt === 'string' ? a.systemPrompt : '',
++                userPromptTemplate: typeof a.userPromptTemplate === 'string' ? a.userPromptTemplate : '',
++            }
++        }
++        data.backendMultiagentConfig = {
++            sourcePresetId: typeof conf.sourcePresetId === 'string' ? conf.sourcePresetId : defaults.sourcePresetId,
++            provider: typeof conf.provider === 'string' ? conf.provider : defaults.provider,
++            baseUrl: typeof conf.baseUrl === 'string' ? conf.baseUrl : defaults.baseUrl,
++            apiKey: typeof conf.apiKey === 'string' ? conf.apiKey : defaults.apiKey,
++            model: typeof conf.model === 'string' ? conf.model : defaults.model,
++            temperature: typeof conf.temperature === 'number' && !Number.isNaN(conf.temperature) ? conf.temperature : defaults.temperature,
++            maxTokens: typeof conf.maxTokens === 'number' && !Number.isNaN(conf.maxTokens) ? conf.maxTokens : null,
++            extraBodyJson: typeof conf.extraBodyJson === 'string' ? conf.extraBodyJson : defaults.extraBodyJson,
++            window: typeof conf.window === 'number' && !Number.isNaN(conf.window) ? conf.window : defaults.window,
++            strictMode: typeof conf.strictMode === 'boolean' ? conf.strictMode : defaults.strictMode,
++            injectionPosition: typeof conf.injectionPosition === 'string' ? conf.injectionPosition : defaults.injectionPosition,
++            injectionFormat: typeof conf.injectionFormat === 'string' ? conf.injectionFormat : defaults.injectionFormat,
++            analysisLanguage: typeof conf.analysisLanguage === 'string' ? conf.analysisLanguage : defaults.analysisLanguage,
++            agents: {
++                worldbuilding: mergeAgent('worldbuilding'),
++                plot: mergeAgent('plot'),
++                character: mergeAgent('character'),
++            },
++        }
++    }
      data.pluginCustomStorage ??= {}
      data.longPressToPopupEditor ??= false
      data.showInputActionBar ??= true
-@@ -1056,6 +1069,15 @@ export interface Database{
+@@ -956,6 +1004,68 @@ export interface RisuPersona {
+     embeddedModule?:RisuModule
+ }
+ 
++export interface BackendMultiagentAgentConfig {
++    enabled: boolean
++    /** Custom system prompt override. Blank = use the server's built-in default. */
++    systemPrompt: string
++    /** Custom user prompt template override. Blank = use the server's built-in default. */
++    userPromptTemplate: string
++}
++
++/**
++ * Native config for the server-side MultiAgent pipeline (server/node/multiagent.cjs).
++ * Mirrors the shape the MultiAgent browser plugin used to store in its config vault,
++ * so the backend option works without installing/configuring that plugin.
++ */
++export interface BackendMultiagentConfig {
++    /** When set, the connection fields (provider/baseUrl/apiKey/model) are
++     * derived at request time from this PocketRisu model preset instead of the
++     * manual fields below. Empty string = manual entry. */
++    sourcePresetId: string
++    provider: string
++    baseUrl: string
++    apiKey: string
++    model: string
++    temperature: number
++    /** Blank field = provider default; stored as null when unset. */
++    maxTokens: number | null
++    extraBodyJson: string
++    window: number
++    strictMode: boolean
++    injectionPosition: string
++    injectionFormat: string
++    analysisLanguage: string
++    agents: {
++        worldbuilding: BackendMultiagentAgentConfig
++        plot: BackendMultiagentAgentConfig
++        character: BackendMultiagentAgentConfig
++    }
++}
++
++export function createDefaultBackendMultiagentConfig(): BackendMultiagentConfig {
++    const agent = (): BackendMultiagentAgentConfig => ({ enabled: true, systemPrompt: '', userPromptTemplate: '' })
++    return {
++        sourcePresetId: '',
++        provider: '',
++        baseUrl: '',
++        apiKey: '',
++        model: '',
++        temperature: 0.7,
++        maxTokens: null,
++        extraBodyJson: '',
++        window: 10,
++        strictMode: false,
++        injectionPosition: 'system-end',
++        injectionFormat: 'classic',
++        analysisLanguage: 'auto',
++        agents: {
++            worldbuilding: agent(),
++            plot: agent(),
++            character: agent(),
++        },
++    }
++}
++
+ export interface Database{
+     characters: character[],
+     apiType: string
+@@ -1056,6 +1166,15 @@ export interface Database{
          FontColorQuote1 : string,
          FontColorQuote2 : string
      }
@@ -1000,12 +1118,13 @@ index f4dcf773c..055a0e002 100644
      requestRetrys:number
      emotionPrompt2:string
      useSayNothing:boolean
-@@ -1121,6 +1143,8 @@ export interface Database{
+@@ -1121,6 +1240,9 @@ export interface Database{
      useChatSticker:boolean,
      useAdditionalAssetsPreview:boolean,
      usePlainFetch:boolean
 +    useBackendChatJobs:boolean
 +    useBackendMultiagent:boolean
++    backendMultiagentConfig:BackendMultiagentConfig
      localNetworkMode:boolean
      localNetworkTimeoutSec:number
      memoryAlgorithmType:string // To enable new memory module/algorithms

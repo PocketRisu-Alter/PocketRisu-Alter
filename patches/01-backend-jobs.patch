@@ -2839,10 +2839,10 @@ index 000000000..628d4faf6
 +})();
 diff --git a/server/node/chatJob.cjs b/server/node/chatJob.cjs
 new file mode 100644
-index 000000000..5ef0904da
+index 000000000..342b0c477
 --- /dev/null
 +++ b/server/node/chatJob.cjs
-@@ -0,0 +1,441 @@
+@@ -0,0 +1,451 @@
 +'use strict';
 +
 +/**
@@ -3137,8 +3137,16 @@ index 000000000..5ef0904da
 +        if (ma && Array.isArray(msgs)) {
 +            const strictMode = Boolean(ma.strictMode);
 +            logger.info(`[ChatJob] Running multiagent pipeline (strictMode=${strictMode}) for job ${job.id}`);
++            // Phase hint for the client request-status indicator: the MultiAgent
++            // pipeline runs server-side before main generation, so the browser
++            // sees no chunks during it. This lets the toast show "MultiAgent".
++            pushEvent(job, { type: 'phase', phase: 'multiagent' });
++            // Forward per-agent progress to the client status indicator.
++            const onAgentProgress = (ev) => {
++                try { pushEvent(job, { type: 'agent', ...ev }); } catch { /* ignore */ }
++            };
 +            try {
-+                job.descriptor.body.messages = await runMultiagentPipeline(ma, msgs);
++                job.descriptor.body.messages = await runMultiagentPipeline(ma, msgs, onAgentProgress);
 +                logger.info(`[ChatJob] Multiagent pipeline finished for job ${job.id}`);
 +            } catch (maErr) {
 +                logger.error('[ChatJob] Multiagent pipeline error:', maErr);
@@ -3147,6 +3155,8 @@ index 000000000..5ef0904da
 +        } else if (ma) {
 +            logger.warn(`[ChatJob] Multiagent config present but body.messages is not an array — skipping pipeline for job ${job.id}`);
 +        }
++        // Phase hint: main prompt generation is starting.
++        pushEvent(job, { type: 'phase', phase: 'main' });
 +        await executeProvider(job);
 +        if (job.status === 'cancelled') {
 +            persistResult(job);
@@ -3370,10 +3380,10 @@ index 000000000..fdf6394de
 \ No newline at end of file
 diff --git a/server/node/multiagent.cjs b/server/node/multiagent.cjs
 new file mode 100644
-index 000000000..31f076fe9
+index 000000000..45c5cf5eb
 --- /dev/null
 +++ b/server/node/multiagent.cjs
-@@ -0,0 +1,700 @@
+@@ -0,0 +1,714 @@
 +'use strict';
 +
 +const { logger } = require('./logs.cjs');
@@ -3975,26 +3985,37 @@ index 000000000..31f076fe9
 +}
 +
 +// ── Agent runner with diagnostics ─────────────────────────────────────────────
-+async function runAgentWithDiagnostics(run, name, action, strictMode) {
++async function runAgentWithDiagnostics(run, name, action, strictMode, onProgress) {
 +    const started = Date.now();
 +    logger.info(`[Multiagent] Calling agent '${name}'`);
++    reportAgentProgress(onProgress, { agent: name, status: 'start' });
 +    try {
 +        const output = cleanAgentOutput(await action());
 +        const elapsed = Date.now() - started;
 +        run.agents[name] = { ok: true, durationMs: elapsed, chars: String(output || '').length };
 +        logger.info(`[Multiagent] Agent '${name}' OK in ${elapsed}ms, ${String(output || '').length} chars`);
++        reportAgentProgress(onProgress, { agent: name, status: 'done', ms: elapsed });
 +        return output;
 +    } catch (err) {
 +        const elapsed = Date.now() - started;
 +        run.agents[name] = { ok: false, durationMs: elapsed, chars: 0, error: err.message };
 +        logger.error(`[Multiagent] Agent '${name}' FAILED in ${elapsed}ms:`, err.message);
++        reportAgentProgress(onProgress, { agent: name, status: 'error', error: err.message });
 +        if (strictMode) throw err;
 +        return '';
 +    }
 +}
 +
-+function markAgentSkipped(run, name) {
++// Progress reporting is best-effort: a broken/throwing sink must never break the
++// pipeline (it only feeds the client status indicator).
++function reportAgentProgress(onProgress, event) {
++    if (typeof onProgress !== 'function') return;
++    try { onProgress(event); } catch { /* ignore */ }
++}
++
++function markAgentSkipped(run, name, onProgress) {
 +    run.agents[name] = { ok: true, skipped: true, durationMs: 0, chars: 0 };
++    reportAgentProgress(onProgress, { agent: name, status: 'skipped' });
 +    return '';
 +}
 +
@@ -4005,7 +4026,7 @@ index 000000000..31f076fe9
 + * @param {Array}  messages — OpenAI message array
 + * @returns {Array} messages with injected context (or original on fail-open)
 + */
-+async function runMultiagentPipeline(conf, messages) {
++async function runMultiagentPipeline(conf, messages, onProgress) {
 +    if (!Array.isArray(messages)) {
 +        logger.warn('[Multiagent] Aborting: messages is not an array');
 +        return messages;
@@ -4038,6 +4059,9 @@ index 000000000..31f076fe9
 +        return messages;
 +    }
 +    logger.info(`[Multiagent] Pipeline start — provider=${effectiveConf.provider} baseUrl=${effectiveConf.baseUrl} model=${effectiveConf.model} agents=[${activeAgents.join(',')}]`);
++    // Announce the agent set up front so the client can pre-render all pending
++    // agents (worldbuilding runs first; plot + character run in parallel after).
++    reportAgentProgress(onProgress, { phase: 'agents-init', agents: activeAgents });
 +
 +    const run = { agents: {} };
 +    const systemContent = formatSystemContext(messages);
@@ -4048,25 +4072,25 @@ index 000000000..31f076fe9
 +        ? await runAgentWithDiagnostics(
 +            run, 'worldbuilding',
 +            () => callAgent(effectiveConf, buildWorldPromptForConfig(effectiveConf, systemContent, history, userInput, effectiveConf.analysisLanguage)),
-+            effectiveConf.strictMode
++            effectiveConf.strictMode, onProgress
 +        )
-+        : markAgentSkipped(run, 'worldbuilding');
++        : markAgentSkipped(run, 'worldbuilding', onProgress);
 +
 +    const plotPromise = liteAgentEnabled(effectiveConf, 'plot')
 +        ? runAgentWithDiagnostics(
 +            run, 'plot',
 +            () => callAgent(effectiveConf, buildPlotPromptForConfig(effectiveConf, contextWorld, history, userInput, effectiveConf.analysisLanguage)),
-+            effectiveConf.strictMode
++            effectiveConf.strictMode, onProgress
 +        )
-+        : Promise.resolve(markAgentSkipped(run, 'plot'));
++        : Promise.resolve(markAgentSkipped(run, 'plot', onProgress));
 +
 +    const charPromise = liteAgentEnabled(effectiveConf, 'character')
 +        ? runAgentWithDiagnostics(
 +            run, 'character',
 +            () => callAgent(effectiveConf, buildCharPromptForConfig(effectiveConf, systemContent, contextWorld, '', history, userInput, effectiveConf.analysisLanguage)),
-+            effectiveConf.strictMode
++            effectiveConf.strictMode, onProgress
 +        )
-+        : Promise.resolve(markAgentSkipped(run, 'character'));
++        : Promise.resolve(markAgentSkipped(run, 'character', onProgress));
 +
 +    const [contextPlot, contextChar] = await Promise.all([plotPromise, charPromise]);
 +
@@ -4362,6 +4386,170 @@ index 8f8927272..832b8735e 100644
  async function startServer() {
      try {
          await migrateInlaysToFilesystem();
+diff --git a/src/lib/Setting/Pages/Advanced/MultiagentBackendSettings.svelte b/src/lib/Setting/Pages/Advanced/MultiagentBackendSettings.svelte
+new file mode 100644
+index 000000000..7fce75f2e
+--- /dev/null
++++ b/src/lib/Setting/Pages/Advanced/MultiagentBackendSettings.svelte
+@@ -0,0 +1,158 @@
++<script lang="ts">
++    import { DBState } from 'src/ts/stores.svelte';
++    import { language } from 'src/lang';
++    import { createDefaultBackendMultiagentConfig } from 'src/ts/storage/database.svelte';
++    import Accordion from 'src/lib/UI/Accordion.svelte';
++    import TextInput from 'src/lib/UI/GUI/TextInput.svelte';
++    import SecretInput from 'src/lib/UI/GUI/SecretInput.svelte';
++    import NumberInput from 'src/lib/UI/GUI/NumberInput.svelte';
++    import TextAreaInput from 'src/lib/UI/GUI/TextAreaInput.svelte';
++    import SelectInput from 'src/lib/UI/GUI/SelectInput.svelte';
++    import CheckInput from 'src/lib/UI/GUI/CheckInput.svelte';
++    import Button from 'src/lib/UI/GUI/Button.svelte';
++
++    // Defensive init: alwaysWriteDefaults runs on load, but a freshly imported
++    // DB blob rendered before that pass would crash on the nested reads below.
++    if (!DBState.db.backendMultiagentConfig) {
++        DBState.db.backendMultiagentConfig = createDefaultBackendMultiagentConfig();
++    }
++
++    const conf = $derived(DBState.db.backendMultiagentConfig);
++
++    // Model presets the multiagent backend can reuse for its connection. The
++    // analysis agent speaks the OpenAI-compatible wire only, so filter to those.
++    const presetOptions = $derived(
++        (DBState.db.modelPresets ?? []).filter(
++            (p) => p.profileSnapshot?.adapterKind === 'openai-compatible'
++        )
++    );
++    const usingPreset = $derived(!!conf.sourcePresetId);
++
++    // NumberInput binds a number; maxTokens is number | null (blank = provider
++    // default). Bridge through a local that maps NaN/empty back to null.
++    let maxTokensInput = $state<number | undefined>(
++        DBState.db.backendMultiagentConfig?.maxTokens ?? undefined
++    );
++    $effect(() => {
++        const v = maxTokensInput;
++        DBState.db.backendMultiagentConfig.maxTokens =
++            (v === undefined || v === null || Number.isNaN(v)) ? null : v;
++    });
++
++    const agentLabels = $derived<Record<string, string>>({
++        worldbuilding: language.backendMultiagent.agentWorldbuilding,
++        plot: language.backendMultiagent.agentPlot,
++        character: language.backendMultiagent.agentCharacter,
++    });
++
++    function resetConfig() {
++        DBState.db.backendMultiagentConfig = createDefaultBackendMultiagentConfig();
++        maxTokensInput = undefined;
++    }
++</script>
++
++<Accordion styled name={language.backendMultiagent.sectionName}>
++    <p class="text-textcolor2 text-sm mb-3">
++        {language.backendMultiagent.description}
++    </p>
++
++    <!-- Connection source: manual fields, or reuse a model preset -->
++    <span class="text-textcolor2 text-sm">{language.backendMultiagent.connectionSource}</span>
++    <SelectInput bind:value={conf.sourcePresetId}>
++        <option value="">{language.backendMultiagent.connectionSourceManual}</option>
++        {#each presetOptions as preset (preset.id)}
++            <option value={preset.id}>{preset.name}</option>
++        {/each}
++    </SelectInput>
++
++    {#if usingPreset}
++        <p class="text-textcolor2 text-sm mt-2">{language.backendMultiagent.usingPresetConnection}</p>
++    {:else}
++        <!-- Analysis agent connection (manual) -->
++        <span class="text-textcolor2 text-sm mt-3 block">{language.backendMultiagent.apiKey}</span>
++        <SecretInput fullwidth bind:value={conf.apiKey} placeholder={language.backendMultiagent.apiKeyPlaceholder} />
++
++        <span class="text-textcolor2 text-sm mt-3 block">{language.backendMultiagent.baseUrl}</span>
++        <TextInput fullwidth bind:value={conf.baseUrl} placeholder="https://api.openai.com/v1" />
++
++        <span class="text-textcolor2 text-sm mt-3 block">{language.backendMultiagent.model}</span>
++        <TextInput fullwidth bind:value={conf.model} placeholder="gpt-4o-mini" />
++
++        <span class="text-textcolor2 text-sm mt-3 block">{language.backendMultiagent.provider}</span>
++        <TextInput fullwidth bind:value={conf.provider} placeholder="openai" />
++    {/if}
++
++    <div class="flex gap-4 mt-3 flex-wrap">
++        <div class="flex flex-col">
++            <span class="text-textcolor2 text-sm">{language.backendMultiagent.temperature}</span>
++            <NumberInput bind:value={conf.temperature} min={0} max={2} />
++        </div>
++        <div class="flex flex-col">
++            <span class="text-textcolor2 text-sm">{language.backendMultiagent.maxTokens}</span>
++            <NumberInput bind:value={maxTokensInput} min={1} placeholder={language.backendMultiagent.maxTokensPlaceholder} />
++        </div>
++        <div class="flex flex-col">
++            <span class="text-textcolor2 text-sm">{language.backendMultiagent.contextWindow}</span>
++            <NumberInput bind:value={conf.window} min={1} max={50} />
++        </div>
++    </div>
++
++    <span class="text-textcolor2 text-sm mt-3 block">{language.backendMultiagent.extraBodyJson}</span>
++    <TextAreaInput fullwidth bind:value={conf.extraBodyJson} placeholder={'{ "top_p": 0.9 }'} />
++
++    <!-- Behaviour -->
++    <div class="flex gap-4 mt-3 flex-wrap">
++        <div class="flex flex-col">
++            <span class="text-textcolor2 text-sm">{language.backendMultiagent.strictMode}</span>
++            <SelectInput
++                value={conf.strictMode ? '1' : '0'}
++                onchange={(e) => { conf.strictMode = e.currentTarget.value === '1'; }}
++            >
++                <option value="0">{language.backendMultiagent.strictModeLenient}</option>
++                <option value="1">{language.backendMultiagent.strictModeStrict}</option>
++            </SelectInput>
++        </div>
++        <div class="flex flex-col">
++            <span class="text-textcolor2 text-sm">{language.backendMultiagent.injectionPosition}</span>
++            <SelectInput bind:value={conf.injectionPosition}>
++                <option value="system-end">system-end</option>
++                <option value="before-last-user">before-last-user</option>
++            </SelectInput>
++        </div>
++        <div class="flex flex-col">
++            <span class="text-textcolor2 text-sm">{language.backendMultiagent.injectionFormat}</span>
++            <SelectInput bind:value={conf.injectionFormat}>
++                <option value="classic">classic</option>
++                <option value="xml">xml</option>
++                <option value="markdown-table">markdown-table</option>
++            </SelectInput>
++        </div>
++        <div class="flex flex-col">
++            <span class="text-textcolor2 text-sm">{language.backendMultiagent.analysisLanguage}</span>
++            <SelectInput bind:value={conf.analysisLanguage}>
++                <option value="auto">auto</option>
++                <option value="en">en</option>
++                <option value="ko">ko</option>
++                <option value="ja">ja</option>
++            </SelectInput>
++        </div>
++    </div>
++
++    <!-- Agents -->
++    <div class="mt-4 flex flex-col gap-2">
++        <span class="text-textcolor2 text-sm">{language.backendMultiagent.agents}</span>
++        {#each Object.keys(conf.agents) as name (name)}
++            <Accordion name={agentLabels[name] ?? name}>
++                <CheckInput name={language.backendMultiagent.agentEnabled} bind:check={conf.agents[name].enabled} />
++                <span class="text-textcolor2 text-sm mt-2 block">{language.backendMultiagent.systemPromptOverride}</span>
++                <TextAreaInput fullwidth bind:value={conf.agents[name].systemPrompt} placeholder={language.backendMultiagent.systemPromptPlaceholder} />
++                <span class="text-textcolor2 text-sm mt-2 block">{language.backendMultiagent.userPromptOverride}</span>
++                <TextAreaInput fullwidth bind:value={conf.agents[name].userPromptTemplate} placeholder={language.backendMultiagent.userPromptPlaceholder} />
++            </Accordion>
++        {/each}
++    </div>
++
++    <div class="mt-4">
++        <Button styled="outlined" onclick={resetConfig}>{language.backendMultiagent.resetToDefaults}</Button>
++    </div>
++</Accordion>
 diff --git a/src/lib/Setting/Pages/Model/ModelPresetBasicInfo.svelte b/src/lib/Setting/Pages/Model/ModelPresetBasicInfo.svelte
 index 2ab7befdc..76f27f3b9 100644
 --- a/src/lib/Setting/Pages/Model/ModelPresetBasicInfo.svelte
@@ -4659,6 +4847,18 @@ index 000000000..a8baf251e
 +span { font-size: 11px; padding: 2px 7px; border: 1px solid currentColor; border-radius: 999px; opacity: .75; white-space: nowrap; }
 +span.active { color: #91c89f; opacity: 1; }
 +</style>
+diff --git a/src/lib/UI/GUI/RequestStatusToast.svelte b/src/lib/UI/GUI/RequestStatusToast.svelte
+index f9126b62b..078d0902b 100644
+--- a/src/lib/UI/GUI/RequestStatusToast.svelte
++++ b/src/lib/UI/GUI/RequestStatusToast.svelte
+@@ -42,6 +42,7 @@
+         memory:    rs?.kindMemory ?? 'Memory',
+         emotion:   rs?.kindEmotion ?? 'Emotion',
+         sub:       rs?.kindSub ?? 'Sub',
++        multiagent: rs?.kindMultiagent ?? 'MultiAgent',
+     }
+ 
+     // Accent bar / phase text color by phase.
 diff --git a/src/ts/preset/backendExecutionSupport.test.ts b/src/ts/preset/backendExecutionSupport.test.ts
 new file mode 100644
 index 000000000..66bb21327
@@ -4737,20 +4937,103 @@ index 00933447b..23a209d41 100644
          currentChar: currentChar,
 diff --git a/src/ts/process/request/backendJob.ts b/src/ts/process/request/backendJob.ts
 new file mode 100644
-index 000000000..b829d4c2b
+index 000000000..2617bf042
 --- /dev/null
 +++ b/src/ts/process/request/backendJob.ts
-@@ -0,0 +1,484 @@
+@@ -0,0 +1,636 @@
 +import { getCurrentCharacter, getCurrentChat, getDatabase, type character, type Chat } from "../../storage/database.svelte";
 +import type { ModelModeExtended } from "./shared";
 +import { requestChatData, type requestDataArgument, type requestDataResponse, type StreamResponseChunk } from "./request";
-+import { resolveChatModelBinding } from "./modelPresetBinding";
++import { resolveChatModelBinding, buildModelPresetCredential } from "./modelPresetBinding";
 +import { getModelPresetBackendExecutionSupport } from "../../preset/backendExecutionSupport";
++import type { ModelPreset } from "../../preset/types";
++import { v4 as uuidv4 } from "uuid";
++import { startStatus, setKind, markPhase, appendText, addBadge, endStatus, type StatusBadge } from "../../status/requestStatus";
++import { language } from "../../../lang";
 +const MULTIAGENT_VAULT_KEY = 'risu_multiagent_lite_config_vault_v1';
 +
-+function readMultiagentConfig(): Record<string, any> | null {
++// Request-status indicator bridge (gated by db.showRequestStatus). Wrapped so
++// status reporting can never throw into the backend stream path.
++interface BackendStatusInfo {
++    genId: string;
++    label: string;
++    chatId?: string;
++}
++
++function backendStatusEnabled(): boolean {
 +    try {
-+        const db = getDatabase();
++        return getDatabase()?.showRequestStatus !== false;
++    } catch {
++        return false;
++    }
++}
++
++function safeStatus(fn: () => void): void {
++    try { fn(); } catch (e) { console.error('[BackendJob] status publish failed', e); }
++}
++
++// Per-agent badge for the MultiAgent pipeline (worldbuilding/plot/character),
++// shown on the status indicator so each agent's progress/completion is visible.
++function multiagentAgentLabel(name: string): string {
++    const rs = language.requestStatus as Record<string, string> | undefined;
++    switch (name) {
++        case 'worldbuilding': return rs?.agentWorldbuilding ?? 'World';
++        case 'plot': return rs?.agentPlot ?? 'Plot';
++        case 'character': return rs?.agentCharacter ?? 'Character';
++        default: return name;
++    }
++}
++
++function multiagentAgentBadge(name: string, agentStatus: string): StatusBadge {
++    const label = multiagentAgentLabel(name);
++    const key = `ma-${name}`;
++    switch (agentStatus) {
++        case 'done': return { key, text: `${label} ✓`, tone: 'success' };
++        case 'error': return { key, text: `${label} ✗`, tone: 'warn' };
++        case 'skipped': return { key, text: `${label} —`, tone: 'info' };
++        default: return { key, text: `${label} …`, tone: 'info' };
++    }
++}
++
++// Derive the multiagent connection fields from a PocketRisu model preset so the
++// analysis agent can reuse an existing key/endpoint/model. Only OpenAI-compatible
++// presets are supported — that is the multiagent backend's primary agent wire
++// (`POST {baseUrl}/chat/completions`); other adapter kinds keep manual entry.
++// endpoint.url is the full chat/completions URL, so strip that suffix to get the
++// base the backend re-appends. Returns null when the preset can't supply a key.
++function deriveMultiagentFromPreset(preset: ModelPreset): Record<string, any> | null {
++    if (preset.profileSnapshot.adapterKind !== 'openai-compatible') return null;
++    const apiKey = buildModelPresetCredential(preset)?.apiKey;
++    if (!apiKey) return null;
++    const fullUrl = preset.profileSnapshot.endpoint?.url ?? '';
++    const baseUrl = fullUrl.replace(/\/chat\/completions\/?(\?.*)?$/, '');
++    return {
++        provider: 'openai',
++        apiKey,
++        baseUrl,
++        model: preset.profileSnapshot.modelId,
++    };
++}
++
++function readMultiagentConfig(): Record<string, any> | null {
++    const db = getDatabase();
++    // Native config first — no plugin install/setup required. The backend
++    // (server/node/multiagent.cjs) supplies built-in agent prompts, so only
++    // an apiKey is strictly required for the pipeline to run.
++    const native = db.backendMultiagentConfig;
++    if (native) {
++        const conf: Record<string, any> = { ...native };
++        // Optional: reuse a model preset's key/endpoint/model for the connection.
++        if (native.sourcePresetId) {
++            const preset = (db.modelPresets ?? []).find((p) => p.id === native.sourcePresetId);
++            const derived = preset ? deriveMultiagentFromPreset(preset) : null;
++            if (derived) Object.assign(conf, derived);
++        }
++        if (conf.apiKey) return conf;
++    }
++    // Backward compatibility: fall back to the MultiAgent browser plugin's
++    // config vault for users who configured it before native settings existed.
++    try {
 +        const raw = db.pluginCustomStorage?.[MULTIAGENT_VAULT_KEY];
 +        if (!raw) return null;
 +        const vault = typeof raw === 'string' ? JSON.parse(raw) : raw;
@@ -4924,9 +5207,23 @@ index 000000000..b829d4c2b
 +        return { type: 'fail', result: 'Aborted' };
 +    }
 +
++    // Status-indicator info: reuse the message generationId (arg.chatId) as the
++    // entry key so it lines up with the rest of the pipeline; mint a memory-only
++    // key for aux requests that carry none. uuid v4 (not crypto.randomUUID) works
++    // over plain HTTP. Label = bound preset name, else the resolved model id.
++    const status: BackendStatusInfo | null = backendStatusEnabled()
++        ? {
++            genId: arg.chatId ?? `backend-${uuidv4()}`,
++            label: binding.kind === 'modelPreset'
++                ? binding.preset.name
++                : (descriptorResponse.model || ''),
++            chatId: target.chatId,
++        }
++        : null;
++
 +    return {
 +        type: 'streaming',
-+        result: createBackendJobStream(jobId, target, abortSignal),
++        result: createBackendJobStream(jobId, target, abortSignal, status),
 +        model: descriptorResponse.model,
 +    };
 +}
@@ -4935,6 +5232,7 @@ index 000000000..b829d4c2b
 +    jobId: string,
 +    target: ChatJobTarget,
 +    abortSignal: AbortSignal = null,
++    status: BackendStatusInfo | null = null,
 +): ReadableStream<StreamResponseChunk> {
 +    return new ReadableStream<StreamResponseChunk>({
 +        start(controller) {
@@ -4943,6 +5241,34 @@ index 000000000..b829d4c2b
 +            let flushTimer: ReturnType<typeof setTimeout> | null = null;
 +            let pendingText: string | null = null;
 +            let lastQueuedText = '';
++
++            // Request-status indicator state. The backend sends cumulative text in
++            // each chunk, so track what we've already reported to derive deltas
++            // for appendText (which accumulates). statusEnded guards idempotency.
++            let lastStatusText = '';
++            let statusEnded = false;
++            if (status) {
++                safeStatus(() => startStatus(status.genId, {
++                    kind: 'main',
++                    label: status.label,
++                    chatId: status.chatId,
++                    phase: 'connecting',
++                    now: Date.now(),
++                }));
++            }
++            const reportStatusText = (text: string) => {
++                if (!status || statusEnded) return;
++                const delta = text.startsWith(lastStatusText)
++                    ? text.slice(lastStatusText.length)
++                    : text;
++                lastStatusText = text;
++                if (delta) safeStatus(() => appendText(status.genId, { response: delta }, Date.now()));
++            };
++            const endStatusOnce = (outcome: 'done' | 'failed' | 'aborted', error?: string) => {
++                if (!status || statusEnded) return;
++                statusEnded = true;
++                safeStatus(() => endStatus(status.genId, outcome, { now: Date.now(), error }));
++            };
 +
 +            const clearFlushTimer = () => {
 +                if (flushTimer) {
@@ -4977,6 +5303,7 @@ index 000000000..b829d4c2b
 +                closed = true;
 +                clearFlushTimer();
 +                connectionController?.abort();
++                endStatusOnce('done');
 +                if (acknowledge) void acknowledgeTarget(target);
 +                try { controller.close(); } catch { /* ignore */ }
 +            };
@@ -4987,14 +5314,39 @@ index 000000000..b829d4c2b
 +                closed = true;
 +                clearFlushTimer();
 +                connectionController?.abort();
++                endStatusOnce(reason === 'Aborted' ? 'aborted' : 'failed', reason === 'Aborted' ? undefined : reason);
 +                if (acknowledge) void acknowledgeTarget(target);
 +                try { controller.error(new Error(reason)); } catch { /* ignore */ }
 +            };
 +
 +            const handleEvent = (data: any) => {
 +                if (!data || closed) return;
++                // Phase hint from the server: flip the status-indicator chip between
++                // the server-side MultiAgent pipeline and main prompt generation.
++                if (data.type === 'phase') {
++                    if (!status || statusEnded) return;
++                    if (data.phase === 'multiagent') {
++                        safeStatus(() => { setKind(status.genId, 'multiagent', Date.now()); markPhase(status.genId, 'thinking', Date.now()); });
++                    } else if (data.phase === 'main') {
++                        safeStatus(() => { setKind(status.genId, 'main', Date.now()); markPhase(status.genId, 'connecting', Date.now()); });
++                    }
++                    return;
++                }
++                // Per-agent MultiAgent progress → status-indicator badges.
++                if (data.type === 'agent') {
++                    if (!status || statusEnded) return;
++                    if (data.phase === 'agents-init' && Array.isArray(data.agents)) {
++                        for (const name of data.agents) {
++                            safeStatus(() => addBadge(status.genId, multiagentAgentBadge(name, 'start')));
++                        }
++                    } else if (typeof data.agent === 'string') {
++                        safeStatus(() => addBadge(status.genId, multiagentAgentBadge(data.agent, data.status)));
++                    }
++                    return;
++                }
 +                if (data.type === 'chunk' && typeof data.text === 'string') {
 +                    queueText(data.text);
++                    reportStatusText(data.text);
 +                    return;
 +                }
 +                if (data.type !== 'status') return;
@@ -5003,7 +5355,7 @@ index 000000000..b829d4c2b
 +                // server sends a single status event with `text` and no preceding
 +                // chunk. Apply it before closing so the message isn't frozen at
 +                // whatever partial text was recovered earlier.
-+                if (typeof data.text === 'string') queueText(data.text, true);
++                if (typeof data.text === 'string') { queueText(data.text, true); reportStatusText(data.text); }
 +                if (data.status === 'done') {
 +                    flushText();
 +                    close(true);
@@ -5072,21 +5424,21 @@ index 000000000..b829d4c2b
 +
 +                    if (closed) return;
 +                    try {
-+                        const status = await fetchStatus();
-+                        if (!status) {
++                        const jobStatus = await fetchStatus();
++                        if (!jobStatus) {
 +                            fail('Backend job not found', false);
 +                            return;
 +                        }
-+                        if (typeof status.text === 'string') queueText(status.text, true);
-+                        if (status.status === 'done') {
++                        if (typeof jobStatus.text === 'string') { queueText(jobStatus.text, true); reportStatusText(jobStatus.text); }
++                        if (jobStatus.status === 'done') {
 +                            close(true);
 +                            return;
 +                        }
-+                        if (status.status === 'error') {
-+                            fail(status.error || 'Backend job failed', true);
++                        if (jobStatus.status === 'error') {
++                            fail(jobStatus.error || 'Backend job failed', true);
 +                            return;
 +                        }
-+                        if (status.status === 'cancelled') {
++                        if (jobStatus.status === 'cancelled') {
 +                            fail('Aborted', true);
 +                            return;
 +                        }
@@ -5304,3 +5656,33 @@ index cc6bf29a5..02dac4310 100644
                  for(const replacer of pluginV2.replacerbeforeRequest){
                      arg.formated = await replacer(arg.formated, model)
                  }
+diff --git a/src/ts/status/requestStatus.ts b/src/ts/status/requestStatus.ts
+index b86bb5400..c0cb2d73b 100644
+--- a/src/ts/status/requestStatus.ts
++++ b/src/ts/status/requestStatus.ts
+@@ -20,7 +20,7 @@ export type RequestPhase =
+ // pipeline's ModelModeExtended: model→main, translate→translate, memory→memory,
+ // emotion→emotion, submodel/otherAx→sub. The renderer maps these to localized
+ // chip labels (메인 / 번역 / 메모리 / 감정 / 보조).
+-export type RequestKind = 'main' | 'translate' | 'memory' | 'emotion' | 'sub'
++export type RequestKind = 'main' | 'translate' | 'memory' | 'emotion' | 'sub' | 'multiagent'
+ 
+ // A phase is terminal when the request has finished one way or another; the
+ // renderer uses this to decide dismissal/retention.
+@@ -205,6 +205,16 @@ export function startStatus(id: string, init: StartStatusInit): void {
+     startStatusTimer()
+ }
+ 
++// Switch an in-flight entry's chip kind (and optionally its label). Used by the
++// backend chat-job path to flip the indicator between 'multiagent' (server-side
++// pipeline running) and 'main' (main prompt generating) within one request.
++export function setKind(id: string, kind: RequestKind, now: number, label?: string): void {
++    update(id, (e) => {
++        if (isTerminalPhase(e.phase)) return e
++        return { ...e, kind, label: label ?? e.label, lastChunkAt: now }
++    })
++}
++
+ export function markPhase(id: string, phase: RequestPhase, now: number): void {
+     update(id, (e) => {
+         // Don't regress out of a terminal phase.

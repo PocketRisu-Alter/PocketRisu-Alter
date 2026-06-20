@@ -143,22 +143,18 @@ index 6f4a5c2a0..1804ac875 100644
 +    }
 +</style>
 diff --git a/src/lib/SideBars/Sidebar.svelte b/src/lib/SideBars/Sidebar.svelte
-index 6cbd317c8..f8295ba8f 100644
+index 6cbd317c8..b61158860 100644
 --- a/src/lib/SideBars/Sidebar.svelte
 +++ b/src/lib/SideBars/Sidebar.svelte
-@@ -34,7 +34,11 @@
+@@ -34,6 +34,7 @@
      User2Icon,
      ChevronsLeft,
      ArrowRight,
-+    MailIcon,
-+    SendIcon,
 +    UsersIcon,
    } from "@lucide/svelte";
-+  import GithubIcon from "../UI/GithubIcon.svelte";
      import {
    addCharacter,
-     changeChar,
-@@ -48,7 +52,7 @@
+@@ -48,7 +49,7 @@
      import BaseRoundedButton from "../UI/BaseRoundedButton.svelte";
      import { getCharacterIndexObject, makeAgoText, selectSingleFile } from "src/ts/util";
      import { v4 } from "uuid";
@@ -167,7 +163,7 @@ index 6cbd317c8..f8295ba8f 100644
      import { alertInput, alertSelect } from "src/ts/alert";
      import SideChatList from "./SideChatList.svelte";
  
-@@ -98,6 +102,7 @@
+@@ -98,6 +99,7 @@
    let { openGrid = () => {}, hidden = false }: Props = $props();
  
    sideBarClosing.set(false)
@@ -175,7 +171,7 @@ index 6cbd317c8..f8295ba8f 100644
  
    $effect(() => {
      let newCharImages: sortType[] = [];
-@@ -503,20 +508,17 @@
+@@ -503,20 +505,17 @@
  </script>
  {#if DBState.db.menuSideBar}
  <div
@@ -200,7 +196,7 @@ index 6cbd317c8..f8295ba8f 100644
    onclick={() => {
      reseter();
      selectedCharID.set(-1)
-@@ -524,12 +526,12 @@
+@@ -524,12 +523,12 @@
      OpenRealmStore.set(false)
    }}
  >
@@ -217,7 +213,7 @@ index 6cbd317c8..f8295ba8f 100644
    onclick={() => {
      if ($settingsOpen) {
        reseter();
-@@ -540,69 +542,65 @@
+@@ -540,69 +539,65 @@
      }
    }}
  >
@@ -305,7 +301,7 @@ index 6cbd317c8..f8295ba8f 100644
          <BarIcon
          onClick={() => {
            if ($settingsOpen) {
-@@ -642,7 +640,7 @@
+@@ -642,7 +637,7 @@
          }}><LayoutGridIcon /></BarIcon
        >
        {#if additionalHamburgerMenu.length > 0}
@@ -314,7 +310,7 @@ index 6cbd317c8..f8295ba8f 100644
          {#each additionalHamburgerMenu as menu}
            <div class="mt-2"></div>
            <BarIcon
-@@ -925,9 +923,9 @@
+@@ -925,9 +920,9 @@
      </div>
    </div>
    {#if DBState.db.hamburgerButtonBottom}
@@ -326,7 +322,7 @@ index 6cbd317c8..f8295ba8f 100644
          <BarIcon
          onClick={() => {
            if ($settingsOpen) {
-@@ -967,7 +965,7 @@
+@@ -967,7 +962,7 @@
          }}><LayoutGridIcon /></BarIcon
        >
        {#if additionalHamburgerMenu.length > 0}
@@ -335,7 +331,7 @@ index 6cbd317c8..f8295ba8f 100644
          {#each additionalHamburgerMenu as menu}
            <div class="mt-2"></div>
            <BarIcon
-@@ -985,25 +983,25 @@
+@@ -985,25 +980,25 @@
    </div>
    {#if !DBState.db.hideLeftBarCollapseButton}
    <button
@@ -366,7 +362,7 @@ index 6cbd317c8..f8295ba8f 100644
    class:risu-sidebar={!$sideBarClosing}
    class:w-96={$sideBarSize === 0}
    class:w-110={$sideBarSize === 1}
-@@ -1019,7 +1017,10 @@
+@@ -1019,7 +1014,10 @@
    class:dynamic-sidebar={$DynamicGUI}
    class:hidden={hidden}
    class:flex={!hidden}
@@ -377,51 +373,12 @@ index 6cbd317c8..f8295ba8f 100644
      if($sideBarClosing){
        $sideBarClosing = false
        sideBarStore.set(false)
-@@ -1056,6 +1057,61 @@
+@@ -1056,6 +1054,22 @@
            onCheckedChange={(v) => (DBState.db.nodeOnlyHideRecentChats = v)}
          />
        </div>
 +      <span class="block text-sm text-textcolor2 mt-2">{language.selectBotHint}</span>
 +      <div class="flex flex-col gap-1.5 mt-2">
-+        <button
-+          type="button"
-+          class="group flex items-center gap-2.5 rounded-md border border-darkborderc bg-transparent p-2.5 text-left transition-colors duration-150 ease-out hover:border-borderc hover:bg-selected/40"
-+          onclick={() => openURL("https://github.com/PocketRisu/PocketRisu")}
-+        >
-+          <div class="shrink-0 flex items-center justify-center w-8 h-8 rounded-md bg-selected/30 text-textcolor2 group-hover:text-textcolor transition-colors duration-150 ease-out">
-+            <GithubIcon size={18} />
-+          </div>
-+          <div class="flex-1 min-w-0">
-+            <div class="text-sm font-semibold text-textcolor leading-tight truncate">{language.relatedGithub}</div>
-+            <div class="text-xs text-textcolor2 leading-tight truncate">{language.relatedGithubDesc}</div>
-+          </div>
-+        </button>
-+        <button
-+          type="button"
-+          class="group flex items-center gap-2.5 rounded-md border border-darkborderc bg-transparent p-2.5 text-left transition-colors duration-150 ease-out hover:border-borderc hover:bg-selected/40"
-+          onclick={() => openURL("https://forms.gle/5ms5XntMrfaxmHTSA")}
-+        >
-+          <div class="shrink-0 flex items-center justify-center w-8 h-8 rounded-md bg-selected/30 text-textcolor2 group-hover:text-textcolor transition-colors duration-150 ease-out">
-+            <SendIcon size={16} strokeWidth={1.5} />
-+          </div>
-+          <div class="flex-1 min-w-0">
-+            <div class="text-sm font-semibold text-textcolor leading-tight truncate">{language.relatedFeedbackForm}</div>
-+            <div class="text-xs text-textcolor2 leading-tight truncate">{language.relatedFeedbackFormDesc}</div>
-+          </div>
-+        </button>
-+        <button
-+          type="button"
-+          class="group flex items-center gap-2.5 rounded-md border border-darkborderc bg-transparent p-2.5 text-left transition-colors duration-150 ease-out hover:border-borderc hover:bg-selected/40"
-+          onclick={() => openURL("mailto:contact@pocketrisu.com")}
-+        >
-+          <div class="shrink-0 flex items-center justify-center w-8 h-8 rounded-md bg-selected/30 text-textcolor2 group-hover:text-textcolor transition-colors duration-150 ease-out">
-+            <MailIcon size={16} strokeWidth={1.5} />
-+          </div>
-+          <div class="flex-1 min-w-0">
-+            <div class="text-sm font-semibold text-textcolor leading-tight truncate">{language.relatedContactEmail}</div>
-+            <div class="text-xs text-textcolor2 leading-tight truncate">{language.relatedContactEmailDesc}</div>
-+          </div>
-+        </button>
 +        <button
 +          type="button"
 +          class="group flex items-center gap-2.5 rounded-md border border-darkborderc bg-transparent p-2.5 text-left transition-colors duration-150 ease-out hover:border-borderc hover:bg-selected/40"
@@ -439,7 +396,7 @@ index 6cbd317c8..f8295ba8f 100644
        {#if DBState.db.nodeOnlyHideRecentChats}
          <!-- list hidden by user preference -->
        {:else if recentChars.length === 0}
-@@ -1097,20 +1153,20 @@
+@@ -1097,20 +1111,20 @@
      {:else if DBState.db.characters[$selectedCharID]?.chaId === '§playground'}
        <SideChatList bind:chara={ DBState.db.characters[$selectedCharID]} />
      {:else}
@@ -465,7 +422,7 @@ index 6cbd317c8..f8295ba8f 100644
            </button>
          {/if}
        </div>
-@@ -1153,6 +1209,92 @@
+@@ -1153,6 +1167,92 @@
    .editMode {
      min-width: 6rem;
    }
@@ -602,3 +559,29 @@ index 47040240f..dcb115d5d 100644
 +    opacity: 1;
 +  }
 +</style>
+diff --git a/src/lib/UI/GithubIcon.svelte b/src/lib/UI/GithubIcon.svelte
+deleted file mode 100644
+index fcc299a37..000000000
+--- a/src/lib/UI/GithubIcon.svelte
++++ /dev/null
+@@ -1,20 +0,0 @@
+-<script lang="ts">
+-    interface Props {
+-        size?: number;
+-        class?: string;
+-    }
+-
+-    let { size = 16, class: className = '' }: Props = $props();
+-</script>
+-
+-<svg
+-    width={size}
+-    height={size}
+-    viewBox="0 0 128 128"
+-    fill="currentColor"
+-    xmlns="http://www.w3.org/2000/svg"
+-    class={className}
+-    aria-hidden="true"
+->
+-    <path d="M56.7937 84.9688C44.4187 83.4688 35.7 74.5625 35.7 63.0313C35.7 58.3438 37.3875 53.2813 40.2 49.9063C38.9812 46.8125 39.1687 40.25 40.575 37.5313C44.325 37.0625 49.3875 39.0313 52.3875 41.75C55.95 40.625 59.7 40.0625 64.2937 40.0625C68.8875 40.0625 72.6375 40.625 76.0125 41.6563C78.9187 39.0313 84.075 37.0625 87.825 37.5313C89.1375 40.0625 89.325 46.625 88.1062 49.8125C91.1062 53.375 92.7 58.1563 92.7 63.0313C92.7 74.5625 83.9812 83.2813 71.4187 84.875C74.6062 86.9375 76.7625 91.4375 76.7625 96.5938L76.7625 106.344C76.7625 109.156 79.1062 110.75 81.9187 109.625C98.8875 103.156 112.2 86.1875 112.2 65.1875C112.2 38.6563 90.6375 17 64.1062 17C37.575 17 16.2 38.6562 16.2 65.1875C16.2 86 29.4187 103.25 47.2312 109.719C49.7625 110.656 52.2 108.969 52.2 106.438L52.2 98.9375C50.8875 99.5 49.2 99.875 47.7 99.875C41.5125 99.875 37.8562 96.5 35.2312 90.2188C34.2 87.6875 33.075 86.1875 30.9187 85.9063C29.7937 85.8125 29.4187 85.3438 29.4187 84.7813C29.4187 83.6563 31.2937 82.8125 33.1687 82.8125C35.8875 82.8125 38.2312 84.5 40.6687 87.9688C42.5437 90.6875 44.5125 91.9063 46.8562 91.9063C49.2 91.9063 50.7 91.0625 52.8562 88.9063C54.45 87.3125 55.6687 85.9063 56.7937 84.9688Z" />
+-</svg>
