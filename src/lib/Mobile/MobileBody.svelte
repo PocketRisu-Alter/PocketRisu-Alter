@@ -33,7 +33,15 @@
     </button>
 </div>
 {/if}
-<div class="w-full flex-1 overflow-y-auto bg-bgcolor relative">
+<!-- When the chat screen is shown it owns its own internal scroller
+     (.default-chat-screen). Making this wrapper a second overflow-y-auto created
+     a nested scroller whose %-height didn't resolve on mobile, so the inner
+     scroller never scrolled and its sticky floating composer "came undone".
+     Use a constrained flex fill (no competing overflow) for the chat case;
+     other mobile tab views keep the scrollable block wrapper. -->
+<div class={`w-full flex-1 bg-bgcolor relative ${(!($MobileSideBar > 0) && $selectedCharID !== -1)
+        ? 'flex flex-col min-h-0 overflow-hidden'
+        : 'overflow-y-auto'}`}>
     {#if $MobileSideBar > 0}
         <div class="w-full flex flex-col p-2 mt-2 h-full">
             {#if $MobileSideBar === 1}
