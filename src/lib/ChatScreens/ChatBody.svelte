@@ -10,6 +10,7 @@
     import { reportMarkdownParse } from "src/ts/process/parseDebug";
     import { getCurrentCharacter } from "src/ts/storage/database.svelte";
     import { getFileSrc } from "src/ts/globalApi.svelte";
+    import { findSafeBlockBoundary, getCommonPrefixLength } from "./incrementalHtml";
 
     interface Props {
         character?: simpleCharacterArgument|string|null
@@ -54,7 +55,6 @@
     const resolvedAssetSrc = new Map<string, string>()
     const resolvingAssetSrc = new Map<string, Promise<string>>()
     let viewerSrc = $state('')
-    const safeBlockEndPattern = /<\/(?:p|div|blockquote|pre|ul|ol|table|figure|h[1-6])>|<hr\b[^>]*\/?\s*>/gi
 
     const getCachedFileSrc = async (cacheKey: string, path: string) => {
         const cached = resolvedAssetSrc.get(cacheKey)
@@ -83,28 +83,6 @@
         liveHtml = ''
         committedPrefix = ''
         previousFullHtml = ''
-    }
-
-    const getCommonPrefixLength = (left: string, right: string) => {
-        const max = Math.min(left.length, right.length)
-        let index = 0
-        while(index < max && left.charCodeAt(index) === right.charCodeAt(index)){
-            index++
-        }
-        return index
-    }
-
-    const findSafeBlockBoundary = (html: string, limit: number) => {
-        safeBlockEndPattern.lastIndex = 0
-        let boundary = 0
-        let match: RegExpExecArray|null
-        const stablePart = html.slice(0, limit)
-
-        while((match = safeBlockEndPattern.exec(stablePart)) !== null){
-            boundary = match.index + match[0].length
-        }
-
-        return boundary
     }
 
     const applyIncrementalHtml = (html: string) => {
@@ -382,7 +360,7 @@
 {#if viewerSrc}
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <!-- svelte-ignore a11y_click_events_have_key_events -->
-<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80" onclick={() => { viewerSrc = '' }}>
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/80" data-risu-modal-scroll onclick={() => { viewerSrc = '' }}>
     <img src={viewerSrc} alt="" class="max-w-[90vw] max-h-[90vh] object-contain rounded-md shadow-2xl" onclick={(e) => e.stopPropagation()} />
 </div>
 {/if}
