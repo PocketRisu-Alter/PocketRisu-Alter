@@ -6,7 +6,7 @@
     import RequestStatusInline from '../UI/GUI/RequestStatusInline.svelte';
     import { requestStatuses, isTerminalPhase } from 'src/ts/status/requestStatus';
     import { getCharImage } from 'src/ts/characters';
-    import { createSimpleCharacter, DBState, selectedCharID, ReloadChatPointer } from 'src/ts/stores.svelte';
+    import { createSimpleCharacter, DBState, selectedCharID, ReloadChatPointer, ReloadGUIPointer } from 'src/ts/stores.svelte';
     import { chatFoldedStateMessageIndex } from 'src/ts/globalApi.svelte';
     import { get } from 'svelte/store';
     import { scrollWithinContainer } from './scrollWithin';
@@ -373,6 +373,16 @@
             anchorOffset = bestTop - scRect.top;
         }
     }
+
+    // Output triggers can request a global GUI refresh exactly when streaming
+    // ends. Capture the visible message before child Chat components re-parse
+    // their variables so ResizeObserver can restore the same viewport anchor.
+    $effect.pre(() => {
+        void $ReloadGUIPointer;
+        if (!chatBody?.parentElement) return;
+        pinnedToBottom = measurePinnedToBottom();
+        if (!pinnedToBottom) captureAnchor();
+    });
 
     function handleContainerScroll() {
         if (suppressScrollHandling) return;

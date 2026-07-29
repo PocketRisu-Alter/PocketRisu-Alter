@@ -25,6 +25,7 @@
     import { requestStatuses, isTerminalPhase } from 'src/ts/status/requestStatus'
     import PopupButton from "../UI/PopupButton.svelte";
     import PartialEditController from './PartialEditController.svelte';
+    import { getChatBodyReloadKey } from './chatRenderKey';
 
     let translating = $state(false)
     let editMode = $state(false)
@@ -407,7 +408,7 @@
             {language.noMessage}
         </div>
     {:else}
-        {@const chatReloadPointer = $ReloadGUIPointer + ($ReloadChatPointer[idx] ?? 0)}
+        {@const chatReloadPointer = getChatBodyReloadKey($ReloadGUIPointer, $ReloadChatPointer[idx])}
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div class="text chat-width chattext prose minw-0"
@@ -432,6 +433,7 @@
                     {msgDisplay}
                     {name}
                     {bodyRoot}
+                    globalReloadPointer={$ReloadGUIPointer}
                     modelShortName={
                         messageGenerationInfo ? getModelInfo(messageGenerationInfo?.model).shortName : ''
                     }

@@ -469,12 +469,13 @@
     </div>
 
 {:else if $alertStore.type === 'cardexport'}
-    <!-- svelte-ignore a11y_click_events_have_key_events -->
-    <div  class="fixed inset-0 bg-black/50 flex flex-col z-50 items-center justify-center" data-risu-modal-scroll role="button" tabindex="0" onclick={close}>
-        <div class="bg-darkbg rounded-md p-4 max-w-full flex flex-col w-2xl" role="button" tabindex="0" onclick={(e) => {
-            e.stopPropagation()
-        }}>
-            <h1 class="font-bold text-2xl w-full">
+    <div class="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-black/50 p-4" data-risu-modal-scroll>
+        <div
+            class="flex min-h-0 max-h-[calc(100dvh-2rem)] w-full max-w-2xl flex-col overflow-y-auto overscroll-contain rounded-md bg-darkbg p-4"
+            role="dialog"
+            aria-labelledby="card-export-title"
+        >
+            <h1 id="card-export-title" class="font-bold text-2xl w-full">
                 <span>
                     {language.shareExport}
                 </span>

@@ -7,13 +7,13 @@
 // bottom. That is why scrolling inside a modal only worked if you kept the
 // pointer over the panel and away from its edges.
 //
-// `overscroll-behavior: contain` alone does not fix it: browsers pick the scroll
-// chain starting from the nearest ancestor that can actually move, so a backdrop
-// with nothing to scroll is skipped entirely and the property never applies.
-//
-// So: one document-level listener. While a modal is open, a scroll gesture is
-// allowed only if some element between the event target and the modal root can
-// still move in the requested direction. Otherwise it is cancelled outright.
+// Wheel input can be cancelled at an edge without disrupting later wheel
+// events, so it is allowed only while a scroller inside the modal can move in
+// that direction. Touch scrolling is different: cancelling one `touchmove`
+// can freeze the browser's native scroll for the rest of that gesture,
+// especially after a tiny direction change at an edge. Touches that start
+// inside the active modal therefore stay native; CSS overscroll containment
+// stops their scroll chain. Outside touches and inert backdrops are blocked.
 
 /** The subset of scroll geometry the decision needs; injectable for tests. */
 export interface ScrollMetrics {
@@ -100,6 +100,32 @@ export function shouldBlockScroll(
     return findScrollableAncestor(target, modalRoot, deltaY, readMetrics) === null
 }
 
+/**
+ * Touch gestures inside the active modal must remain native. Preventing a
+ * single move at a scroll edge can cancel the browser's whole gesture, making
+ * direction changes and momentum scrolling appear frozen on mobile. A
+ * hand-rolled, non-scrolling backdrop is still blocked so it cannot leak a
+ * gesture to the chat beneath it.
+ */
+export function shouldBlockTouchScroll(
+    target: Element | null,
+    doc: Document = document,
+    readMetrics: (element: Element) => ScrollMetrics = readScrollMetrics,
+): boolean {
+    const modalRoot = getActiveModalRoot(doc)
+    if (!modalRoot) return false
+    if (!target || !modalRoot.contains(target)) return true
+    if (target !== modalRoot || !modalRoot.hasAttribute('data-risu-modal-scroll')) return false
+
+    const metrics = readMetrics(modalRoot)
+    const rootIsScrollable =
+        metrics.overflowY !== 'hidden' &&
+        metrics.overflowY !== 'visible' &&
+        metrics.overflowY !== 'clip' &&
+        metrics.scrollHeight - metrics.clientHeight > EDGE_EPSILON
+    return !rootIsScrollable
+}
+
 let installed = false
 
 /** Idempotent; safe to call from bootstrap on every start. */
@@ -114,21 +140,9 @@ export function initModalScrollLock(): void {
         }
     }, { passive: false })
 
-    let touchStartY = 0
-    let multiTouch = false
-
-    document.addEventListener('touchstart', (event) => {
-        multiTouch = event.touches.length > 1
-        touchStartY = event.touches[0]?.clientY ?? 0
-    }, { passive: true })
-
     document.addEventListener('touchmove', (event) => {
-        if (multiTouch || event.touches.length > 1) return
-        const currentY = event.touches[0]?.clientY ?? 0
-        // Finger up (currentY < startY) reveals content further down, i.e. a
-        // positive scroll delta — same sign convention as wheel deltaY.
-        const deltaY = touchStartY - currentY
-        if (shouldBlockScroll(event.target as Element | null, deltaY)) {
+        if (event.touches.length > 1) return
+        if (shouldBlockTouchScroll(event.target as Element | null)) {
             event.preventDefault()
         }
     }, { passive: false })

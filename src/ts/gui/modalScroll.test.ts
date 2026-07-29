@@ -4,6 +4,7 @@ import {
     findScrollableAncestor,
     getActiveModalRoot,
     shouldBlockScroll,
+    shouldBlockTouchScroll,
     type ScrollMetrics,
 } from './modalScroll'
 
@@ -160,5 +161,38 @@ describe('shouldBlockScroll', () => {
         const { leaf } = setup()
         expect(shouldBlockScroll(leaf, 0, document, readMetrics)).toBe(false)
         expect(shouldBlockScroll(null, 10, document, readMetrics)).toBe(true)
+    })
+})
+
+describe('shouldBlockTouchScroll', () => {
+    test('allows native touch scrolling anywhere inside the active modal', () => {
+        document.body.innerHTML = `
+            <div id="chat"></div>
+            <div id="modal" data-risu-modal-scroll>
+                <div id="panel"><span id="leaf"></span></div>
+            </div>`
+        const panel = document.getElementById('panel')!
+        const leaf = document.getElementById('leaf')!
+        scrollable(panel, 600)
+
+        expect(shouldBlockTouchScroll(leaf, document)).toBe(false)
+        expect(shouldBlockTouchScroll(panel, document)).toBe(false)
+    })
+
+    test('blocks touches outside the active modal and on a hand-rolled backdrop', () => {
+        document.body.innerHTML = `
+            <div id="chat"></div>
+            <div id="modal" data-risu-modal-scroll><div id="panel"></div></div>`
+
+        expect(shouldBlockTouchScroll(document.getElementById('chat'), document)).toBe(true)
+        expect(shouldBlockTouchScroll(document.getElementById('modal'), document)).toBe(true)
+        scrollable(document.getElementById('modal')!, 100)
+        expect(shouldBlockTouchScroll(document.getElementById('modal'), document, readMetrics)).toBe(false)
+        expect(shouldBlockTouchScroll(null, document)).toBe(true)
+    })
+
+    test('does nothing when no modal is open', () => {
+        document.body.innerHTML = `<div id="chat"></div>`
+        expect(shouldBlockTouchScroll(document.getElementById('chat'), document)).toBe(false)
     })
 })

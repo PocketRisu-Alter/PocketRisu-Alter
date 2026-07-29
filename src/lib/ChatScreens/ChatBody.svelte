@@ -24,6 +24,7 @@
         retranslate: boolean
         bodyRoot?: HTMLElement|null
         modelShortName: string
+        globalReloadPointer?: number
     }
 
     let {
@@ -37,6 +38,7 @@
         retranslate = $bindable(false),
         bodyRoot,
         modelShortName = '',
+        globalReloadPointer = 0,
     }: Props =  $props()
 
     // svelte-ignore non_reactive_update
@@ -53,10 +55,21 @@
     let streamIdentity = ''
 
     const resolvedAssetSrc = new Map<string, string>()
-    const resolvingAssetSrc = new Map<string, Promise<string>>()
+    const resolvingAssetSrc = new Map<string, Promise<string | null>>()
     let viewerSrc = $state('')
+    let assetCacheReloadPointer = Number.NaN
 
-    const getCachedFileSrc = async (cacheKey: string, path: string) => {
+    // Keep the component/scroll anchor alive on a global GUI refresh, but drop
+    // asset resolutions because a module update may reuse a name with a new path.
+    $effect.pre(() => {
+        if(globalReloadPointer === assetCacheReloadPointer) return
+        assetCacheReloadPointer = globalReloadPointer
+        resolvedAssetSrc.clear()
+        resolvingAssetSrc.clear()
+    })
+
+
+    const getCachedFileSrc = async (cacheKey: string, path: string): Promise<string | null> => {
         const cached = resolvedAssetSrc.get(cacheKey)
         if(cached){
             return cached
@@ -64,15 +77,24 @@
 
         let resolving = resolvingAssetSrc.get(cacheKey)
         if(!resolving){
-            resolving = getFileSrc(path).then((src) => {
-                resolvedAssetSrc.set(cacheKey, src)
-                resolvingAssetSrc.delete(cacheKey)
-                return src
+            const requestReloadPointer = assetCacheReloadPointer
+            const request = getFileSrc(path).then((src) => {
+                const isCurrentRequest = requestReloadPointer === assetCacheReloadPointer
+                if(isCurrentRequest){
+                    resolvedAssetSrc.set(cacheKey, src)
+                }
+                if(resolvingAssetSrc.get(cacheKey) === request){
+                    resolvingAssetSrc.delete(cacheKey)
+                }
+                return isCurrentRequest ? src : null
             }).catch((error) => {
-                resolvingAssetSrc.delete(cacheKey)
+                if(resolvingAssetSrc.get(cacheKey) === request){
+                    resolvingAssetSrc.delete(cacheKey)
+                }
                 throw error
             })
-            resolvingAssetSrc.set(cacheKey, resolving)
+            resolving = request
+            resolvingAssetSrc.set(cacheKey, request)
         }
 
         return resolving
@@ -267,7 +289,7 @@
 
                     const originalName = name
                     const resolved = await getCachedFileSrc(name, foundAsset)
-                    if(img.isConnected && img.getAttribute('src')?.toLocaleLowerCase() === originalName){
+                    if(resolved && img.isConnected && img.getAttribute('src')?.toLocaleLowerCase() === originalName){
                         img.src = resolved
                     }
                     return
@@ -309,7 +331,7 @@
 
                     const originalName = name
                     const got = await getCachedFileSrc(name, currentFound)
-                    if(img.isConnected && img.getAttribute('src')?.toLocaleLowerCase() === originalName){
+                    if(got && img.isConnected && img.getAttribute('src')?.toLocaleLowerCase() === originalName){
                         img.setAttribute('src', got)
                         img.removeAttribute('noimage')
                     }
